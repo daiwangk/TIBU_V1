@@ -1,0 +1,291 @@
+
+> tibu@0.0.0 lint
+> eslint .
+
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Candles.jsx
+  490:36  error  'index' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Components\ReelCard.jsx
+  3:3  error  'business' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Components\SearchBar.jsx
+  14:3  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  12 |   const [search, setSearch] = useState(initialValue);
+  13 |   useEffect(() => {
+> 14 |   setSearch(initialValue);
+     |   ^^^^^^^^^ Avoid calling setState() directly within an effect
+  15 | }, [initialValue]);
+  16 |   const [showFilters, setShowFilters] = useState(false);
+  17 | const [selectedCategory, setSelectedCategory] = useState("All");  react-hooks/set-state-in-effect
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Crochet.jsx
+  493:37  error  'index' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Data\dessertBusinesses.js
+  109:5  error  Duplicate key 'category'  no-dupe-keys
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Desserts.jsx
+   41:8   error  'activeCategory' is assigned a value but never used     no-unused-vars
+   41:24  error  'setActiveCategory' is assigned a value but never used  no-unused-vars
+  486:37  error  'index' is defined but never used                       no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Discover.jsx
+   8:17  error  'candleBusinesses' is assigned a value but never used        no-unused-vars
+   9:17  error  'crochetBusinesses' is assigned a value but never used       no-unused-vars
+  10:17  error  'dessertBusinesses' is assigned a value but never used       no-unused-vars
+  11:17  error  'embroideryBusinesses' is assigned a value but never used    no-unused-vars
+  12:17  error  'giftsBusinesses' is assigned a value but never used         no-unused-vars
+  13:17  error  'jewelleryBusinesses' is assigned a value but never used     no-unused-vars
+  14:17  error  'menFashionBusinesses' is assigned a value but never used    no-unused-vars
+  15:17  error  'resinBusinesses' is assigned a value but never used         no-unused-vars
+  16:17  error  'womenFashionBusinesses' is assigned a value but never used  no-unused-vars
+  17:17  error  'candleReels' is assigned a value but never used             no-unused-vars
+  18:17  error  'crochetReels' is assigned a value but never used            no-unused-vars
+  19:17  error  'dessertReels' is assigned a value but never used            no-unused-vars
+  20:17  error  'embroideryReels' is assigned a value but never used         no-unused-vars
+  21:17  error  'giftsReels' is assigned a value but never used              no-unused-vars
+  22:17  error  'jewelleryReels' is assigned a value but never used          no-unused-vars
+  23:17  error  'menFashionReels' is assigned a value but never used         no-unused-vars
+  24:17  error  'resinReels' is assigned a value but never used              no-unused-vars
+  25:17  error  'womenFashionReels' is assigned a value but never used       no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\EditProfile.jsx
+  11:18  error  'setAvatar' is assigned a value but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Embroidery.jsx
+  345:45  error  'index' is defined but never used  no-unused-vars
+  416:45  error  'index' is defined but never used  no-unused-vars
+  487:40  error  'index' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Fashion.jsx
+   9:3   error  'setSelectedBusiness' is defined but never used  no-unused-vars
+  21:33  error  'fashionSearchProducts' is not defined           no-undef
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Gifts.jsx
+  322:41  error  'index' is defined but never used  no-unused-vars
+  393:39  error  'index' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Handmade.jsx
+    9:3   error  'setSelectedBusiness' is defined but never used  no-unused-vars
+   20:34  error  'handmadeSearchProducts' is not defined          no-undef
+  307:38  error  'index' is defined but never used                no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Home.jsx
+  71:9  error  Parsing error: Identifier 'fashionProducts' has already been declared
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Jewellery.jsx
+  490:39  error  'index' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\MenFashion.jsx
+  493:40  error  'index' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\NotificationPreferences.jsx
+  156:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  154 |         }}
+  155 |       >
+> 156 |         <SettingRow
+      |          ^^^^^^^^^^ This component is created during render
+  157 |           title="Push Notifications"
+  158 |           description="Receive notifications about businesses, offers and updates."
+  159 |           enabled={pushNotifications}
+
+  37 |   );
+  38 |
+> 39 |   const SettingRow = ({ title, description, enabled, onClick }) => (
+     |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 40 |     <div
+     | ^^^^^^^^
+> 41 |       style={{
+     …
+     | ^^^^^^^^
+> 84 |     </div>
+     | ^^^^^^^^
+> 85 |   );
+     | ^^^^ The component is created during render here
+  86 |
+  87 |   return (
+  88 |     <div                                                                             react-hooks/static-components
+  165:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  163 |         />
+  164 |
+> 165 |         <SettingRow
+      |          ^^^^^^^^^^ This component is created during render
+  166 |           title="Offers & Discounts"
+  167 |           description="Get notified about offers from businesses near you."
+  168 |           enabled={offersNotifications}
+
+  37 |   );
+  38 |
+> 39 |   const SettingRow = ({ title, description, enabled, onClick }) => (
+     |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 40 |     <div
+     | ^^^^^^^^
+> 41 |       style={{
+     …
+     | ^^^^^^^^
+> 84 |     </div>
+     | ^^^^^^^^
+> 85 |   );
+     | ^^^^ The component is created during render here
+  86 |
+  87 |   return (
+  88 |     <div                                                                                           react-hooks/static-components
+  213:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  211 |           </div>
+  212 |
+> 213 |           <Toggle
+      |            ^^^^^^ This component is created during render
+  214 |             enabled={businessNotifications}
+  215 |             onClick={() =>
+  216 |               setBusinessNotifications(!businessNotifications)
+
+   6 |   const [businessNotifications, setBusinessNotifications] = useState(false);
+   7 |
+>  8 |   const Toggle = ({ enabled, onClick }) => (
+     |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  9 |     <button
+     | ^^^^^^^^^^^
+> 10 |       onClick={onClick}
+     …
+     | ^^^^^^^^^^^
+> 36 |     </button>
+     | ^^^^^^^^^^^
+> 37 |   );
+     | ^^^^ The component is created during render here
+  38 |
+  39 |   const SettingRow = ({ title, description, enabled, onClick }) => (
+  40 |     <div  react-hooks/static-components
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Pages\Notification.jsx
+  1:10  error  'listReels' is defined but never used     no-unused-vars
+  3:10  error  'listProducts' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Product.jsx
+   8:3  error  'setPreviousPage' is defined but never used  no-unused-vars
+  12:3  error  'sellerMode' is defined but never used       no-unused-vars
+  13:3  error  'setSellerMode' is defined but never used    no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Reel.jsx
+  5:3  error  'currentReels' is defined but never used         no-unused-vars
+  6:3  error  'setSelectedBusiness' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Resin.jsx
+  478:35  error  'index' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Saved.jsx
+  26:17  error  'candleProducts' is assigned a value but never used        no-unused-vars
+  27:17  error  'crochetProducts' is assigned a value but never used       no-unused-vars
+  28:17  error  'dessertsProducts' is assigned a value but never used      no-unused-vars
+  29:17  error  'embroideryProducts' is assigned a value but never used    no-unused-vars
+  30:17  error  'giftsProducts' is assigned a value but never used         no-unused-vars
+  31:17  error  'jewelleryProducts' is assigned a value but never used     no-unused-vars
+  32:17  error  'menFashionProducts' is assigned a value but never used    no-unused-vars
+  33:17  error  'resinProducts' is assigned a value but never used         no-unused-vars
+  34:17  error  'womenFashionProducts' is assigned a value but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\Search.jsx
+  13:3  error  'previousPage' is defined but never used  no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\SellerDashboard.jsx
+  384:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  382 |     return (
+  383 |       <div style={pageStyle}>
+> 384 |         <BackButton />
+      |          ^^^^^^^^^^ This component is created during render
+  385 |
+  386 |         <h1
+  387 |           style={{
+
+  351 |   ========================================================= */
+  352 |
+> 353 |   const BackButton = () => (
+      |                      ^^^^^^^
+> 354 |     <button
+      | ^^^^^^^^^^^
+> 355 |       onClick={() => {
+      …
+      | ^^^^^^^^^^^
+> 374 |     </button>
+      | ^^^^^^^^^^^
+> 375 |   );
+      | ^^^^ The component is created during render here
+  376 |
+  377 |   /* =========================================================
+  378 |      AVAILABLE TODAY FULL PAGE   react-hooks/static-components
+  494:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  492 |     return (
+  493 |       <div style={pageStyle}>
+> 494 |         <BackButton />
+      |          ^^^^^^^^^^ This component is created during render
+  495 |
+  496 |         <div
+  497 |           style={{
+
+  351 |   ========================================================= */
+  352 |
+> 353 |   const BackButton = () => (
+      |                      ^^^^^^^
+> 354 |     <button
+      | ^^^^^^^^^^^
+> 355 |       onClick={() => {
+      …
+      | ^^^^^^^^^^^
+> 374 |     </button>
+      | ^^^^^^^^^^^
+> 375 |   );
+      | ^^^^ The component is created during render here
+  376 |
+  377 |   /* =========================================================
+  378 |      AVAILABLE TODAY FULL PAGE  react-hooks/static-components
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\WomenFashion.jsx
+   37:17  error  'menFashionProducts' is assigned a value but never used    no-unused-vars
+   39:17  error  'menFashionBusinesses' is assigned a value but never used  no-unused-vars
+   41:17  error  'menFashionReels' is assigned a value but never used       no-unused-vars
+  469:42  error  'index' is defined but never used                          no-unused-vars
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\hooks\useAsync.js
+  34:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  32 |
+  33 |   useEffect(() => {
+> 34 |     execute();
+     |     ^^^^^^^ Avoid calling setState() directly within an effect
+  35 |   }, [execute]);
+  36 |
+  37 |   return { data, loading, error, refetch: execute };  react-hooks/set-state-in-effect
+
+C:\Users\daiwang.khera_engine\OneDrive\Desktop\EXAMPLE repo\Repo\tibu frontend\tibu frontend\src\services\reelService.js
+  6:33  error  '_categoryKey' is defined but never used  no-unused-vars
+
+✖ 69 problems (69 errors, 0 warnings)
+

@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Backgrounds ─────────────────────────────────── */
+  --color-bg: #faf7f2;        /* warm cream page background */
+  --color-surface: #ffffff;   /* card / panel white */
+
+  /* ── Brand / Primary ─────────────────────────────── */
+  --color-primary: #5a1848;   /* deep plum — buttons, logo, active states */
+  --color-primary-fg: #ffffff;
+
+  /* ── Pastel surfaces ─────────────────────────────── */
+  --color-lime: #eef3d6;
+  --color-blush: #fbe6ea;
+  --color-lavender: #efe4f7;
+  --color-mint: #ddf1ee;
+
+  /* ── Borders ─────────────────────────────────────── */
+  --color-border: #ede7ee;
+
+  /* ── Text ────────────────────────────────────────── */
+  --color-ink: #2a0f2a;       /* heading dark ink-plum */
+  --color-body: #4a4556;      /* body text */
+  --color-muted: #8a8494;     /* captions / placeholder */
+
+  /* ── Typography ──────────────────────────────────── */
+  --font-heading: "Nunito", sans-serif;
+  --font-body: "Nunito Sans", sans-serif;
+
+  /* ── Radius ──────────────────────────────────────── */
+  --radius-card: 16px;
+  --radius-card-lg: 24px;
+  --radius-btn: 12px;
+
+  /* ── Spacing (4px grid) ──────────────────────────── */
+  --spacing-screen: 16px;     /* standard screen-edge horizontal padding */
+  --spacing-screen-lg: 20px;  /* wider contexts */
+}
