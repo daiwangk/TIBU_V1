@@ -40,7 +40,7 @@ import SellerProductDetail from './SellerProductDetail';
 import SellerRegister from './SellerRegister';
 import TermsConditions from './TermsConditions';
 import WomenFashion from './WomenFashion';
-import NotFound from './pages/NotFound';
+import NotFound from './Pages/NotFound';
 
 // Contexts
 import { useSaved } from './contexts/SavedContext';

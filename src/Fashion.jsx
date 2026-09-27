@@ -15,6 +15,8 @@ export default function Fashion({
   savedProducts,
   setSavedProducts,
 }) {
+  const { data: fashionProducts_raw, loading: fashionProducts_loading } = useAsync(() => listProducts({}));
+  const fashionProducts = fashionProducts_raw || [];
 const [searchText, setSearchText] = useState("");
 
 const [filters, setFilters] = useState({

@@ -7,23 +7,6 @@ import { useState } from "react";
 import ProductCard from "./Components/ProductCard";
 import BusinessCard from "./Components/BusinessCard";
 import SearchBar from "./Components/SearchBar";
-const fashionProducts = [
-  ...womenFashionProducts,
-  ...menFashionProducts,
-];
-
-const fashionBusinesses = [
-  ...womenFashionBusinesses,
-  ...menFashionBusinesses,
-];
-
-const handmadeBusinesses = [
-  ...crochetBusinesses,
-  ...resinBusinesses,
-  ...candleBusinesses,
-  ...embroideryBusinesses,
-];
-
 export default function Home({
   setPage,
   searchText,
@@ -48,26 +31,28 @@ setFilters,
    savedBusinesses,
   setSavedBusinesses,
 }) {
-  const { data: candleProducts = [], loading: load_candleProducts } = useAsync(() => listProducts('candle'));
-  const { data: crochetProducts = [], loading: load_crochetProducts } = useAsync(() => listProducts('crochet'));
-  const { data: dessertsProducts = [], loading: load_dessertsProducts } = useAsync(() => listProducts('desserts'));
-  const { data: embroideryProducts = [], loading: load_embroideryProducts } = useAsync(() => listProducts('embroidery'));
-  const { data: fashionProducts = [], loading: load_fashionProducts } = useAsync(() => listProducts('fahion'));
-  const { data: giftsProducts = [], loading: load_giftsProducts } = useAsync(() => listProducts('gifts'));
-  const { data: handmadeProducts = [], loading: load_handmadeProducts } = useAsync(() => listProducts('handmade'));
-  const { data: jewelleryProducts = [], loading: load_jewelleryProducts } = useAsync(() => listProducts('jewellery'));
-  const { data: menFashionProducts = [], loading: load_menFashionProducts } = useAsync(() => listProducts('men-fashion'));
-  const { data: resinProducts = [], loading: load_resinProducts } = useAsync(() => listProducts('rein'));
-  const { data: womenFashionProducts = [], loading: load_womenFashionProducts } = useAsync(() => listProducts('women-fashion'));
-  const { data: candleBusinesses = [], loading: load_candleBusinesses } = useAsync(() => listBusinesses('candle'));
+  const { data: candleProducts = [], loading: load_candleProducts } = useAsync(() => listProducts({ category: 'candles' }));
+  const { data: crochetProducts = [], loading: load_crochetProducts } = useAsync(() => listProducts({ category: 'crochet' }));
+  const { data: dessertsProducts = [], loading: load_dessertsProducts } = useAsync(() => listProducts({ category: 'desserts' }));
+  const { data: embroideryProducts = [], loading: load_embroideryProducts } = useAsync(() => listProducts({ category: 'embroidery' }));
+  const { data: fashionProducts = [], loading: load_fashionProducts } = useAsync(() => listProducts({ category: 'fashion' }));
+  const { data: giftsProducts = [], loading: load_giftsProducts } = useAsync(() => listProducts({ category: 'gifts' }));
+  const { data: handmadeProducts = [], loading: load_handmadeProducts } = useAsync(() => listProducts({ category: 'handmade' }));
+  const { data: jewelleryProducts = [], loading: load_jewelleryProducts } = useAsync(() => listProducts({ category: 'jewellery' }));
+  const { data: menFashionProducts = [], loading: load_menFashionProducts } = useAsync(() => listProducts({ category: 'men-fashion' }));
+  const { data: resinProducts = [], loading: load_resinProducts } = useAsync(() => listProducts({ category: 'resin' }));
+  const { data: womenFashionProducts = [], loading: load_womenFashionProducts } = useAsync(() => listProducts({ category: 'women-fashion' }));
+  const { data: candleBusinesses = [], loading: load_candleBusinesses } = useAsync(() => listBusinesses('candles'));
   const { data: crochetBusinesses = [], loading: load_crochetBusinesses } = useAsync(() => listBusinesses('crochet'));
-  const { data: dessertBusinesses = [], loading: load_dessertBusinesses } = useAsync(() => listBusinesses('desert'));
+  const { data: dessertBusinesses = [], loading: load_dessertBusinesses } = useAsync(() => listBusinesses('desserts'));
   const { data: embroideryBusinesses = [], loading: load_embroideryBusinesses } = useAsync(() => listBusinesses('embroidery'));
   const { data: jewelleryBusinesses = [], loading: load_jewelleryBusinesses } = useAsync(() => listBusinesses('jewellery'));
   const { data: menFashionBusinesses = [], loading: load_menFashionBusinesses } = useAsync(() => listBusinesses('men-fashion'));
-  const { data: resinBusinesses = [], loading: load_resinBusinesses } = useAsync(() => listBusinesses('rein'));
+  const { data: resinBusinesses = [], loading: load_resinBusinesses } = useAsync(() => listBusinesses('resin'));
   const { data: womenFashionBusinesses = [], loading: load_womenFashionBusinesses } = useAsync(() => listBusinesses('women-fashion'));
   if (load_candleProducts || load_crochetProducts || load_dessertsProducts || load_embroideryProducts || load_fashionProducts || load_giftsProducts || load_handmadeProducts || load_jewelleryProducts || load_menFashionProducts || load_resinProducts || load_womenFashionProducts || load_candleBusinesses || load_crochetBusinesses || load_dessertBusinesses || load_embroideryBusinesses || load_jewelleryBusinesses || load_menFashionBusinesses || load_resinBusinesses || load_womenFashionBusinesses) return <div style={{padding: "40px", textAlign: "center"}}>Loading...</div>;
+  const fashionBusinesses = [...(womenFashionBusinesses || []), ...(menFashionBusinesses || [])];
+  const handmadeBusinesses = [...(crochetBusinesses || []), ...(resinBusinesses || []), ...(candleBusinesses || []), ...(embroideryBusinesses || [])];
 
         
 
@@ -499,7 +484,7 @@ onClick={() => {
     crochetBusinesses[0],
     jewelleryBusinesses[0],
     fashionBusinesses[0],
-  ]);
+  ].filter(Boolean));
 
   setViewAllBusinessTitle("🌱 New On Tibu");
   setPreviousPage("home");
@@ -538,7 +523,7 @@ View All →
   crochetBusinesses[0],
   jewelleryBusinesses[0],
   fashionBusinesses[0],
-].map((business, index) => (
+].filter(Boolean).map((business, index) => (
   <BusinessCard
   key={index}
   business={business}
@@ -573,7 +558,7 @@ View All →
     crochetProducts[0],
     jewelleryProducts[0],
     fashionProducts[0],
-  ]);
+  ].filter(Boolean));
 
   setPreviousPage("home");
   setPage("productsviewall");
@@ -617,7 +602,7 @@ scrollbarWidth:"none"
   crochetProducts[0],
   jewelleryProducts[0],
   fashionProducts[0],
-].map((shop, index) => (
+].filter(Boolean).map((shop, index) => (
  <ProductCard
   key={index}
   product={shop}

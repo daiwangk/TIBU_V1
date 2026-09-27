@@ -36,7 +36,7 @@ setSavedBusinesses,
 savedReels,
 setSavedReels,
 }) {
-  const { data: dessertProducts = [], loading: load_dessertProducts } = useAsync(() => listProducts('desserts'));
+  const { data: dessertProducts = [], loading: load_dessertProducts } = useAsync(() => listProducts({ category: 'desserts' }));
   const { data: dessertBusinesses = [], loading: load_dessertBusinesses } = useAsync(() => listBusinesses('desert'));
   const { data: dessertReels = [], loading: load_dessertReels } = useAsync(() => listReels('desert'));
 const [activeCategory] = useState("Desserts");

@@ -2,8 +2,8 @@
 import ProductCard from "./Components/ProductCard";
 
 export default function ProductsViewAll({
-  title,
-  products,
+  title = '',
+  products = [],
   setPage,
   setSelectedProduct,
   availableTodayCategory,

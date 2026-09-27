@@ -2,8 +2,8 @@ import ReelCard from "./Components/ReelCard";
 
 export default function ReelsViewAll({
   setPage,
-  reels,
-  title,
+  reels = [],
+  title = '',
   previousPage,
   setSelectedReel,
   setCurrentReels,

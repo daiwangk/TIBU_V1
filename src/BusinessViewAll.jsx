@@ -2,8 +2,8 @@ import BusinessCard from "./Components/BusinessCard";
 
 export default function BusinessViewAll({
   setPage,
-  businesses,
-  title,
+  businesses = [],
+  title = '',
   previousPage,
   setSelectedBusiness,
 

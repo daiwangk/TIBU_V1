@@ -15,6 +15,8 @@ export default function Handmade({
   savedProducts,
   setSavedProducts,
 }) {
+  const { data: handmadeProducts_raw, loading: handmadeProducts_loading } = useAsync(() => listProducts({}));
+  const handmadeProducts = handmadeProducts_raw || [];
 
 const [searchText, setSearchText] = useState("");
 const [filters, setFilters] = useState({
