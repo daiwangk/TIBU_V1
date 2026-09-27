@@ -1,8 +1,8 @@
 import { listProducts } from "./services/productService";
 import { useAsync } from "./hooks/useAsync";
 import { useState } from "react";
-import SearchBar from "./Components/SearchBar";
-import ProductCard from "./Components/ProductCard";
+import SearchBar from "./legacy/components/SearchBar";
+import ProductCard from "./legacy/components/ProductCard";
 export default function Search({
   setPage,
   searchText,

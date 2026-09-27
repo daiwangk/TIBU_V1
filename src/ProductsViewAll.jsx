@@ -1,5 +1,5 @@
 
-import ProductCard from "./Components/ProductCard";
+import ProductCard from "./legacy/components/ProductCard";
 
 export default function ProductsViewAll({
   title = '',

@@ -1,4 +1,4 @@
-import BusinessCard from "./Components/BusinessCard";
+import BusinessCard from "./legacy/components/BusinessCard";
 
 export default function BusinessViewAll({
   setPage,

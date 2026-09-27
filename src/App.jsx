@@ -24,7 +24,7 @@ import Home from './Home';
 import Jewellery from './Jewellery';
 import MenFashion from './MenFashion';
 import NotificationPreferences from './NotificationPreferences';
-import Notification from './Pages/Notification';
+import Notification from './legacy/pages/Notification';
 import Offers from './Offers';
 import PrivacySecurity from './PrivacySecurity';
 import Product from './Product';
@@ -40,7 +40,7 @@ import SellerProductDetail from './SellerProductDetail';
 import SellerRegister from './SellerRegister';
 import TermsConditions from './TermsConditions';
 import WomenFashion from './WomenFashion';
-import NotFound from './Pages/NotFound';
+import NotFound from './legacy/pages/NotFound';
 
 // Contexts
 import { useSaved } from './contexts/SavedContext';

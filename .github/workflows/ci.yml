@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest   # Linux on purpose: case-sensitive paths, same as Cloudflare's build
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Structural guards
+        run: node scripts/check-guards.mjs
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm run test --if-present
+      - name: Build (mock data, no secrets needed)
+        run: npm run build
+        env:
+          VITE_DATA_SOURCE: mock
+          VITE_SITE_URL: https://example.pages.dev
