@@ -1,0 +1,8 @@
+---
+description: Tibu project rules (always on)
+alwaysApply: true
+---
+
+Follow `AGENTS.md` at the repository root for every task; read it before planning. Also read `docs/PROGRESS.md` ("Now") and, for any data work, `docs/CONTRACT.md`.
+
+Non-negotiables: JavaScript only (no TypeScript/shadcn/new scaffold) · page → `src/queries` → `src/services/index.js` → adapter · match `docs/CONTRACT.md` (price = integer rupees) · phones only via `revealContact()` · routes `/p/:productId` `/b/:slug` `/category/:slug` loaded from the URL · legacy files are replaced and deleted, never restyled · Tailwind tokens, no inline styles in new folders · plan first, minimal diff, `npm run check` green, append to `docs/PROGRESS.md` · never touch prod or expose secret keys · Phase 2 is out of scope.

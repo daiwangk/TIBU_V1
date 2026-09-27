@@ -3,11 +3,11 @@ import { listBusinesses } from "./services/businessService";
 import { listProducts } from "./services/productService";
 import { useAsync } from "./hooks/useAsync";
 import { useState } from "react";
-import ProductCard from "./Components/ProductCard";
-import BusinessCard from "./Components/BusinessCard";
-import ReelCard from "./Components/ReelCard";
-import Banner from "./Components/Banner";
-import SearchBar from "./Components/SearchBar";
+import ProductCard from "./legacy/components/ProductCard";
+import BusinessCard from "./legacy/components/BusinessCard";
+import ReelCard from "./legacy/components/ReelCard";
+import Banner from "./legacy/components/Banner";
+import SearchBar from "./legacy/components/SearchBar";
 export default function Embroidery({
   setPage,
   setSelectedProduct,

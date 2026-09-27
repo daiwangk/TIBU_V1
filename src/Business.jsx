@@ -1,6 +1,6 @@
 import { useState } from "react";
-import ReelCard from "./Components/ReelCard";
-import ProductCard from "./Components/ProductCard";
+import ReelCard from "./legacy/components/ReelCard";
+import ProductCard from "./legacy/components/ProductCard";
 export default function Business({
   setPage,
   selectedBusiness,

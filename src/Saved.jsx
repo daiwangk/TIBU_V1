@@ -1,7 +1,7 @@
 import { useState } from "react";
-import ProductCard from "./Components/ProductCard";
-import BusinessCard from "./Components/BusinessCard";
-import ReelCard from "./Components/ReelCard";
+import ProductCard from "./legacy/components/ProductCard";
+import BusinessCard from "./legacy/components/BusinessCard";
+import ReelCard from "./legacy/components/ReelCard";
 
 
 export default function Saved({

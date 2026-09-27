@@ -2,9 +2,9 @@
 import { useState } from "react";
 import { useAsync } from "./hooks/useAsync";
 import { listProducts } from "./services/productService";
-import Banner from "./Components/Banner";
-import SearchBar from "./Components/SearchBar";
-import ProductCard from "./Components/ProductCard";
+import Banner from "./legacy/components/Banner";
+import SearchBar from "./legacy/components/SearchBar";
+import ProductCard from "./legacy/components/ProductCard";
 
 export default function Fashion({
 

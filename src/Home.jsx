@@ -4,9 +4,9 @@ import { listBusinesses } from "./services/businessService";
 import { listProducts } from "./services/productService";
 import { useAsync } from "./hooks/useAsync";
 import { useState } from "react";
-import ProductCard from "./Components/ProductCard";
-import BusinessCard from "./Components/BusinessCard";
-import SearchBar from "./Components/SearchBar";
+import ProductCard from "./legacy/components/ProductCard";
+import BusinessCard from "./legacy/components/BusinessCard";
+import SearchBar from "./legacy/components/SearchBar";
 export default function Home({
   setPage,
   searchText,

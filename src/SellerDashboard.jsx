@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { useState } from "react";
-import ProductCard from "./Components/ProductCard";
-import ReelCard from "./Components/ReelCard";
+import ProductCard from "./legacy/components/ProductCard";
+import ReelCard from "./legacy/components/ReelCard";
 
 export default function SellerDashboard({
   setPage,

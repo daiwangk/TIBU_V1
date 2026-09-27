@@ -1,0 +1,24 @@
+# Keeps free-tier Supabase projects from pausing after a week of inactivity.
+# Add repo secrets: SUPABASE_URL and SUPABASE_ANON_KEY (the public anon/publishable key only).
+# Enable in Week 5 for prod; optional for dev.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "17 3 * * *"   # daily, 08:47 IST
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping a public, RLS-readable table
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/categories?select=slug&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          echo "HTTP $code"
+          test "$code" = "200"

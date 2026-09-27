@@ -1,4 +1,4 @@
-import ReelCard from "./Components/ReelCard";
+import ReelCard from "./legacy/components/ReelCard";
 
 export default function ReelsViewAll({
   setPage,
