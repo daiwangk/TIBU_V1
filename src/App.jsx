@@ -116,7 +116,6 @@ function LegacyPage({ Component, extraProps = {} }) {
     selectedProduct: state.selectedProduct ?? null,
     selectedBusiness: state.selectedBusiness ?? null,
     selectedReel: state.selectedReel ?? null,
-    selectedOffer: state.selectedOffer ?? null,
     currentReels: state.currentReels ?? [],
     // view-all payloads
     viewAllTitle: state.viewAllTitle ?? '',
