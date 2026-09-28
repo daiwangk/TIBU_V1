@@ -6,7 +6,7 @@ export default function Reel({
     if (!selectedReel) {
   return (
     <div style={{ padding: "30px" }}>
-      <button onClick={() => setPage("discover")}>
+      <button onClick={() => setPage("home")}>
         ← Back
       </button>
     </div>
@@ -31,7 +31,7 @@ alignItems:"center"
 >
 
 <button
-onClick={() => setPage("discover")}
+onClick={() => setPage("home")}
 style={{
 border:"none",
 background:"none",

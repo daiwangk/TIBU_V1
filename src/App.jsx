@@ -6,14 +6,11 @@ import AppShell from './layouts/AppShell';
 
 // Pages — alphabetical
 import AboutTibu from './AboutTibu';
-import AddAddress from './AddAddress';
-import Addresses from './Addresses';
 import Business from './Business';
 import BusinessViewAll from './BusinessViewAll';
 import Candles from './Candles';
 import Crochet from './Crochet';
 import Desserts from './Desserts';
-import Discover from './Discover';
 import EditProfile from './EditProfile';
 import Embroidery from './Embroidery';
 import Fashion from './Fashion';
@@ -25,7 +22,6 @@ import Jewellery from './Jewellery';
 import MenFashion from './MenFashion';
 import NotificationPreferences from './NotificationPreferences';
 import Notification from './legacy/pages/Notification';
-import Offers from './Offers';
 import PrivacySecurity from './PrivacySecurity';
 import Product from './Product';
 import ProductsViewAll from './ProductsViewAll';
@@ -65,7 +61,7 @@ function LegacyPage({ Component, extraProps = {} }) {
   const [searchText, setSearchText] = React.useState('');
 
   const { savedProducts, setSavedProducts, savedBusinesses, setSavedBusinesses, savedReels, setSavedReels } = useSaved();
-  const { profile, setProfile, addresses, setAddresses, filters, setFilters, profileStats } = useProfile();
+  const { profile, setProfile, filters, setFilters, profileStats } = useProfile();
 
   /** Shim: translate old page strings to navigate() calls */
   function setPage(pageKey, entityState) {
@@ -75,11 +71,8 @@ function LegacyPage({ Component, extraProps = {} }) {
       saved: '/saved',
       profile: '/profile',
       editprofile: '/profile/edit',
-      addresses: '/addresses',
-      addaddress: '/addresses/new',
       notification: '/notifications',
       notificationPreferences: '/notifications/preferences',
-      offers: '/offers',
       product: '/product/view',
       business: '/business/view',
       productsviewall: '/viewall/products',
@@ -97,7 +90,6 @@ function LegacyPage({ Component, extraProps = {} }) {
       gifts: '/category/gifts',
       fashion: '/category/fashion',
       handmade: '/category/handmade',
-      discover: '/discover',
       sellerregister: '/seller/register',
       sellerdashboard: '/seller/dashboard',
       sellerproduct: '/seller/products/view',
@@ -162,8 +154,6 @@ function LegacyPage({ Component, extraProps = {} }) {
     profile,
     setProfile,
     profileStats,
-    addresses,
-    setAddresses,
     filters,
     setFilters,
     ...extraProps,
@@ -187,12 +177,8 @@ function AppRoutes() {
         <Route path="/saved" element={L(Saved)} />
         <Route path="/profile" element={L(Profile)} />
         <Route path="/profile/edit" element={L(EditProfile)} />
-        <Route path="/addresses" element={L(Addresses)} />
-        <Route path="/addresses/new" element={L(AddAddress)} />
         <Route path="/notifications" element={L(Notification)} />
         <Route path="/notifications/preferences" element={L(NotificationPreferences)} />
-        <Route path="/offers" element={L(Offers)} />
-        <Route path="/discover" element={L(Discover)} />
         <Route path="/privacy" element={L(PrivacySecurity)} />
         <Route path="/help" element={L(HelpFeedback)} />
         <Route path="/terms" element={L(TermsConditions)} />

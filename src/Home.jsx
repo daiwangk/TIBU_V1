@@ -11,9 +11,7 @@ export default function Home({
   setPage,
   searchText,
   setSearchText,
-  addresses,
-setAddresses,
- 
+
   setSelectedProduct,
   setSelectedBusiness,
 
@@ -142,13 +140,6 @@ const allProducts = [
   { name: "Crochet", icon: "🧶", color: "#FFE8F1", page: "crochet" },
   { name: "Gifts", icon: "🎁", color: "#E2F2FF", page: "gifts" },
 ];
-const selectedAddress =
-  (addresses || []).find((address) => address.selected) ||
-  (addresses || [])[0];
-
-const displayAddress =
-  selectedAddress?.address ||
-  "Mumbai, Maharashtra";
 
   return (
     <div style={styles.page}>
@@ -187,7 +178,6 @@ const displayAddress =
     {/* FULL SELECTED ADDRESS */}
 
     <div
-      onClick={() => setPage("addresses")}
       style={{
         marginTop: "5px",
         color: "#5A1848",
@@ -198,7 +188,6 @@ const displayAddress =
         maxWidth: "750px",
         overflow: "hidden",
         textOverflow: "ellipsis",
-        cursor: "pointer",
         display: "flex",
         alignItems: "center",
         gap: "5px",
@@ -206,17 +195,7 @@ const displayAddress =
     >
       <span>📍</span>
 
-      <span>{displayAddress}</span>
-
-      <span
-        style={{
-          fontSize: "11px",
-          fontWeight: "400",
-          marginLeft: "2px",
-        }}
-      >
-        ▼ 
-      </span>
+      <span>Mumbai</span>
     </div>
   </div>
 
