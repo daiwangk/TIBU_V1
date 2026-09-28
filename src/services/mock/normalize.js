@@ -217,25 +217,3 @@ rawBusinesses.forEach((b) => {
     });
   }
 });
-
-// Hardcoded offers from original audit
-export const normalizedOffers = [
-  {
-    id: "offer-1",
-    businessId: 'pearl-bloom',
-    title: 'Flat 15% off on all jewellery',
-    discount: '15% OFF',
-    description: 'Use code PEARL15 to get 15% off on your first order from Pearl Bloom.',
-    code: 'PEARL15',
-    validTill: '2026-10-31T00:00:00Z',
-  },
-  {
-    id: "offer-2",
-    businessId: 'gift-studio',
-    title: '₹100 off on orders above ₹500',
-    discount: '₹100 OFF',
-    description: 'Use code GIFT100 to get ₹100 off on orders above ₹500 from The Gift Studio.',
-    code: 'GIFT100',
-    validTill: '2026-11-15T00:00:00Z',
-  },
-];

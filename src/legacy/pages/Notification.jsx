@@ -148,7 +148,7 @@ export default function Notification({
 
     if (offer) {
       setSelectedOffer(offer);
-      setPage("offers");
+      setPage("home");
     } else {
       console.log("Offer not found:", item.offerId);
     }

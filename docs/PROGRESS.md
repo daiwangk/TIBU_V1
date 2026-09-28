@@ -6,14 +6,30 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock`
 - Last green commit on main: `a7a66a0`
-- In progress: `A1.2 — dk — chore/a1-2-supabase` (finish: copy `supabase/` into repo + save `docs/kit/rpc-signatures.txt`)
+- In progress: `A1.2 — finish copy supabase/ into repo + save docs/kit/rpc-signatures.txt` / Next: `B1.4`
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Cloudflare, Resend, and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
 
-### 2026-09-27 · B1.1 / B1.2 / A1.2 · dk · Cursor
+### 2026-09-28 · B1.3 · dk · Antigravity (Gemini 3.7 Flash)
+- Done:
+  - Removed Phase-2 screens (Offers, OfferDetails, Discover, Addresses, AddAddress, offerService.js) per DECISIONS D16
+  - Cleaned up routing, imports, and URL map keys in `App.jsx` and `useSetPage.js`
+  - Removed `normalizedOffers` from `normalize.js`
+  - Removed `addresses` state, defaultAddresses, and addresses count from `ProfileContext.jsx`
+  - Removed Addresses stat and Manage Addresses / Tibu Offers quick actions from `Profile.jsx`
+  - Updated `Home.jsx` location line to static "Mumbai" and removed addresses props
+  - Redirected remaining `setPage('offers' | 'discover')` in `Reel.jsx` and `Notification.jsx` to `setPage('home')`
+  - Removed `src/Discover.jsx` from `scripts/legacy-allowlist.json`
+- Files: `src/Offers.jsx` (del), `src/OfferDetails.jsx` (del), `src/Discover.jsx` (del), `src/Addresses.jsx` (del), `src/AddAddress.jsx` (del), `src/services/offerService.js` (del), `src/App.jsx`, `src/hooks/useSetPage.js`, `src/services/mock/normalize.js`, `src/contexts/ProfileContext.jsx`, `src/Profile.jsx`, `src/Home.jsx`, `src/Reel.jsx`, `src/legacy/pages/Notification.jsx`, `scripts/legacy-allowlist.json`
+- How verified: `npm run check` (guards + lint + tests + build) all green
+- Not done / left out (why):
+  - `Reel.jsx` and `ReelsViewAll.jsx` kept for now (scheduled for deletion in B2.4)
+  - `Notification.jsx` internal mock offer payload kept for Week 5 notification rewrite
+- Next step (exact): finish A1.2 or proceed to B1.4 (Build mock/supabase seam & queries folder)
+- Gotchas for the next person: none
 - Done:
   - Solo session: dk covered both A and B tracks (no partner session)
   - B1.1: done, merged to main (`f27d73b`) — boot patch + Desserts category filtering

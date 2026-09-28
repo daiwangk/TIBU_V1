@@ -127,7 +127,7 @@ export default function Profile({
 <div
   style={{
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
+    gridTemplateColumns: "repeat(2, 1fr)",
     gap: "16px",
     marginTop: "30px",
   }}
@@ -135,7 +135,6 @@ export default function Profile({
   {[
   { number: profileStats.saved, label: "Saved" },
   { number: profileStats.reviews, label: "Reviews" },
-  { number: profileStats.addresses, label: "Addresses" },
 ].map((item, index) => (
     <div
       key={index}
@@ -168,91 +167,6 @@ export default function Profile({
       </p>
     </div>
   ))}
-</div>
-{/* ================= QUICK ACTIONS ================= */}
-
-<h2
-  style={{
-    marginTop: "40px",
-    marginBottom: "20px",
-    color: "#35142E",
-  }}
->
-  ⚡ Quick Actions
-</h2>
-
-<div
-  style={{
-    background: "white",
-    borderRadius: "20px",
-    overflow: "hidden",
-    boxShadow: "0 8px 18px rgba(0,0,0,.05)",
-  }}
->
-
-  {/* MANAGE ADDRESSES */}
-
-  <div
-    onClick={() => setPage("addresses")}
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "20px 22px",
-      borderBottom: "1px solid #F2F2F2",
-      cursor: "pointer",
-    }}
-  >
-    <span
-      style={{
-        fontWeight: "600",
-        color: "#35142E",
-      }}
-    >
-      📍 Manage Addresses
-    </span>
-
-    <span
-      style={{
-        fontSize: "22px",
-        color: "#999",
-      }}
-    >
-      ›
-    </span>
-  </div>
-
-  {/* TIBU OFFERS */}
-
- <div 
-  onClick={() => setPage("offers")}
-  style={{ 
-    display: "flex", 
-    justifyContent: "space-between", 
-    alignItems: "center", 
-    padding: "20px 22px", 
-    cursor: "pointer", 
-  }} 
->
-    <span
-      style={{
-        fontWeight: "600",
-        color: "#35142E",
-      }}
-    >
-      💜 Tibu Offers
-    </span>
-
-    <span
-      style={{
-        fontSize: "22px",
-        color: "#999",
-      }}
-    >
-      ›
-    </span>
-  </div>
-
 </div>
 {/* ================= RECENT ACTIVITY ================= */}
 

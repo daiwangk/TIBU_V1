@@ -12,21 +12,6 @@ const defaultProfile = {
   avatarFile: null,
 };
 
-const defaultAddresses = [
-  {
-    id: 1,
-    label: 'Home',
-    address: 'Flat 302, Sunrise Apartments, 14th Road, Khar West, Mumbai, Maharashtra — 400052',
-    selected: true,
-  },
-  {
-    id: 2,
-    label: 'Work',
-    address: 'Office 5B, XYZ Tower, Andheri East, Mumbai, Maharashtra — 400069',
-    selected: false,
-  },
-];
-
 const defaultFilters = {
   category: 'All',
   distance: 'Anywhere',
@@ -35,7 +20,6 @@ const defaultFilters = {
 
 const defaultState = {
   profile: defaultProfile,
-  addresses: defaultAddresses,
   filters: defaultFilters,
 };
 
@@ -62,7 +46,6 @@ export function ProfileProvider({ children }) {
 
   useEffect(() => {
     // Don't persist avatarFile (File object is not JSON-serializable)
-    // eslint-disable-next-line no-unused-vars
     const { avatarFile: _avatarFile, ...profileWithoutFile } = state.profile;
     localStorage.setItem(
       STORAGE_KEY,
@@ -76,12 +59,6 @@ export function ProfileProvider({ children }) {
       profile: typeof profile === 'function' ? profile(prev.profile) : profile,
     }));
 
-  const setAddresses = (addresses) =>
-    setState((prev) => ({
-      ...prev,
-      addresses: typeof addresses === 'function' ? addresses(prev.addresses) : addresses,
-    }));
-
   const setFilters = (filters) =>
     setState((prev) => ({
       ...prev,
@@ -91,7 +68,6 @@ export function ProfileProvider({ children }) {
   const profileStats = {
     saved: 0, // will be computed from SavedContext in a later task
     reviews: 0,
-    addresses: state.addresses.length,
   };
 
   return (
@@ -99,8 +75,6 @@ export function ProfileProvider({ children }) {
       value={{
         profile: state.profile,
         setProfile,
-        addresses: state.addresses,
-        setAddresses,
         filters: state.filters,
         setFilters,
         profileStats,
@@ -111,7 +85,6 @@ export function ProfileProvider({ children }) {
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useProfile() {
   const ctx = useContext(ProfileContext);
   if (!ctx) throw new Error('useProfile must be used within ProfileProvider');
