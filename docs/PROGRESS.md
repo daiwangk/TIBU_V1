@@ -5,8 +5,9 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock`
-- Last green commit on main: `a7a66a0`
-- In progress: `A1.2 — finish copy supabase/ into repo + save docs/kit/rpc-signatures.txt` / Next: `B1.4`
+- Last green commit on main: `b69c05e` (PR #3 — B1.3 remove Phase-2 screens)
+- In progress: —
+- Next task: `A1.2` (finish copy `supabase/` into repo + save `docs/kit/rpc-signatures.txt`) or `B1.4`
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Cloudflare, Resend, and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
