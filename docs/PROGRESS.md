@@ -5,7 +5,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock`
-- Last green commit on main: `b69c05e` (PR #3 — B1.3 remove Phase-2 screens)
+- Last green commit on main: `f234296` (B1.3 follow-up — Notification offer branch + selectedOffer cleanup)
 - In progress: —
 - Next task: `A1.2` (finish copy `supabase/` into repo + save `docs/kit/rpc-signatures.txt`) or `B1.4`
 - Blocked: —
@@ -13,6 +13,18 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-09-29 · B1.3 follow-up · daiwang · Cursor
+- Done:
+  - Compared local Cursor B1.3 tree vs merged PR #3 (`ba93136`); kept merged main as source of truth
+  - Removed leftover Notification offer branch that merged B1.3 had only redirected (`setPage("offers")` → `"home"`): deleted mock `offers` array, type `"offer"` notifications, `handleOffer`, offer tap/label branch, and `setSelectedOffer` prop
+  - Removed dead `selectedOffer` from `App.jsx` LegacyPage props
+- Files: `src/legacy/pages/Notification.jsx`, `src/App.jsx`
+- How verified: greps clean for offer/`selectedOffer` in those files; commit `f234296` on `main`
+- Not done / left out (why): —
+- Next step (exact): finish A1.2 or proceed to B1.4
+- Gotchas for the next person:
+  - `Notification.jsx` still has no real branch for enquiry/review/digest types (only business remains). Needs proper handling when rebuilt against Supabase notifications.
 
 ### 2026-09-28 · B1.3 · dk · Antigravity (Gemini 3.7 Flash)
 - Done:
@@ -28,9 +40,11 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - How verified: `npm run check` (guards + lint + tests + build) all green
 - Not done / left out (why):
   - `Reel.jsx` and `ReelsViewAll.jsx` kept for now (scheduled for deletion in B2.4)
-  - `Notification.jsx` internal mock offer payload kept for Week 5 notification rewrite
+  - Notification offer mock/handler left as redirect-only — cleaned up next day by daiwang (`f234296`)
 - Next step (exact): finish A1.2 or proceed to B1.4 (Build mock/supabase seam & queries folder)
 - Gotchas for the next person: none
+
+### 2026-09-27 · B1.1 / B1.2 / A1.2 · dk · Cursor
 - Done:
   - Solo session: dk covered both A and B tracks (no partner session)
   - B1.1: done, merged to main (`f27d73b`) — boot patch + Desserts category filtering
