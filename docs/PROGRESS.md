@@ -4,17 +4,17 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
-- Data source on preview: `mock`
-- Last green commit on main: `f234296` (B1.3 follow-up — Notification offer branch + selectedOffer cleanup)
-- In progress: B1.6 UI kit complete and verified (working tree, not yet committed). B1.4 on branch `feat/b1-4-contract` (`87ffc51`) — not yet PR'd / merged.
-- Next task: commit B1.6 on `feat/b1-6-ui-kit`, open PR for B1.4, then **B1.5** (AppProviders + TanStack Query catalog hooks)
+- Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
+- Last green commit on main: `f8c095c` (merge PR #6 — A1.4 Seed dev script)
+- In progress: `B1.6` — PR #7 (`feat/b1-6-ui-kit`); conflict with main resolved; awaiting merge
+- Next task: merge PR #7; then B1.5 (AppProviders + TanStack Query catalog hooks) or A1.5 (Supabase catalog adapter)
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
 
-### 2026-09-30 · B1.6 · dk · Antigravity (Claude Sonnet 4.6)
+### 2026-09-30 · B1.6 · dk · Antigravity (Claude Sonnet 4.6 / Gemini 3.8 Flash)
 - Done:
   - Built full in-house UI kit per DECISIONS D14, D15. All Tailwind tokens; no `style={{}}` in new folders; lucide-react only; JSDoc on all props.
   - `src/components/ui/`: Button, IconButton, Card, Badge, Chip, Input, Textarea, Select, Switch, Tabs, Sheet, Dialog, Skeleton, Spinner, EmptyState, ErrorState, PageHeader, Avatar, ImagePlaceholder (19 components).
@@ -30,11 +30,41 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Not done / left out (why):
   - `brand/Logo` audit: `git grep "brand/Logo" src/` → 0 results; legacy Logo is orphaned, safe to create new one. Deletion deferred to its strangler task.
   - `BottomNav.jsx` still has `style={{}}` (pre-existing legacy code) — only added the `'/dev/'` string, did not restyle.
-- Next step (exact): commit B1.6 on `feat/b1-6-ui-kit`, open PR for B1.4, then B1.5 (AppProviders + TanStack Query hooks).
+- Next step (exact): merge PR #7; then B1.5 (AppProviders + TanStack Query hooks).
 - Gotchas for the next person:
   - `Avatar.size` accepts one of 32 | 36 | 40 | 48 | 56 | 64 (Tailwind static class map). Custom sizes → use `className` with `w-/h-` utilities.
   - `ImagePlaceholder.aspect` accepts `'1/1' | '4/3' | '3/4' | '16/9'` (mapped to Tailwind aspect-* classes). The old `aspectRatio` string prop is gone.
   - `Skeleton.variant='rect'` no longer takes `width`/`height` props — control those via `className` (e.g. `className="h-20 w-full"`).
+
+### 2026-09-30 · A1.4 · dk · Cursor
+- Done:
+  - Idempotent `scripts/seed-dev.mjs` for `tibu-dev`: `SEED_ALLOWED_REF` guard before any DB work; 12 sellers + 2 customers; 12 businesses (10 approved / 1 pending / 1 rejected); contacts; 45 products + 81 images; 17 reviews; optional `REELS` → videos
+  - Deletes of reviews / videos / products scoped with `.in('business_id', businessIds)` from this run’s upserted seed slugs only
+  - Added `@supabase/supabase-js` (OK’d for A1.5; used here by the Node seed)
+  - Optional `REELS=` documented in `.env.seed.example`
+- Files: `scripts/seed-dev.mjs`, `package.json`, `package-lock.json`, `.env.seed.example`, `docs/PROGRESS.md`
+- How verified:
+  - Seed run ×2 → identical summary counts (14 users, 12 businesses, 12 contacts, 45 products, 81 images, 0 videos, 17 reviews)
+  - Service-role check: all 12 seed businesses have `location`; all 10 approved have `rating_avg > 0`
+  - Anon RLS probe: `businesses?status=neq.approved` → `[]`; `business_contacts` → `[]`; approved rows still visible
+  - `npm run check` green (guards OK · lint 0 errors / 1 pre-existing legacy warning · 15/15 tests · build OK)
+- Not done / left out (why):
+  - `REELS` not set locally → `business_videos` skipped (by design)
+  - `src/lib/geo.js` / `MUMBAI_AREAS` still A1.3; seed inlines `AREAS`
+  - A1.5 adapter not started
+- Next step (exact): merge PR #6 after conflict resolution; then A1.5 or parallel B1.5 / B1.6 / A1.3
+- Gotchas for the next person:
+  - Never commit `.env.seed` (service-role). Example only is tracked
+  - Anon may see more than 10 approved businesses if non-seed approved rows already exist on `tibu-dev`
+  - Password for seed users remains `Test@12345` (dev only)
+
+### 2026-09-30 · A1.4 (WIP, stopped mid-task) · dk · Cursor
+- Done: draft seed script + supabase-js + REELS note in example; session stopped before verify
+- Files: same as A1.4 completion entry (was uncommitted WIP)
+- How verified: not yet (superseded by completion entry above)
+- Not done / left out (why): verify + commit deferred to same-day follow-up
+- Next step (exact): run seed twice + check — done in completion entry
+- Gotchas for the next person: superseded
 
 ### 2026-09-30 · A1.6 · dk · Antigravity (Gemini 3.8 Flash)
 - Done:
@@ -52,7 +82,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
   - Local `npm run check` (guards, lint, test, build) all green
 - Not done / left out (why):
   - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` skipped per runbook (will set in A2.3 after A1.2 finishes)
-- Next step (exact): A1.2 (copy `supabase/` into repo + save `docs/kit/rpc-signatures.txt`) or B1.4
+- Next step (exact): A1.2 leftovers or A1.5 / B1.5 (B1.4 already on main)
 - Gotchas for the next person:
   - In Cloudflare Pages project settings, the build output directory must remain `dist` (default `/` serves raw unbundled source files)
 
