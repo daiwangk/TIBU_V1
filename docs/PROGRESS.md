@@ -6,13 +6,24 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
 - Last green commit on main: `57da7c4` (merge PR #7 — B1.6 UI kit)
-- In progress: `B1.5` — branch `feat/b1-5-queries` (providers + catalog hooks); not committed yet
-- Next task: commit/PR B1.5; then B1.7 (product page) or A1.5 (Supabase catalog adapter)
+- In progress: `B1.5` — branch `feat/b1-5-queries` (feat commit on remote; options-spread fix committing now)
+- Next task: open/merge B1.5 PR; then B1.7 (product page) or A1.5 (Supabase catalog adapter)
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-09-30 · B1.5 follow-up · dk · Cursor (Composer)
+- Done:
+  - Fixed catalog hooks so caller `options` cannot override `queryKey` / `queryFn`: `...options` first in every options-aware hook
+  - `enabled` gates now `!!id|slug|businessId && (options.enabled ?? true)` on useCategory / useBusiness / useProduct / useReviews
+- Files: `src/queries/catalog.js`, `docs/PROGRESS.md`
+- How verified: `npm run check` green; `grep` shows six `...options` spreads, all first in their objects; `git diff --stat` was catalog-only before this PROGRESS update
+- Not done / left out (why): —
+- Next step (exact): push fix; open/merge B1.5 PR; then B1.7 or A1.5
+- Gotchas for the next person:
+  - Always put hook-owned `queryKey`/`queryFn`/`enabled` after `...options` so callers can only tighten `enabled`, never replace the service seam
 
 ### 2026-09-30 · B1.5 · dk · Cursor (Composer)
 - Done:
@@ -30,8 +41,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Not done / left out (why):
   - No zustand stores yet (A2.2)
   - No page consumers yet (B1.7+)
-  - Commit/PR not created (wait for explicit ask)
-- Next step (exact): commit `feat(b1.5): query client, error boundary, catalog hooks` and open PR; then B1.7 or A1.5
+- Next step (exact): open/merge B1.5 PR; then B1.7 or A1.5
 - Gotchas for the next person:
   - Infinite hooks strip `offset` from the key and force `limit: 20`; `pageParam` is the offset
   - ErrorBoundary sits outside BrowserRouter — Home must stay an `<a href="/">`, not `<Link>`
