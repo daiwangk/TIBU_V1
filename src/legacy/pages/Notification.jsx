@@ -4,7 +4,6 @@ import { useAsync } from "../../hooks/useAsync";
 export default function Notification({
   setPage,
   setSelectedBusiness,
-  setSelectedOffer,
 }) {
   const { data: candleBusinesses = [], loading: load_candleBusinesses } = useAsync(() => listBusinesses('candle'));
   const { data: crochetBusinesses = [], loading: load_crochetBusinesses } = useAsync(() => listBusinesses('crochet'));
@@ -29,31 +28,6 @@ export default function Notification({
     ...giftsBusinesses,
     ...menFashionBusinesses,
     ...womenFashionBusinesses,
-  ];
-
-  // ================= OFFERS =================
-  // Keep these IDs the same as the IDs used in Offers.jsx
-
-  const offers = [
-    {
-      id: 1,
-      business: "ABC Bakery",
-      title: "Independence Day Offer",
-      discount: "15% OFF",
-      description: "On all products",
-      code: "TIBU15",
-      validTill: "15 August",
-    },
-
-    {
-      id: 2,
-      business: "Handmade by Sara",
-      title: "Rakhi Special",
-      discount: "₹100 OFF",
-      description: "On purchases above ₹799",
-      code: "TIBUSARA100",
-      validTill: "20 August",
-    },
   ];
 
   // ================= NOTIFICATIONS =================
@@ -98,26 +72,6 @@ export default function Notification({
       time: "Today",
       businessId: "gift-studio",
     },
-
-    {
-      id: 5,
-      type: "offer",
-      icon: "🏷️",
-      title: "Offer Near You",
-      message: "ABC Bakery has 15% OFF — 1.1 km away.",
-      time: "Today",
-      offerId: 1,
-    },
-
-    {
-      id: 6,
-      type: "offer",
-      icon: "🏷️",
-      title: "Offer Near You",
-      message: "Handmade by Sara has ₹100 OFF — 1.8 km away.",
-      time: "Today",
-      offerId: 2,
-    },
   ];
 
   // ================= VIEW BUSINESS =================
@@ -134,23 +88,6 @@ export default function Notification({
       setPage("business");
     } else {
       console.log("Business not found:", item.businessId);
-    }
-  };
-
-  // ================= VIEW OFFER =================
-
-  const handleOffer = (item) => {
-    if (!item.offerId) return;
-
-    const offer = offers.find(
-      (offer) => offer.id === item.offerId
-    );
-
-    if (offer) {
-      setSelectedOffer(offer);
-      setPage("home");
-    } else {
-      console.log("Offer not found:", item.offerId);
     }
   };
 
@@ -318,10 +255,6 @@ export default function Notification({
                     if (item.type === "business") {
                       handleBusiness(item);
                     }
-
-                    if (item.type === "offer") {
-                      handleOffer(item);
-                    }
                   }}
                   style={{
                     border: "none",
@@ -333,9 +266,7 @@ export default function Notification({
                     cursor: "pointer",
                   }}
                 >
-                  {item.type === "business"
-                    ? "View Business →"
-                    : "View Offer →"}
+                  View Business →
                 </button>
 
               </div>

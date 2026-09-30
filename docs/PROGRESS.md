@@ -5,9 +5,9 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock`
-- Last green commit on main: `b69c05e` (PR #3 — B1.3 remove Phase-2 screens)
-- In progress: —
-- Next task: `A1.2` (finish copy `supabase/` into repo + save `docs/kit/rpc-signatures.txt`) or `B1.4`
+- Last green commit on main: `f234296` (B1.3 follow-up — Notification offer branch + selectedOffer cleanup)
+- In progress: `B1.4` on branch `feat/b1-4-contract` (`87ffc51`) — contract + mock adapter + format helpers committed; not yet PR'd / merged
+- Next task: open PR for B1.4 (A reviews against CONTRACT.md / S9), then `B1.5` (providers + catalog query hooks) or finish `A1.2`
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
@@ -26,13 +26,44 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
   - Deployment URL: `https://be9f1995.tibu-v1.pages.dev`
 - Files: `docs/PROGRESS.md`
 - How verified:
-  - Terminal `Invoke-WebRequest` / `curl` on `https://tibu-v1.pages.dev/p/anything` and `/b/anything` returned HTTP 200 with index.html root and compiled asset scripts
+  - Terminal `curl` on `https://tibu-v1.pages.dev/p/anything` and `/b/anything` returned HTTP 200 with index.html root and compiled asset scripts
   - Local `npm run check` (guards, lint, test, build) all green
 - Not done / left out (why):
   - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` skipped per runbook (will set in A2.3 after A1.2 finishes)
 - Next step (exact): A1.2 (copy `supabase/` into repo + save `docs/kit/rpc-signatures.txt`) or B1.4
 - Gotchas for the next person:
   - In Cloudflare Pages project settings, the build output directory must remain `dist` (default `/` serves raw unbundled source files)
+
+### 2026-09-29 · B1.4 · daiwang · Cursor
+- Done:
+  - Service contract seam: `AppError`, `FUNCTION_NAMES` + JSDoc typedefs, adapter switch on `VITE_DATA_SOURCE`
+  - Deterministic mock adapter (taxonomy, fixtures from legacy raw data, catalog search/get/listReviews); other functions throw `unavailable_in_mock`
+  - Supabase adapter stubs throw `config` (for A1.5)
+  - `formatPrice` / `formatDistance` / `formatRating` / `formatRelativeTime` + vitest coverage
+- Files: `src/services/errors.js`, `src/services/contract.js`, `src/services/contract.test.js`, `src/services/index.js`, `src/services/mock/taxonomy.js`, `src/services/mock/fixtures.js`, `src/services/mock/index.js`, `src/services/mock/mock.test.js`, `src/services/supabase/index.js`, `src/lib/format.js`, `src/lib/format.test.js`
+- How verified: `npm run check` green (guards OK · lint 0 errors / 1 pre-existing legacy warning · 15/15 tests · build OK). Legacy `*Service.js` / pages untouched.
+- Not done / left out (why):
+  - No PR yet; not on `main`
+  - `src/queries/` and app providers (B1.5) not started
+  - Supabase adapter still stubs only (A1.5)
+  - Legacy pages still on old `*Service.js` path by design until later strangler tasks
+- Next step (exact): push `feat/b1-4-contract` and open PR for contract review (S9); then start B1.5 on a new branch from main (or from this PR once merged)
+- Gotchas for the next person:
+  - Working tree was already committed as `87ffc51` -- do not re-add the same files as a `wip:` commit
+  - PROGRESS.md "Now"/log update in this session is uncommitted until you decide to amend or add a docs commit
+  - Legacy Home still uses old services; empty fashion row can still happen until taxonomy is wired through queries/pages
+
+### 2026-09-29 · B1.3 follow-up · daiwang · Cursor
+- Done:
+  - Compared local Cursor B1.3 tree vs merged PR #3 (`ba93136`); kept merged main as source of truth
+  - Removed leftover Notification offer branch that merged B1.3 had only redirected: deleted mock `offers` array, type `"offer"` notifications, `handleOffer`, offer tap/label branch, and `setSelectedOffer` prop
+  - Removed dead `selectedOffer` from `App.jsx` LegacyPage props
+- Files: `src/legacy/pages/Notification.jsx`, `src/App.jsx`
+- How verified: greps clean for offer/`selectedOffer` in those files; commit `f234296` on `main`
+- Not done / left out (why): —
+- Next step (exact): finish A1.2 or proceed to B1.4
+- Gotchas for the next person:
+  - `Notification.jsx` still has no real branch for enquiry/review/digest types (only business remains). Needs proper handling when rebuilt against Supabase notifications.
 
 ### 2026-09-28 · B1.3 · dk · Antigravity (Gemini 3.7 Flash)
 - Done:
@@ -48,9 +79,11 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - How verified: `npm run check` (guards + lint + tests + build) all green
 - Not done / left out (why):
   - `Reel.jsx` and `ReelsViewAll.jsx` kept for now (scheduled for deletion in B2.4)
-  - `Notification.jsx` internal mock offer payload kept for Week 5 notification rewrite
+  - Notification offer mock/handler left as redirect-only — cleaned up next day by daiwang (`f234296`)
 - Next step (exact): finish A1.2 or proceed to B1.4 (Build mock/supabase seam & queries folder)
 - Gotchas for the next person: none
+
+### 2026-09-27 · B1.1 / B1.2 / A1.2 · dk · Cursor
 - Done:
   - Solo session: dk covered both A and B tracks (no partner session)
   - B1.1: done, merged to main (`f27d73b`) — boot patch + Desserts category filtering
