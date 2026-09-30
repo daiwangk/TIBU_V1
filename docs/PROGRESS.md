@@ -5,14 +5,28 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `57da7c4` (merge PR #7 — B1.6 UI kit)
-- In progress: `B1.5` — branch `feat/b1-5-queries` (feat commit on remote; options-spread fix committing now)
-- Next task: open/merge B1.5 PR; then B1.7 (product page) or A1.5 (Supabase catalog adapter)
+- Last green commit on main: `73efed7` (merge PR #8 — B1.5 queries)
+- In progress: `A1.3` — branch `feat/a1-3-lib` (ready for PR)
+- Next task: open/merge A1.3 PR; then A1.5 (Supabase catalog adapter) or B1.7 (product page)
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-01 · A1.3 · Codex
+- Done:
+  - Added contract-aligned WhatsApp/call links, Instagram shortcode parsing and reel embed URLs, browser location helpers, a seed-aligned `MUMBAI_AREAS` list, browser image compression, safe localStorage helpers, and category-icon mapping.
+  - Added `browser-image-compression` as the only dependency; WhatsApp messages use straight ASCII apostrophes consistently.
+  - Added focused Vitest coverage for all runtime utilities except the static category-icon map.
+- Files: `src/lib/whatsapp.js`, `src/lib/whatsapp.test.js`, `src/lib/instagram.js`, `src/lib/instagram.test.js`, `src/lib/geo.js`, `src/lib/geo.test.js`, `src/lib/image.js`, `src/lib/image.test.js`, `src/lib/storage.js`, `src/lib/storage.test.js`, `src/lib/categoryIcons.js`, `package.json`, `package-lock.json`, `docs/PROGRESS.md`
+- How verified: `npm run check` green — guards OK (140 files), lint 0 errors / 1 pre-existing legacy warning, 34/34 tests pass, production build OK.
+- Not done / left out (why): A1.4 keeps its local seed area array; moving it to the browser utility is optional and would couple the Node-only seed to application source.
+- Next step (exact): commit and open the A1.3 PR; A1.5 can import `haversineMeters` from `src/lib/geo.js` for detail distances.
+- Gotchas for the next person:
+  - `MUMBAI_AREAS` is an array of `{ name, lat, lng }` records, deliberately aligned with the current seed data; do not create a second UI areas list.
+  - `getBrowserLocation` rejects with `AppError('validation', ...)`, including denied, timeout, and unsupported cases.
+
 
 ### 2026-09-30 · B1.5 follow-up · dk · Cursor (Composer)
 - Done:
