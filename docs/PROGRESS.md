@@ -6,8 +6,8 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock`
 - Last green commit on main: `cd0563b` (merge PR #4 — B1.4 contract + mock adapter + format helpers)
-- In progress: `A1.4` on branch `chore/a1-4-seed` — verified on `tibu-dev`; committing / PR + Codex S9 review
-- Next task: merge A1.4 after Codex review; then A1.5 (Supabase catalog adapter) or parallel B1.5 / B1.6 / A1.3 / A1.6
+- In progress: `A1.4` — PR #6 (`chore/a1-4-seed`, `271201c`); S9+safety review posted on PR (APPROVE); awaiting human/Codex second look then merge
+- Next task: merge PR #6; then A1.5 (Supabase catalog adapter) or parallel B1.5 / B1.6 / A1.3 / A1.6
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Cloudflare, Resend, and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
