@@ -5,14 +5,37 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `f8c095c` (merge PR #6 — A1.4 Seed dev script)
-- In progress: `B1.6` — PR #7 (`feat/b1-6-ui-kit`); conflict with main resolved; awaiting merge
-- Next task: merge PR #7; then B1.5 (AppProviders + TanStack Query catalog hooks) or A1.5 (Supabase catalog adapter)
+- Last green commit on main: `57da7c4` (merge PR #7 — B1.6 UI kit)
+- In progress: `B1.5` — branch `feat/b1-5-queries` (providers + catalog hooks); not committed yet
+- Next task: commit/PR B1.5; then B1.7 (product page) or A1.5 (Supabase catalog adapter)
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-09-30 · B1.5 · dk · Cursor (Composer)
+- Done:
+  - Installed `@tanstack/react-query`, `zustand` (unused until A2.2), `sonner`
+  - `src/app/providers.jsx` — QueryClientProvider (staleTime 60_000, retry 1, refetchOnWindowFocus true) + sonner Toaster top-center richColors
+  - `src/app/ErrorBoundary.jsx` — class boundary; full-screen recovery; Reload + Home (`<a href="/">`); `console.error` only in DEV
+  - `src/main.jsx` — ErrorBoundary → Providers → legacy ProfileProvider/SavedProvider → App
+  - `src/queries/keys.js` — exactly CONTRACT §8
+  - `src/queries/catalog.js` — catalog hooks via `src/services/index.js`; infinite search pages of 20 via offset (limit never grows); `useCategory` key `[...qk.categories, slug]`
+- Files created: `src/app/providers.jsx`, `src/app/ErrorBoundary.jsx`, `src/queries/keys.js`, `src/queries/catalog.js`
+- Files modified: `src/main.jsx`, `package.json`, `package-lock.json`, `docs/PROGRESS.md`
+- How verified:
+  - `npm run check` green (guards OK · lint 0 errors / 1 pre-existing legacy warning · 15/15 tests · build OK)
+  - Smoke: temporary `useProductSearch({ limit: 3 })` on `/dev/ui` → console `B1.5 smoke useProductSearch 3` + three product objects; probe removed after
+- Not done / left out (why):
+  - No zustand stores yet (A2.2)
+  - No page consumers yet (B1.7+)
+  - Commit/PR not created (wait for explicit ask)
+- Next step (exact): commit `feat(b1.5): query client, error boundary, catalog hooks` and open PR; then B1.7 or A1.5
+- Gotchas for the next person:
+  - Infinite hooks strip `offset` from the key and force `limit: 20`; `pageParam` is the offset
+  - ErrorBoundary sits outside BrowserRouter — Home must stay an `<a href="/">`, not `<Link>`
+  - `useCategory` intentionally does not add a factory to `qk` (CONTRACT §8 exact)
 
 ### 2026-09-30 · B1.6 · dk · Antigravity (Claude Sonnet 4.6 / Gemini 3.8 Flash)
 - Done:
