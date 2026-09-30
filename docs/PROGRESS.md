@@ -9,10 +9,30 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - In progress: —
 - Next task: `A1.2` (finish copy `supabase/` into repo + save `docs/kit/rpc-signatures.txt`) or `B1.4`
 - Blocked: —
-- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Cloudflare, Resend, and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
+- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-09-30 · A1.6 · dk · Antigravity (Gemini 3.8 Flash)
+- Done:
+  - Connected repo to Cloudflare Pages (`tibu-v1.pages.dev`)
+  - Configured build settings: build command `npm run build`, output directory `dist`, root `/`
+  - Added environment variables for Production & Preview: `NODE_VERSION=22`, `VITE_DATA_SOURCE=mock`, `VITE_SITE_URL=https://tibu-v1.pages.dev`
+  - Verified SPA deep links (`/p/anything`, `/b/anything`) return HTTP 200 and serve `index.html` (not Cloudflare 404)
+  - Verified app boots with production Vite bundle from `dist/`
+- URLs:
+  - Production URL: `https://tibu-v1.pages.dev`
+  - Deployment URL: `https://be9f1995.tibu-v1.pages.dev`
+- Files: `docs/PROGRESS.md`
+- How verified:
+  - Terminal `Invoke-WebRequest` / `curl` on `https://tibu-v1.pages.dev/p/anything` and `/b/anything` returned HTTP 200 with index.html root and compiled asset scripts
+  - Local `npm run check` (guards, lint, test, build) all green
+- Not done / left out (why):
+  - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` skipped per runbook (will set in A2.3 after A1.2 finishes)
+- Next step (exact): A1.2 (copy `supabase/` into repo + save `docs/kit/rpc-signatures.txt`) or B1.4
+- Gotchas for the next person:
+  - In Cloudflare Pages project settings, the build output directory must remain `dist` (default `/` serves raw unbundled source files)
 
 ### 2026-09-28 · B1.3 · dk · Antigravity (Gemini 3.7 Flash)
 - Done:
