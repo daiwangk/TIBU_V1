@@ -1,5 +1,11 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import Spinner from './components/ui/Spinner';
+
+// DEV-only lazy route — excluded from production bundle
+const UiGalleryPage = import.meta.env.DEV
+  ? lazy(() => import('./pages/dev/UiGalleryPage'))
+  : null;
 
 // Layout
 import AppShell from './layouts/AppShell';
@@ -219,6 +225,18 @@ function AppRoutes() {
         <Route path="/seller/videos/new" element={L(SellerDashboard)} />
         <Route path="/seller/posts" element={L(SellerDashboard)} />
         <Route path="/seller/reviews" element={L(SellerDashboard)} />
+
+        {/* DEV only — UI component gallery */}
+        {import.meta.env.DEV && UiGalleryPage && (
+          <Route
+            path="/dev/ui"
+            element={
+              <Suspense fallback={<div className="flex items-center justify-center h-screen"><Spinner size={32} /></div>}>
+                <UiGalleryPage />
+              </Suspense>
+            }
+          />
+        )}
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />

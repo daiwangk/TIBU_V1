@@ -6,13 +6,35 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock`
 - Last green commit on main: `f234296` (B1.3 follow-up — Notification offer branch + selectedOffer cleanup)
-- In progress: `B1.4` on branch `feat/b1-4-contract` (`87ffc51`) — contract + mock adapter + format helpers committed; not yet PR'd / merged
-- Next task: open PR for B1.4 (A reviews against CONTRACT.md / S9), then `B1.5` (providers + catalog query hooks) or finish `A1.2`
+- In progress: B1.6 UI kit complete and verified (working tree, not yet committed). B1.4 on branch `feat/b1-4-contract` (`87ffc51`) — not yet PR'd / merged.
+- Next task: commit B1.6 on `feat/b1-6-ui-kit`, open PR for B1.4, then **B1.5** (AppProviders + TanStack Query catalog hooks)
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-09-30 · B1.6 · dk · Antigravity (Claude Sonnet 4.6)
+- Done:
+  - Built full in-house UI kit per DECISIONS D14, D15. All Tailwind tokens; no `style={{}}` in new folders; lucide-react only; JSDoc on all props.
+  - `src/components/ui/`: Button, IconButton, Card, Badge, Chip, Input, Textarea, Select, Switch, Tabs, Sheet, Dialog, Skeleton, Spinner, EmptyState, ErrorState, PageHeader, Avatar, ImagePlaceholder (19 components).
+  - `src/components/brand/Logo.jsx` (new, no inline styles; same fallback wordmark). Legacy `src/legacy/components/brand/Logo.jsx` left untouched (not imported by any file — confirmed by grep).
+  - `src/components/`: Price, Rating, Distance, ProductCard (row + grid variants), BusinessCard, SectionHeader, HorizontalScroller, CategoryChips.
+  - `src/pages/dev/UiGalleryPage.jsx` — all components in all states with inline fake data; no mock adapter imports.
+  - `src/index.css` — added `@utility no-scrollbar` and `@utility line-clamp-2`.
+  - `src/App.jsx` — lazy-loaded UiGalleryPage behind `import.meta.env.DEV` guard; `/dev/ui` route (Suspense-wrapped).
+  - `src/layouts/BottomNav.jsx` — added `'/dev/'` to `HIDDEN_PREFIXES`.
+- Files created (36): all files listed above.
+- Files modified (3): `src/App.jsx`, `src/layouts/BottomNav.jsx`, `src/index.css`.
+- How verified: `npm run check` exits 0 — guards OK (125 files, 8 allowlist), lint 0 errors / 1 pre-existing legacy warning, 15/15 tests pass, build OK. Production bundle does NOT include UiGalleryPage (lazy + DEV guard → tree-shaken out).
+- Not done / left out (why):
+  - `brand/Logo` audit: `git grep "brand/Logo" src/` → 0 results; legacy Logo is orphaned, safe to create new one. Deletion deferred to its strangler task.
+  - `BottomNav.jsx` still has `style={{}}` (pre-existing legacy code) — only added the `'/dev/'` string, did not restyle.
+- Next step (exact): commit B1.6 on `feat/b1-6-ui-kit`, open PR for B1.4, then B1.5 (AppProviders + TanStack Query hooks).
+- Gotchas for the next person:
+  - `Avatar.size` accepts one of 32 | 36 | 40 | 48 | 56 | 64 (Tailwind static class map). Custom sizes → use `className` with `w-/h-` utilities.
+  - `ImagePlaceholder.aspect` accepts `'1/1' | '4/3' | '3/4' | '16/9'` (mapped to Tailwind aspect-* classes). The old `aspectRatio` string prop is gone.
+  - `Skeleton.variant='rect'` no longer takes `width`/`height` props — control those via `className` (e.g. `className="h-20 w-full"`).
 
 ### 2026-09-30 · A1.6 · dk · Antigravity (Gemini 3.8 Flash)
 - Done:
