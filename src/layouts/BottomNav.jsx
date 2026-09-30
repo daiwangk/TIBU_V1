@@ -18,6 +18,7 @@ const HIDDEN_PREFIXES = [
   '/reel/',
   '/seller/',
   '/viewall/',
+  '/dev/',
 ];
 
 export default function BottomNav() {

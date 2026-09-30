@@ -40,3 +40,19 @@ video {
   max-width: 100%;
   display: block;
 }
+
+/* ── Utility: hide scrollbar visually but keep it functional ── */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Utility: clamp text to 2 lines ── */
+@utility line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
