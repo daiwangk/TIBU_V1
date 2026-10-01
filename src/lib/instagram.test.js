@@ -18,9 +18,20 @@ describe('Instagram helpers', () => {
     expect(parseInstagramShortcode('not a URL')).toBeNull();
   });
 
-  it('creates the public reel embed URL', () => {
+  it('creates the public reel embed URL for a valid shortcode', () => {
     expect(reelEmbedUrl('Cookie_123')).toBe(
       'https://www.instagram.com/reel/Cookie_123/embed',
     );
+  });
+
+  it('returns null for shortcodes that fail the CONTRACT §12 regex', () => {
+    expect(reelEmbedUrl('no')).toBeNull();
+    expect(reelEmbedUrl('')).toBeNull();
+    expect(reelEmbedUrl('../evil')).toBeNull();
+    expect(reelEmbedUrl(null)).toBeNull();
+    expect(reelEmbedUrl('a'.repeat(41))).toBeNull();
+    expect(reelEmbedUrl('a'.repeat(40))).not.toBeNull();
+    expect(reelEmbedUrl('a'.repeat(4))).toBeNull();
+    expect(reelEmbedUrl('a'.repeat(5))).not.toBeNull();
   });
 });

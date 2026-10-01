@@ -5,9 +5,11 @@ import { formatPrice } from './format.js';
 
 /**
  * Normalise an Indian mobile number for use in international links.
+ * Returns `'91'` + 10 digits for `wa.me` / `tel:` (CONTRACT §10).
+ * DB writes (CONTRACT §12) must store the 10-digit form only — strip the leading `91`.
  *
  * @param {string|number} number
- * @returns {string|null}
+ * @returns {string|null} e.g. `'919876543210'`, or `null` if invalid
  */
 export function normalizeIndianMobile(number) {
   let digits = String(number ?? '').replace(/\D/g, '');

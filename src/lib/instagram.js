@@ -26,8 +26,9 @@ export function parseInstagramShortcode(url) {
 
 /**
  * @param {string} shortcode
- * @returns {string}
+ * @returns {string|null}
  */
 export function reelEmbedUrl(shortcode) {
+  if (typeof shortcode !== 'string' || !SHORTCODE.test(shortcode)) return null;
   return `https://www.instagram.com/reel/${shortcode}/embed`;
 }

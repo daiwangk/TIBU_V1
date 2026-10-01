@@ -49,4 +49,17 @@ describe('geo helpers', () => {
     });
     vi.unstubAllGlobals();
   });
+
+  it('maps a location timeout to a validation AppError', async () => {
+    vi.stubGlobal('navigator', {
+      geolocation: { getCurrentPosition: (_success, failure) => failure({ code: 3 }) },
+    });
+
+    await expect(getBrowserLocation()).rejects.toBeInstanceOf(AppError);
+    await expect(getBrowserLocation()).rejects.toMatchObject({
+      code: 'validation',
+      message: 'Location request timed out.',
+    });
+    vi.unstubAllGlobals();
+  });
 });

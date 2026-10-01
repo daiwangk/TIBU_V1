@@ -14,6 +14,19 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-10-01 · A1.3 review fixes · Cursor (Composer)
+- Done:
+  - `reelEmbedUrl` returns null when the shortcode fails CONTRACT §12; tests for valid + invalid shortcodes (incl. length 4/5/40/41 boundaries).
+  - JSDoc on `normalizeIndianMobile`: returns `'91'+10` digits for wa.me; DB writes must use the 10-digit form.
+  - Geo timeout (`code === 3`) → validation AppError covered in tests; `MUMBAI_AREAS` sync comment vs `scripts/seed-dev.mjs`.
+  - `categoryIcons.test.js` asserts every CONTRACT §2 slug maps to an explicit icon (not Tag).
+- Files: `src/lib/instagram.js`, `src/lib/instagram.test.js`, `src/lib/whatsapp.js`, `src/lib/geo.js`, `src/lib/geo.test.js`, `src/lib/categoryIcons.test.js`, `docs/PROGRESS.md`
+- How verified: `npm run check` green — guards OK (140 files), lint 0 errors / 1 pre-existing legacy warning, 38/38 tests pass, production build OK.
+- Not done / left out (why): A1.3 review nice-to-haves deferred: revokeObjectUrl, maxSizeMB, NaN guard in haversine, getWithExpiry null ambiguity, 00/0091 tests.
+- Next step (exact): open/merge A1.3 PR.
+- Gotchas for the next person:
+  - `normalizeIndianMobile` is for links; strip leading `91` before writing contacts to the DB.
+
 ### 2026-10-01 · A1.3 · Codex
 - Done:
   - Added contract-aligned WhatsApp/call links, Instagram shortcode parsing and reel embed URLs, browser location helpers, a seed-aligned `MUMBAI_AREAS` list, browser image compression, safe localStorage helpers, and category-icon mapping.

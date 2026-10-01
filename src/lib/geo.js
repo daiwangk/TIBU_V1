@@ -4,6 +4,7 @@ const EARTH_RADIUS_METERS = 6_371_000;
 
 /**
  * Fallback areas when browser location permission is unavailable.
+ * Duplicated in `scripts/seed-dev.mjs` (`AREAS`) — keep both lists in sync.
  * @type {ReadonlyArray<{ name: string, lat: number, lng: number }>}
  */
 export const MUMBAI_AREAS = Object.freeze([
