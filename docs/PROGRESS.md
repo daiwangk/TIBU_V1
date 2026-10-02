@@ -5,14 +5,50 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `73efed7` (merge PR #8 — B1.5 queries)
-- In progress: `A1.3` — branch `feat/a1-3-lib` (ready for PR)
-- Next task: open/merge A1.3 PR; then A1.5 (Supabase catalog adapter) or B1.7 (product page)
+- Last green commit on main: `5212f7e` (merge PR #9 — A1.3 lib utilities)
+- In progress: `A1.5` — branch `feat/a1-5-supabase-catalog`, ready for Codex S9 review
+- Next task: Codex S9 review on `git diff main`, squash A1.5 into one commit, push, open the PR, partner review, merge, then tick A1.5
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-02 · A1.5 · Codex
+- Done:
+  - Supabase client, error mapping, mappers, and catalog adapter: `searchBusinesses`, `searchProducts`, `getBusinessBySlug`, `getProductById`, `listReviews`, `listCategories`, and `getCategory`.
+  - Fixed invalid IDs so `getProductById` returns `null` and `listReviews` returns `[]` for non-UUID IDs without making a network call.
+- Files: `src/services/supabase/*` (client, errors, mappers, catalog, index, and tests); `docs/PROGRESS.md` for this log only. No other files.
+- How verified: hand-tested on `tibu-dev` with `VITE_DATA_SOURCE=supabase` from the browser console: prices are rupees; pending/rejected businesses and their products return `null`; `handmade` returns only crochet/embroidery/resin-art/candles; limits cap correctly; a privacy regex on `BusinessDetail` finds no `phone`/`whatsapp`/`userId`/`contacts` keys; reviews return `isMine: false`. `npm run check` is green (60/60 tests) with no env vars.
+- Not done / left out (why): Cloudflare/OG work, auth and other adapter functions (still `AppError('config')` stubs), and any missing PROGRESS entries from earlier sessions are outside A1.5.
+- Next step (exact): Codex S9 review on `git diff main` (including the A1.5 SQL-trap checks), squash into one commit, push, open the PR, partner review, merge, then tick A1.5.
+- Gotchas for the next person:
+  - `.env.local` holds the anon key and must stay git-ignored; `VITE_*` variables are read only when the dev server starts.
+  - Temporary `main.jsx` lines were removed.
+  - `searchBusinesses` returned 11 approved businesses on dev (the seed prompt predicted 10); confirm the count in SQL if it matters.
+
+### 2026-10-02 · A1.5 review fixes · Codex
+- Done:
+  - Public detail reads now query only approved businesses and active products, including an inner approved-business filter for product detail.
+  - Product searches reject the unsupported `businessId` filter with a validation error; RPC support remains deferred to a later migration.
+  - Mapper distance precedence is RPC `distance_m`, then haversine fallback, then `null`; incomplete-application errors retain the original Supabase error as `cause` with `cause.missing`.
+  - Added catalog query-builder, validation, mapper-distance, and error-cause tests.
+- Files: `src/services/supabase/catalog.js`, `catalog.test.js`, `mappers.js`, `mappers.test.js`, `errors.js`, `errors.test.js`, `docs/PROGRESS.md`
+- How verified: `npm run check` green — guards OK (148 files), lint 0 errors / 1 pre-existing legacy warning, 57/57 tests pass, production build OK.
+- Not done / left out (why): `SearchParams.businessId` needs a `p_business_id` parameter in a later RPC migration, which is outside A1.5 and this review-fix scope.
+
+### 2026-10-02 · A1.5 · Cursor (Composer)
+- Done:
+  - Supabase read adapter: lazy `getSupabase()` client, `mapSupabaseError` (§11), mappers (rupees, distanceM, sort_order, details, no contacts), catalog RPCs + nested getBusinessBySlug / getProductById / listReviews.
+  - `buildSearchArgs` pure helper (always-boolean `p_available_today`, radius omit/null, limit cap 50, price×100, near → lat/lng, CONTRACT default sort).
+  - Unit tests: errors, mappers, buildSearchArgs; contract export test still green.
+- Files: `src/services/supabase/client.js`, `errors.js`, `errors.test.js`, `mappers.js`, `mappers.test.js`, `catalog.js`, `catalog.test.js`, `index.js`, `docs/PROGRESS.md`
+- How verified: `npm run check` green — guards OK (148 files), lint 0 errors / 1 pre-existing legacy warning, 52/52 tests pass, production build OK.
+- Not done / left out (why): `SearchParams.businessId` not supported yet (no consumer in `src/queries` / `src/pages` / `src/components`; Business page products come from `getBusinessBySlug` nested select). Write/auth/seller/admin still stubs.
+- Next step (exact): merge A1.5 PR; smoke against `tibu-dev` with `VITE_DATA_SOURCE=supabase` when ready.
+- Gotchas for the next person:
+  - `getSupabase()` throws `config` without Vite anon env — mock builds stay fine.
+  - `incomplete_application:<keys>` → `AppError('validation')` with `cause.missing`.
 
 ### 2026-10-01 · A1.3 review fixes · Cursor (Composer)
 - Done:
