@@ -6,13 +6,39 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
 - Last green commit on main: `f8c095c` (merge PR #6 — A1.4 Seed dev script)
-- In progress: `B1.6` — PR #7 (`feat/b1-6-ui-kit`); conflict with main resolved; awaiting merge
-- Next task: merge PR #7; then B1.5 (AppProviders + TanStack Query catalog hooks) or A1.5 (Supabase catalog adapter)
+- In progress: `B1.7` completed on branch `feat/b1-6-ui-kit` (ready to commit/PR)
+- Next task: B1.8 (Business page `/b/:slug`) or remaining B1.5 hooks
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-02 · B1.7 · dk · Antigravity (Gemini 3.8 Flash)
+- Done:
+  - Built new Product page loaded from URL (`/p/:productId`) per DECISIONS D7, CONTRACT §3, and mockup.
+  - Implemented 4 states: `ProductSkeleton` matching layout, `EmptyState` when not found with Home redirect, `ErrorState` with retry, and full data view.
+  - Added `ImageGallery` with horizontal scroll-snap and dot indicators, falling back to `ImagePlaceholder`.
+  - Added `ContactButtons` with WhatsApp (primary) and Call (secondary) wired to sonner toast until B3.3.
+  - Added `SaveButton` with heart icon wired to sonner toast until B3.5.
+  - Created query & provider infrastructure: `src/queries/keys.js` (CONTRACT §8), `src/queries/catalog.js` (`useProduct`), and `src/app/providers.jsx` (`QueryClientProvider` + `Toaster`).
+  - Wrapped `App` in `Providers` in `src/main.jsx`.
+  - Updated `App.jsx`: added route `/p/:productId`, removed `/product/view` and `/product/:productId`, updated `LegacyPage` shim so `setSelectedProduct` ref + `setPage('product')` redirect to `/p/${ref.current.id}`.
+  - Added `'/p/'` and `'/b/'` to `HIDDEN_PREFIXES` in `src/layouts/BottomNav.jsx`.
+  - Deleted legacy `src/Product.jsx` per the strangler rule.
+- Files created (9): `src/queries/keys.js`, `src/queries/catalog.js`, `src/app/providers.jsx`, `src/components/ImageGallery.jsx`, `src/components/ContactButtons.jsx`, `src/components/SaveButton.jsx`, `src/pages/product/ProductPage.jsx`, `src/pages/product/ProductDetailsList.jsx`, `src/pages/product/ProductSkeleton.jsx`.
+- Files modified (5): `package.json`, `package-lock.json`, `src/main.jsx`, `src/App.jsx`, `src/layouts/BottomNav.jsx`.
+- Files deleted (1): `src/Product.jsx`.
+- How verified:
+  - `npm run check` exits 0 (guards OK with 133 source files, 8 legacy allowlist entries; lint 0 errors / 1 pre-existing legacy warning; 15/15 tests pass; build OK).
+  - Browser verification at 390×844: validated loading & data view on `/p/crochet-by-sarah-crochet-flowers`, Save toast ("Saving arrives with accounts"), WhatsApp/Call toasts ("Contact opens after login — coming soon"), business card link to `/b/crochet-by-sarah`, EmptyState on `/p/nonexistent-item-999` with "Back to Home" navigation, and confirmed BottomNav is hidden.
+- Not done / left out (why):
+  - Real contact reveal / enquiry flow deferred to B3.3.
+  - Real saving persistence deferred to B3.5.
+  - `near` location store in `useProduct` omitted per task step 8 (location store scheduled for A2.2).
+- Next step (exact): B1.8 (Business page `/b/:slug`) or B1.5 remaining catalog hooks.
+- Gotchas for the next person:
+  - `useProduct(id)` does not pass `near` yet; will receive `near` once the location store is built in A2.2.
 
 ### 2026-09-30 · B1.6 · dk · Antigravity (Claude Sonnet 4.6 / Gemini 3.8 Flash)
 - Done:

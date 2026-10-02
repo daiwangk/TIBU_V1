@@ -13,6 +13,8 @@ const NAV_ITEMS = [
  * Matches from the start of the pathname.
  */
 const HIDDEN_PREFIXES = [
+  '/p/',
+  '/b/',
   '/product/',
   '/business/',
   '/reel/',
