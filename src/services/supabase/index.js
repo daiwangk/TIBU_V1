@@ -1,16 +1,28 @@
 import { AppError } from '../errors.js';
+import {
+  getBusinessBySlug,
+  getCategory,
+  getProductById,
+  listCategories,
+  listReviews,
+  searchBusinesses,
+  searchProducts,
+} from './catalog.js';
 
 const notImplemented = async () => {
   throw new AppError('config', 'Supabase adapter not implemented yet');
 };
 
-export const listCategories = notImplemented;
-export const getCategory = notImplemented;
-export const searchBusinesses = notImplemented;
-export const searchProducts = notImplemented;
-export const getBusinessBySlug = notImplemented;
-export const getProductById = notImplemented;
-export const listReviews = notImplemented;
+export {
+  listCategories,
+  getCategory,
+  searchBusinesses,
+  searchProducts,
+  getBusinessBySlug,
+  getProductById,
+  listReviews,
+};
+
 export const getMyReview = notImplemented;
 export const saveMyReview = notImplemented;
 export const deleteMyReview = notImplemented;
