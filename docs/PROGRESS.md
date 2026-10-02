@@ -5,9 +5,9 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `f8c095c` (merge PR #6 — A1.4 Seed dev script)
-- In progress: `B1.7` completed on branch `feat/b1-6-ui-kit` (ready to commit/PR)
-- Next task: B1.8 (Business page `/b/:slug`) or remaining B1.5 hooks
+- Last green commit on main: `cf05ade` (merge PR #10 — A1.5 Supabase catalog)
+- In progress: `B1.7` merged with `main` on branch `feat/b1-7-product-page`
+- Next task: B1.8 (Business page `/b/:slug`)
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
@@ -21,8 +21,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
   - Added `ImageGallery` with horizontal scroll-snap and dot indicators, falling back to `ImagePlaceholder`.
   - Added `ContactButtons` with WhatsApp (primary) and Call (secondary) wired to sonner toast until B3.3.
   - Added `SaveButton` with heart icon wired to sonner toast until B3.5.
-  - Created query & provider infrastructure: `src/queries/keys.js` (CONTRACT §8), `src/queries/catalog.js` (`useProduct`), and `src/app/providers.jsx` (`QueryClientProvider` + `Toaster`).
-  - Wrapped `App` in `Providers` in `src/main.jsx`.
+  - Integrated with query & provider infrastructure: `src/queries/keys.js` (CONTRACT §8), `src/queries/catalog.js` (`useProduct`), and `src/app/providers.jsx` (`QueryClientProvider` + `Toaster`).
   - Updated `App.jsx`: added route `/p/:productId`, removed `/product/view` and `/product/:productId`, updated `LegacyPage` shim so `setSelectedProduct` ref + `setPage('product')` redirect to `/p/${ref.current.id}`.
   - Added `'/p/'` and `'/b/'` to `HIDDEN_PREFIXES` in `src/layouts/BottomNav.jsx`.
   - Deleted legacy `src/Product.jsx` per the strangler rule.
@@ -36,9 +35,106 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
   - Real contact reveal / enquiry flow deferred to B3.3.
   - Real saving persistence deferred to B3.5.
   - `near` location store in `useProduct` omitted per task step 8 (location store scheduled for A2.2).
-- Next step (exact): B1.8 (Business page `/b/:slug`) or B1.5 remaining catalog hooks.
+- Next step (exact): B1.8 (Business page `/b/:slug`).
 - Gotchas for the next person:
   - `useProduct(id)` does not pass `near` yet; will receive `near` once the location store is built in A2.2.
+
+### 2026-10-02 · A1.5 · Codex
+- Done:
+  - Supabase client, error mapping, mappers, and catalog adapter: `searchBusinesses`, `searchProducts`, `getBusinessBySlug`, `getProductById`, `listReviews`, `listCategories`, and `getCategory`.
+  - Fixed invalid IDs so `getProductById` returns `null` and `listReviews` returns `[]` for non-UUID IDs without making a network call.
+- Files: `src/services/supabase/*` (client, errors, mappers, catalog, index, and tests); `docs/PROGRESS.md` for this log only. No other files.
+- How verified: hand-tested on `tibu-dev` with `VITE_DATA_SOURCE=supabase` from the browser console: prices are rupees; pending/rejected businesses and their products return `null`; `handmade` returns only crochet/embroidery/resin-art/candles; limits cap correctly; a privacy regex on `BusinessDetail` finds no `phone`/`whatsapp`/`userId`/`contacts` keys; reviews return `isMine: false`. `npm run check` is green (60/60 tests) with no env vars.
+- Not done / left out (why): Cloudflare/OG work, auth and other adapter functions (still `AppError('config')` stubs), and any missing PROGRESS entries from earlier sessions are outside A1.5.
+- Next step (exact): Codex S9 review on `git diff main` (including the A1.5 SQL-trap checks), squash into one commit, push, open the PR, partner review, merge, then tick A1.5.
+- Gotchas for the next person:
+  - `.env.local` holds the anon key and must stay git-ignored; `VITE_*` variables are read only when the dev server starts.
+  - Temporary `main.jsx` lines were removed.
+  - `searchBusinesses` returned 11 approved businesses on dev (the seed prompt predicted 10); confirm the count in SQL if it matters.
+
+### 2026-10-02 · A1.5 review fixes · Codex
+- Done:
+  - Public detail reads now query only approved businesses and active products, including an inner approved-business filter for product detail.
+  - Product searches reject the unsupported `businessId` filter with a validation error; RPC support remains deferred to a later migration.
+  - Mapper distance precedence is RPC `distance_m`, then haversine fallback, then `null`; incomplete-application errors retain the original Supabase error as `cause` with `cause.missing`.
+  - Added catalog query-builder, validation, mapper-distance, and error-cause tests.
+- Files: `src/services/supabase/catalog.js`, `catalog.test.js`, `mappers.js`, `mappers.test.js`, `errors.js`, `errors.test.js`, `docs/PROGRESS.md`
+- How verified: `npm run check` green — guards OK (148 files), lint 0 errors / 1 pre-existing legacy warning, 57/57 tests pass, production build OK.
+- Not done / left out (why): `SearchParams.businessId` needs a `p_business_id` parameter in a later RPC migration, which is outside A1.5 and this review-fix scope.
+
+### 2026-10-02 · A1.5 · Cursor (Composer)
+- Done:
+  - Supabase read adapter: lazy `getSupabase()` client, `mapSupabaseError` (§11), mappers (rupees, distanceM, sort_order, details, no contacts), catalog RPCs + nested getBusinessBySlug / getProductById / listReviews.
+  - `buildSearchArgs` pure helper (always-boolean `p_available_today`, radius omit/null, limit cap 50, price×100, near → lat/lng, CONTRACT default sort).
+  - Unit tests: errors, mappers, buildSearchArgs; contract export test still green.
+- Files: `src/services/supabase/client.js`, `errors.js`, `errors.test.js`, `mappers.js`, `mappers.test.js`, `catalog.js`, `catalog.test.js`, `index.js`, `docs/PROGRESS.md`
+- How verified: `npm run check` green — guards OK (148 files), lint 0 errors / 1 pre-existing legacy warning, 52/52 tests pass, production build OK.
+- Not done / left out (why): `SearchParams.businessId` not supported yet (no consumer in `src/queries` / `src/pages` / `src/components`; Business page products come from `getBusinessBySlug` nested select). Write/auth/seller/admin still stubs.
+- Next step (exact): merge A1.5 PR; smoke against `tibu-dev` with `VITE_DATA_SOURCE=supabase` when ready.
+- Gotchas for the next person:
+  - `getSupabase()` throws `config` without Vite anon env — mock builds stay fine.
+  - `incomplete_application:<keys>` → `AppError('validation')` with `cause.missing`.
+
+### 2026-10-01 · A1.3 review fixes · Cursor (Composer)
+- Done:
+  - `reelEmbedUrl` returns null when the shortcode fails CONTRACT §12; tests for valid + invalid shortcodes (incl. length 4/5/40/41 boundaries).
+  - JSDoc on `normalizeIndianMobile`: returns `'91'+10` digits for wa.me; DB writes must use the 10-digit form.
+  - Geo timeout (`code === 3`) → validation AppError covered in tests; `MUMBAI_AREAS` sync comment vs `scripts/seed-dev.mjs`.
+  - `categoryIcons.test.js` asserts every CONTRACT §2 slug maps to an explicit icon (not Tag).
+- Files: `src/lib/instagram.js`, `src/lib/instagram.test.js`, `src/lib/whatsapp.js`, `src/lib/geo.js`, `src/lib/geo.test.js`, `src/lib/categoryIcons.test.js`, `docs/PROGRESS.md`
+- How verified: `npm run check` green — guards OK (140 files), lint 0 errors / 1 pre-existing legacy warning, 38/38 tests pass, production build OK.
+- Not done / left out (why): A1.3 review nice-to-haves deferred: revokeObjectUrl, maxSizeMB, NaN guard in haversine, getWithExpiry null ambiguity, 00/0091 tests.
+- Next step (exact): open/merge A1.3 PR.
+- Gotchas for the next person:
+  - `normalizeIndianMobile` is for links; strip leading `91` before writing contacts to the DB.
+
+### 2026-10-01 · A1.3 · Codex
+- Done:
+  - Added contract-aligned WhatsApp/call links, Instagram shortcode parsing and reel embed URLs, browser location helpers, a seed-aligned `MUMBAI_AREAS` list, browser image compression, safe localStorage helpers, and category-icon mapping.
+  - Added `browser-image-compression` as the only dependency; WhatsApp messages use straight ASCII apostrophes consistently.
+  - Added focused Vitest coverage for all runtime utilities except the static category-icon map.
+- Files: `src/lib/whatsapp.js`, `src/lib/whatsapp.test.js`, `src/lib/instagram.js`, `src/lib/instagram.test.js`, `src/lib/geo.js`, `src/lib/geo.test.js`, `src/lib/image.js`, `src/lib/image.test.js`, `src/lib/storage.js`, `src/lib/storage.test.js`, `src/lib/categoryIcons.js`, `package.json`, `package-lock.json`, `docs/PROGRESS.md`
+- How verified: `npm run check` green — guards OK (140 files), lint 0 errors / 1 pre-existing legacy warning, 34/34 tests pass, production build OK.
+- Not done / left out (why): A1.4 keeps its local seed area array; moving it to the browser utility is optional and would couple the Node-only seed to application source.
+- Next step (exact): commit and open the A1.3 PR; A1.5 can import `haversineMeters` from `src/lib/geo.js` for detail distances.
+- Gotchas for the next person:
+  - `MUMBAI_AREAS` is an array of `{ name, lat, lng }` records, deliberately aligned with the current seed data; do not create a second UI areas list.
+  - `getBrowserLocation` rejects with `AppError('validation', ...)`, including denied, timeout, and unsupported cases.
+
+
+### 2026-09-30 · B1.5 follow-up · dk · Cursor (Composer)
+- Done:
+  - Fixed catalog hooks so caller `options` cannot override `queryKey` / `queryFn`: `...options` first in every options-aware hook
+  - `enabled` gates now `!!id|slug|businessId && (options.enabled ?? true)` on useCategory / useBusiness / useProduct / useReviews
+- Files: `src/queries/catalog.js`, `docs/PROGRESS.md`
+- How verified: `npm run check` green; `grep` shows six `...options` spreads, all first in their objects; `git diff --stat` was catalog-only before this PROGRESS update
+- Not done / left out (why): —
+- Next step (exact): push fix; open/merge B1.5 PR; then B1.7 or A1.5
+- Gotchas for the next person:
+  - Always put hook-owned `queryKey`/`queryFn`/`enabled` after `...options` so callers can only tighten `enabled`, never replace the service seam
+
+### 2026-09-30 · B1.5 · dk · Cursor (Composer)
+- Done:
+  - Installed `@tanstack/react-query`, `zustand` (unused until A2.2), `sonner`
+  - `src/app/providers.jsx` — QueryClientProvider (staleTime 60_000, retry 1, refetchOnWindowFocus true) + sonner Toaster top-center richColors
+  - `src/app/ErrorBoundary.jsx` — class boundary; full-screen recovery; Reload + Home (`<a href="/">`); `console.error` only in DEV
+  - `src/main.jsx` — ErrorBoundary → Providers → legacy ProfileProvider/SavedProvider → App
+  - `src/queries/keys.js` — exactly CONTRACT §8
+  - `src/queries/catalog.js` — catalog hooks via `src/services/index.js`; infinite search pages of 20 via offset (limit never grows); `useCategory` key `[...qk.categories, slug]`
+- Files created: `src/app/providers.jsx`, `src/app/ErrorBoundary.jsx`, `src/queries/keys.js`, `src/queries/catalog.js`
+- Files modified: `src/main.jsx`, `package.json`, `package-lock.json`, `docs/PROGRESS.md`
+- How verified:
+  - `npm run check` green (guards OK · lint 0 errors / 1 pre-existing legacy warning · 15/15 tests · build OK)
+  - Smoke: temporary `useProductSearch({ limit: 3 })` on `/dev/ui` → console `B1.5 smoke useProductSearch 3` + three product objects; probe removed after
+- Not done / left out (why):
+  - No zustand stores yet (A2.2)
+  - No page consumers yet (B1.7+)
+- Next step (exact): open/merge B1.5 PR; then B1.7 or A1.5
+- Gotchas for the next person:
+  - Infinite hooks strip `offset` from the key and force `limit: 20`; `pageParam` is the offset
+  - ErrorBoundary sits outside BrowserRouter — Home must stay an `<a href="/">`, not `<Link>`
+  - `useCategory` intentionally does not add a factory to `qk` (CONTRACT §8 exact)
+>>>>>>> origin/main
 
 ### 2026-09-30 · B1.6 · dk · Antigravity (Claude Sonnet 4.6 / Gemini 3.8 Flash)
 - Done:

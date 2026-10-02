@@ -1,19 +1,147 @@
-import { useQuery } from '@tanstack/react-query';
-import { getProductById } from '../services/index.js';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import {
+  getBusinessBySlug,
+  getCategory,
+  getProductById,
+  listCategories,
+  listReviews,
+  searchBusinesses,
+  searchProducts,
+} from '../services/index.js';
 import { qk } from './keys.js';
 
+const PAGE_SIZE = 20;
+
 /**
- * Fetch a single product's detail by ID.
- *
+ * @param {Record<string, unknown>} [params]
+ * @returns {Record<string, unknown>}
+ */
+function withoutOffset(params = {}) {
+  const { offset: _offset, ...rest } = params;
+  return rest;
+}
+
+/** All active categories. */
+export function useCategories() {
+  return useQuery({
+    queryKey: qk.categories,
+    queryFn: () => listCategories(),
+  });
+}
+
+/**
+ * Single category by slug.
+ * @param {string|undefined} slug
+ * @param {import('@tanstack/react-query').UseQueryOptions} [options]
+ */
+export function useCategory(slug, options = {}) {
+  return useQuery({
+    ...options,
+    queryKey: [...qk.categories, slug],
+    queryFn: () => getCategory(slug),
+    enabled: !!slug && (options.enabled ?? true),
+  });
+}
+
+/**
+ * One-shot business search.
+ * @param {import('../services/contract.js').SearchParams} [params]
+ * @param {import('@tanstack/react-query').UseQueryOptions} [options]
+ */
+export function useBusinessSearch(params = {}, options = {}) {
+  return useQuery({
+    ...options,
+    queryKey: qk.businesses(params),
+    queryFn: () => searchBusinesses(params),
+  });
+}
+
+/**
+ * One-shot product search.
+ * @param {import('../services/contract.js').SearchParams} [params]
+ * @param {import('@tanstack/react-query').UseQueryOptions} [options]
+ */
+export function useProductSearch(params = {}, options = {}) {
+  return useQuery({
+    ...options,
+    queryKey: qk.products(params),
+    queryFn: () => searchProducts(params),
+  });
+}
+
+/**
+ * Infinite business search — pages of 20 via offset; limit never grows.
+ * @param {import('../services/contract.js').SearchParams} [params]
+ */
+export function useInfiniteBusinessSearch(params = {}) {
+  const stable = { ...withoutOffset(params), limit: PAGE_SIZE };
+  return useInfiniteQuery({
+    queryKey: qk.businesses(stable),
+    queryFn: ({ pageParam = 0 }) =>
+      searchBusinesses({ ...stable, limit: PAGE_SIZE, offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _pages, lastPageParam) =>
+      lastPage.length < PAGE_SIZE ? undefined : lastPageParam + PAGE_SIZE,
+  });
+}
+
+/**
+ * Infinite product search — pages of 20 via offset; limit never grows.
+ * @param {import('../services/contract.js').SearchParams} [params]
+ */
+export function useInfiniteProductSearch(params = {}) {
+  const stable = { ...withoutOffset(params), limit: PAGE_SIZE };
+  return useInfiniteQuery({
+    queryKey: qk.products(stable),
+    queryFn: ({ pageParam = 0 }) =>
+      searchProducts({ ...stable, limit: PAGE_SIZE, offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _pages, lastPageParam) =>
+      lastPage.length < PAGE_SIZE ? undefined : lastPageParam + PAGE_SIZE,
+  });
+}
+
+/**
+ * Business detail by slug.
+ * @param {string|undefined} slug
+ * @param {{ lat: number, lng: number }|null} [near]
+ * @param {import('@tanstack/react-query').UseQueryOptions} [options]
+ */
+export function useBusiness(slug, near, options = {}) {
+  return useQuery({
+    ...options,
+    queryKey: qk.business(slug, near),
+    queryFn: () => getBusinessBySlug(slug, { near }),
+    enabled: !!slug && (options.enabled ?? true),
+  });
+}
+
+/**
+ * Product detail by id.
  * @param {string|undefined} id
  * @param {{ lat: number, lng: number }|null} [near]
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
-export function useProduct(id, near = null, options = {}) {
+export function useProduct(id, near, options = {}) {
   return useQuery({
+    ...options,
     queryKey: qk.product(id, near),
     queryFn: () => getProductById(id, { near }),
-    enabled: Boolean(id),
+    enabled: !!id && (options.enabled ?? true),
+  });
+}
+
+/**
+ * Reviews for a business.
+ * @param {string|undefined} businessId
+ * @param {{ limit?: number, offset?: number }} [page]
+ * @param {import('@tanstack/react-query').UseQueryOptions} [options]
+ */
+export function useReviews(businessId, page = {}, options = {}) {
+  return useQuery({
     ...options,
+    queryKey: qk.reviews(businessId, page),
+    queryFn: () => listReviews(businessId, page),
+    enabled: !!businessId && (options.enabled ?? true),
   });
 }
