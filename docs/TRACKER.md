@@ -18,14 +18,14 @@ Done before 2 Oct: B1.1 · B1.2 · B1.3 · B1.4 · B1.5 · B1.6 · A1.2 · A1.3 
 | ☐ | A1.5 | Supabase catalog adapter — **apply patch 0003** (`patches/README.md`), live test 12/12 | A | 0.5 | R1-1 |
 | ☐ | R1-2 | R1 Part 2: contract v1.2, D32–D38, AGENTS.md, v1.2 fields in the adapter | A | 1.5 | A1.5 |
 | ☐ | A1.7 | Auth URLs on dev | A | 0.5 | — |
-| ☐ | B1.7 | Product page `/p/:productId` | B | 2 | — |
-| ☐ | B1.8 | Business page `/b/:slug` | B | 3 | B1.7 |
+| ☑ | B1.7 | Product page `/p/:productId` | B | 2 | — |
+| ☑ | B1.8 | Business page `/b/:slug` | B | 3 | B1.7 |
 
 ## Week 2 — 5–9 Oct (`WEEK2_DEEP_DIVE.md`)
 | ✓ | ID | Task | Who | Day | Est | Needs |
 |---|---|---|---|---|---|---|
 | ☐ | A2.1 | Real data on preview **and** production env | A | Mon | 1.5 | A1.5 |
-| ☐ | B2.1 | Home page | B | Mon | 3 | B1.7, B1.8 |
+| ✓ | B2.1 | Home page | B | Mon | 3 | B1.7, B1.8 |
 | ☐ | A2.2 | Location store | A | Tue | 2 | — |
 | ☐ | B2.2 | Generic CategoryPage | B | Tue | 2 | B2.1 |
 | ☐ | A2.3 | WhatsApp/OG link previews (real phones) | A | Wed | 2.5 | A2.1 |

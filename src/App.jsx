@@ -23,7 +23,7 @@ import Fashion from './Fashion';
 import Gifts from './Gifts';
 import Handmade from './Handmade';
 import HelpFeedback from './HelpFeedback';
-import Home from './Home';
+import HomePage from './pages/home/HomePage';
 import Jewellery from './Jewellery';
 import MenFashion from './MenFashion';
 import NotificationPreferences from './NotificationPreferences';
@@ -204,7 +204,7 @@ function AppRoutes() {
     <Routes>
       {/* ── Shell routes (with BottomNav) ── */}
       <Route element={<AppShell />}>
-        <Route path="/" element={L(Home)} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/search" element={L(Search)} />
         <Route path="/saved" element={L(Saved)} />
         <Route path="/profile" element={L(Profile)} />

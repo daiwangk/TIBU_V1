@@ -6,13 +6,41 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
 - Last green commit on main: `1bc8fb3` (merge PR #11 — docs kit update; B1.7 `514dc4c` on main)
-- In progress: `B1.8` on branch `feat/b1-8-business-page`
-- Next task: B2.1 (Category page `/category/:slug`)
+- In progress: — (B2.1 done on branch `feat/b2-1-home`)
+- Next task: B2.2 (Category page `/category/:slug`)
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-03 · B2.1 · dk · Antigravity (Gemini 3.8 Flash)
+- Done:
+  - Rebuilt Home screen (`src/pages/home/HomePage.jsx`) per AGENTS.md, CONTRACT §2–§3, Feature Spec F3, and design system.
+  - Implemented `HomeHeader`: brand `Logo` on the left, empty location slot reserved for B2.6 (`<LocationChip />`), and notifications bell icon linking to `/notifications` with 44px touch target.
+  - Implemented `HomeHero`: lavender card (`bg-lavender rounded-card-lg`) with brand line in `font-heading font-extrabold text-ink`, subtitle in `text-body`, and search field. Empty-field tap/click navigates to `/search`; form submission navigates to `/search?q=<text>`. Keyboard focus does not trigger navigation (WCAG 3.2.1).
+  - Implemented `CategoryShortcuts`: loads top-level categories via `useCategories()`, renders 4-color cycling pastel round tiles (`bg-lavender`, `bg-blush`, `bg-lime`, `bg-mint`) with `getCategoryIcon()` Lucide icons, pulsing circular skeletons when loading, and error retry state.
+  - Implemented 3 discovery sections with `SectionHeader` + `HorizontalScroller`:
+    - "New businesses" via `useBusinessSearch({ sort: 'newest', limit: 8, radiusKm: null })` with `BusinessRowSkeleton`, `EmptyState`, and `ErrorState`.
+    - "New products" via `useProductSearch({ sort: 'newest', limit: 8, radiusKm: null })` with `ProductRowSkeleton`, `EmptyState`, and `ErrorState`.
+    - "Available today" via `useProductSearch({ availableToday: true, sort: 'newest', limit: 8, radiusKm: null })` with `ProductRowSkeleton`, `EmptyState`, and `ErrorState`.
+    - "Near you" deferred with TODO comment until location store (`useSearchOrigin`) is added in A2.2.
+  - Added `min-w-0 w-full` to `HorizontalScroller` and constrained `HomePage` with `overflow-x-hidden` to guarantee zero page-level horizontal overflow at 360, 390, and 430 px viewports.
+  - Updated `src/components/SectionHeader.jsx` to satisfy the ≥44px touch-target rule with `min-h-11 px-2 -mr-2`.
+  - Updated `src/App.jsx`: route `/` now renders `<HomePage />` directly without `LegacyPage`.
+  - Deleted legacy `src/Home.jsx` and removed it from `scripts/legacy-allowlist.json`.
+- Files created (9): `src/pages/home/HomePage.jsx`, `src/pages/home/HomeHeader.jsx`, `src/pages/home/HomeHero.jsx`, `src/pages/home/CategoryShortcuts.jsx`, `src/pages/home/HomeSection.jsx`, `src/pages/home/ProductRowSkeleton.jsx`, `src/pages/home/BusinessRowSkeleton.jsx`, `src/pages/home/NewBusinessesSection.jsx`, `src/pages/home/NewProductsSection.jsx`, `src/pages/home/AvailableTodaySection.jsx`.
+- Files modified (4): `src/App.jsx`, `scripts/legacy-allowlist.json`, `src/components/HorizontalScroller.jsx`, `src/components/SectionHeader.jsx`, `docs/PROGRESS.md`.
+- Files deleted (1): `src/Home.jsx`.
+- How verified:
+  - `npm run check` green: guards OK (168 source files, 7 legacy allowlist entries); ESLint 0 errors / 1 pre-existing legacy warning; 61/61 Vitest tests pass; production build OK.
+  - Headless Chrome CDP device emulation test verified at 360px, 390px, and 430px: `hasHorizontalScroll: false` and `scrollWidth === innerWidth` across all widths.
+- Not done / left out (why):
+  - "Near you" section skipped until location store is built in A2.2.
+  - `<LocationChip />` in header omitted until B2.6.
+- Next step (exact): B2.2 (Category page `/category/:slug`).
+- Gotchas for the next person:
+  - Skeletons and cards in horizontal scrollers require `min-w-0 w-full` on flex parent containers to prevent expanding the 480px AppShell column on narrow viewports.
 
 ### 2026-10-03 · B1.8 · dk · Antigravity (Gemini 3.8 Flash)
 - Done:

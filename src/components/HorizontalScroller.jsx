@@ -13,7 +13,7 @@ export default function HorizontalScroller({ children, className = '' }) {
       className={`
         flex gap-3 overflow-x-auto no-scrollbar
         scroll-smooth snap-x snap-mandatory
-        px-screen
+        px-screen w-full min-w-0
         ${className}
       `}
     >

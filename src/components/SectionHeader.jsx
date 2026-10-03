@@ -23,7 +23,7 @@ export default function SectionHeader({
       {viewAllTo && (
         <Link
           to={viewAllTo}
-          className="inline-flex items-center gap-0.5 text-sm font-body font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+          className="inline-flex items-center gap-0.5 min-h-11 px-2 -mr-2 text-sm font-body font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
         >
           {viewAllLabel}
           <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
