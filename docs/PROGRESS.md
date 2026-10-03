@@ -5,14 +5,42 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `cf05ade` (merge PR #10 — A1.5 Supabase catalog)
-- In progress: `B1.7` merged with `main` on branch `feat/b1-7-product-page`
-- Next task: B1.8 (Business page `/b/:slug`)
+- Last green commit on main: `1bc8fb3` (merge PR #11 — docs kit update; B1.7 `514dc4c` on main)
+- In progress: `B1.8` on branch `feat/b1-8-business-page`
+- Next task: B2.1 (Category page `/category/:slug`)
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-03 · B1.8 · dk · Antigravity (Gemini 3.8 Flash)
+- Done:
+  - Built new Business page loaded from URL (`/b/:slug`) per CONTRACT §3, Feature Spec F8, and design system.
+  - Implemented 4 states: `BusinessSkeleton` matching layout, `EmptyState` when not found with Home redirect, `ErrorState` with retry, and full data view.
+  - Header: banner image (16:9 with gradient) falling back to `ImagePlaceholder`, overlapping 64px `Avatar` logo, name, category, locality + distance, rating, delivery/pickup badges, description with 4-line clamp toggle.
+  - Sticky tabs (Products | Videos | Reviews) synced with URL query param `?tab=`, replacing history entry on change.
+  - Products tab: 2-column grid of `ProductCard variant="grid"`, `EmptyState` when no products.
+  - Videos tab: Instagram reel embeds via new `ReelEmbed` component using `reelEmbedUrl()` fallback, `EmptyState` when empty.
+  - Reviews tab: aggregate rating summary, "Write a review" action with toast, review list with star ratings and relative dates via `formatRelativeTime`, `EmptyState` when empty.
+  - Added sticky bottom bar with `ContactButtons` (WhatsApp/Call toasts) and header `SaveButton` + `Share` action.
+  - Updated `App.jsx`: route `/b/:slug` -> `BusinessPage`, removed `/business/view` and `/business/:businessId`, updated `LegacyPage` shim for `setSelectedBusiness` and `setPage('business')`.
+  - Deleted legacy `src/Business.jsx`.
+- Files created (7): `src/components/ReelEmbed.jsx`, `src/pages/business/BusinessPage.jsx`, `src/pages/business/BusinessHeader.jsx`, `src/pages/business/BusinessSkeleton.jsx`, `src/pages/business/ProductsTab.jsx`, `src/pages/business/VideosTab.jsx`, `src/pages/business/ReviewsTab.jsx`.
+- Files modified (2): `src/App.jsx`, `docs/PROGRESS.md`.
+- Files deleted (1): `src/Business.jsx`.
+- How verified:
+  - `npm run check` green (guards OK with 159 files, 8 legacy allowlist entries; lint 0 errors / 1 pre-existing legacy warning; 61/61 tests pass; production build OK).
+  - Verified `/b/:slug` route and legacy shim redirect normalisation for `whisk-wonders` and `cocoa corner`.
+- Not done / left out (why):
+  - Real contact reveal / enquiry flow deferred to B3.3.
+  - Real saving persistence deferred to B3.5.
+  - Real review submission deferred to B5.2.
+  - `near` location in `useBusiness` omitted until location store is built in A2.2.
+- Next step (exact): B2.1 (Category page `/category/:slug`).
+- Gotchas for the next person:
+  - Tabs are synced with `?tab=` and replace history on change.
+  - Legacy business IDs from mock data equal the URL slugs after lowercasing and URL-encoding (e.g. `cocoa%20corner`).
 
 ### 2026-10-02 · B1.7 · dk · Antigravity (Gemini 3.8 Flash)
 - Done:
@@ -134,7 +162,6 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
   - Infinite hooks strip `offset` from the key and force `limit: 20`; `pageParam` is the offset
   - ErrorBoundary sits outside BrowserRouter — Home must stay an `<a href="/">`, not `<Link>`
   - `useCategory` intentionally does not add a factory to `qk` (CONTRACT §8 exact)
->>>>>>> origin/main
 
 ### 2026-09-30 · B1.6 · dk · Antigravity (Claude Sonnet 4.6 / Gemini 3.8 Flash)
 - Done:
