@@ -12,7 +12,7 @@ import AppShell from './layouts/AppShell';
 
 // Pages — alphabetical
 import AboutTibu from './AboutTibu';
-import Business from './Business';
+import BusinessPage from './pages/business/BusinessPage';
 import BusinessViewAll from './BusinessViewAll';
 import Candles from './Candles';
 import Crochet from './Crochet';
@@ -63,6 +63,7 @@ function LegacyPage({ Component, extraProps = {} }) {
   const location = useLocation();
   const state = location.state ?? {};
   const selectedProductRef = React.useRef(null);
+  const selectedBusinessRef = React.useRef(null);
   
   // searchText needs to be held locally so Home/Search don't crash when calling toLowerCase()
   const [searchText, setSearchText] = React.useState('');
@@ -82,6 +83,17 @@ function LegacyPage({ Component, extraProps = {} }) {
       return;
     }
 
+    if (pageKey === 'business') {
+      const b = selectedBusinessRef.current;
+      const rawId = b?.slug || b?.id || b?.businessName;
+      if (rawId) {
+        navigate(`/b/${encodeURIComponent(String(rawId).toLowerCase())}`);
+        return;
+      }
+      navigate('/');
+      return;
+    }
+
     const urlMap = {
       home: '/',
       search: '/search',
@@ -90,7 +102,6 @@ function LegacyPage({ Component, extraProps = {} }) {
       editprofile: '/profile/edit',
       notification: '/notifications',
       notificationPreferences: '/notifications/preferences',
-      business: '/business/view',
       productsviewall: '/viewall/products',
       businessViewAll: '/viewall/businesses',
       reel: '/reel/view',
@@ -147,7 +158,10 @@ function LegacyPage({ Component, extraProps = {} }) {
       selectedProductRef.current = p;
       navigate(location.pathname, { replace: true, state: { ...state, selectedProduct: p } });
     },
-    setSelectedBusiness: (b) => navigate(location.pathname, { replace: true, state: { ...state, selectedBusiness: b } }),
+    setSelectedBusiness: (b) => {
+      selectedBusinessRef.current = b;
+      navigate(location.pathname, { replace: true, state: { ...state, selectedBusiness: b } });
+    },
     setSelectedReel: (r) => navigate(location.pathname, { replace: true, state: { ...state, selectedReel: r } }),
     setCurrentReels: (rs) => navigate(location.pathname, { replace: true, state: { ...state, currentReels: rs } }),
     setViewAllTitle: (t) => navigate(location.pathname, { replace: true, state: { ...state, viewAllTitle: t } }),
@@ -204,8 +218,7 @@ function AppRoutes() {
 
         {/* Entity detail — BottomNav hidden via prefix matching in BottomNav.jsx */}
         <Route path="/p/:productId" element={<ProductPage />} />
-        <Route path="/business/:businessId" element={L(Business)} />
-        <Route path="/business/view" element={L(Business)} />
+        <Route path="/b/:slug" element={<BusinessPage />} />
         <Route path="/reel/:reelId" element={L(Reel)} />
         <Route path="/reel/view" element={L(Reel)} />
 
