@@ -5,14 +5,34 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `1bc8fb3` (merge PR #11 — docs kit update; B1.7 `514dc4c` on main)
-- In progress: — (B2.1 done on branch `feat/b2-1-home`)
-- Next task: B2.2 (Category page `/category/:slug`)
-- Blocked: —
-- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
+- Last green commit on main: `52ca919` (merge PR #13 — Home page B2.1)
+- In progress: — (A2.1 verified locally on branch `chore/a2-1-real-data`)
+- Next task: Reconnect Pages project to `daiwangk/TIBU_V1` for preview build; next feature task is B2.2 (Category page `/category/:slug`)
+- Blocked: Cloudflare preview build requires Pages project recreation via Connect to Git on `daiwangk/TIBU_V1` (waiting on Daiwang Cloudflare GitHub app approval if needed)
+- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-04 · A2.1 · dk · Antigravity (Gemini 3.8 Flash)
+- Done:
+  - Verified the Supabase adapter locally (`VITE_DATA_SOURCE=supabase`, `localhost:5174`) against tibu-dev.
+  - Checked `/p/:id` (₹350, image, no phone) and `/b/:slug` (products, reviews, `?tab=reviews`), plus pending, rejected, and nonexistent slugs → not-found.
+  - No mapper changes needed. `npm run check` green.
+- Files created: —
+- Files modified (1): `docs/PROGRESS.md`.
+- Files deleted: —
+- How verified:
+  - `npm run check` green (guards OK, lint 0 errors, 12 test files / 61 tests passed, build OK).
+  - Verified local dev server connected to tibu-dev database.
+- Not done / left out (why):
+  - Home, Search, and Category (still legacy until B2.1–B2.3).
+  - Distance check waits for A2.2 (no location store yet).
+  - Preview on Cloudflare: A1.6 is open; the Pages project was created via "source repo import" (`Thipak3/tibu-v1`, `tibu-v12`), so it never builds `daiwangk/TIBU_V1`.
+- Next step (exact): Recreate the Pages project through Connect to Git on `daiwangk/TIBU_V1` (Daiwang may need to approve the Cloudflare GitHub app), then set Preview env vars and re-check `/p/<uuid>` on a phone. Next feature task is B2.2 (Category page `/category/:slug`).
+- Gotchas for the next person:
+  - Vite bakes env vars in at build time, so redeploy after changing them.
+  - The two Supabase variable names must match the code exactly (`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`).
 
 ### 2026-10-03 · B2.1 · dk · Antigravity (Gemini 3.8 Flash)
 - Done:
