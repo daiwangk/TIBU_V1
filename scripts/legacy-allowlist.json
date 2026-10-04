@@ -3,9 +3,6 @@
   "blanketEslintDisable": [
     "src/legacy/components/SearchBar.jsx",
     "src/services/mock/data/dessertBusinesses.js",
-    "src/Desserts.jsx",
-    "src/Fashion.jsx",
-    "src/Handmade.jsx",
     "src/SellerDashboard.jsx",
     "src/contexts/ProfileContext.jsx"
   ]

@@ -6,13 +6,40 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
 - Last green commit on main: `6a80e3a` (merge PR #14 — A2.2 location store)
-- In progress: — (A2.1 verified locally on branch `chore/a2-1-real-data`)
-- Next task: Reconnect Pages project to `daiwangk/TIBU_V1` for preview build; next feature task is B2.2 (Category page `/category/:slug`)
+- In progress: — (B2.2 done on branch; needs PR)
+- Next task: B2.3 (Search page `/search`)
 - Blocked: Cloudflare preview build requires Pages project recreation via Connect to Git on `daiwangk/TIBU_V1` (waiting on Daiwang Cloudflare GitHub app approval if needed)
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-04 · B2.2 · dk · Antigravity (Claude Sonnet 4.6)
+- Done:
+  - Built `CategoryPage` at `/category/:slug` replacing 11 legacy category pages.
+  - `CategoryPage.jsx`: reads `useParams().slug` → `useCategory(slug)`; unknown slug → `EmptyState` with "Go Home". Drives all filters through URL params (`?sub=`, `?tab=`, `?sort=`, `?today=`, `?price=`) with `replace: true`.
+  - `CategoryFilters.jsx`: tab toggle (Products/Businesses), sub-category chips row (All + children, hidden when no children), sort `<Select>` with `distance` disabled + hint when no location origin (`useSearchOrigin()` from A2.2), "Today" `Chip`, price range `<Select>` for products only.
+  - On tab change: drops `?sort=` if invalid for new tab; drops `?price=` when switching to Businesses.
+  - `ProductGrid.jsx`: `useInfiniteProductSearch` → 2-column grid of `ProductCard variant="grid"`. All 4 states (skeleton/empty/error/data). Load More button hidden when last page < 20 rows.
+  - `BusinessList.jsx`: `useInfiniteBusinessSearch` → `BusinessCard` list. Same 4 states + Load More.
+  - `CategorySkeleton.jsx`: chips + tab + filters row + 6-card grid skeleton.
+  - `src/App.jsx`: replaced 11 legacy `<Route>` elements + 11 imports with single `/category/:slug → <CategoryPage />`. Fixed 3 slug typos in `urlMap` (`resin→resin-art`, `womenfashion→womens-fashion`, `menfashion→mens-fashion`).
+  - `src/hooks/useSetPage.js`: same 3 slug fixes in `PAGE_URL_MAP`.
+  - `scripts/legacy-allowlist.json`: removed `Desserts.jsx`, `Fashion.jsx`, `Handmade.jsx`.
+  - Deleted 11 legacy files: `Candles`, `Crochet`, `Desserts`, `Embroidery`, `Fashion`, `Gifts`, `Handmade`, `Jewellery`, `MenFashion`, `Resin`, `WomenFashion`.
+- Files created (5): `src/pages/category/CategoryPage.jsx`, `src/pages/category/CategoryFilters.jsx`, `src/pages/category/ProductGrid.jsx`, `src/pages/category/BusinessList.jsx`, `src/pages/category/CategorySkeleton.jsx`.
+- Files modified (3): `src/App.jsx`, `src/hooks/useSetPage.js`, `scripts/legacy-allowlist.json`, `docs/PROGRESS.md`.
+- Files deleted (11): `src/Candles.jsx`, `src/Crochet.jsx`, `src/Desserts.jsx`, `src/Embroidery.jsx`, `src/Fashion.jsx`, `src/Gifts.jsx`, `src/Handmade.jsx`, `src/Jewellery.jsx`, `src/MenFashion.jsx`, `src/Resin.jsx`, `src/WomenFashion.jsx`.
+- How verified:
+  - `npm run check` green: guards OK (164 source files, 4 legacy allowlist entries); ESLint 0 errors / 1 pre-existing legacy warning; 13 test files / 70 tests passed; production build OK (549 kB, smaller than before due to 11 deleted files).
+- Not done / left out (why):
+  - BottomNav is NOT hidden on `/category/` — it is a hub/discovery page, not a detail page; BottomNav stays visible by design.
+  - No browser-level UI check run (localhost dev server running on port 5174).
+- Next step (exact): B2.3 (Search page `/search`).
+- Gotchas for the next person:
+  - `?sort=` is omitted from search params when absent; the hooks default to `distance` if origin is set, else `newest`.
+  - Old bookmarks to `/category/resin`, `/category/women-fashion`, `/category/men-fashion` will show the NotFound EmptyState since those aren't valid DB slugs. No redirect added (MVP scope).
+  - `availableToday: false` is always passed explicitly (not omitted) per CONTRACT §3 note that SQL treats `null` as "only available today".
 
 ### 2026-10-04 · A2.2 · Antigravity (Gemini 3.1 Pro (High))
 - Done:
