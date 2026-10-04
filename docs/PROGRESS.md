@@ -14,7 +14,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
-### 2026-10-04 · A2.2 · Antigravity (Gemini 3.1 Pro (High))
+### 2026-10-04 ï¿½ A2.2 ï¿½ Antigravity (Gemini 3.1 Pro (High))
 - Done:
   - Created `src/stores/location.js` using zustand and persist middleware for `tibu.location`.
   - Added store actions `requestGps()`, `setArea()`, `setFromProfile()`, `clear()`, and `markAsked()`.
