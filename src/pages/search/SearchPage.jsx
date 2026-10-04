@@ -30,6 +30,7 @@ export default function SearchPage() {
   const availableToday = searchParams.get('today') === '1';
   const sortParam = searchParams.get('sort') || undefined;
   const price = searchParams.get('price') || '';
+  const searchPrice = tab === 'products' ? price : '';
 
   // Local state
   const [localQ, setLocalQ] = useState(q);
@@ -69,19 +70,23 @@ export default function SearchPage() {
   const validSort = useMemo(() => {
     if (!sortParam) return undefined;
     if (sortParam === 'distance' && !origin) return undefined;
-    if (tab === 'businesses' && (sortParam === 'price_asc' || sortParam === 'price_desc')) return undefined;
-    if (tab === 'products' && sortParam === 'rating') return undefined;
-    return sortParam;
+    const allowed = tab === 'businesses'
+      ? ['distance', 'newest', 'rating']
+      : ['distance', 'newest', 'price_asc', 'price_desc'];
+    return allowed.includes(sortParam) ? sortParam : undefined;
   }, [sortParam, origin, tab]);
+
+  const productSort = tab === 'products' ? validSort : undefined;
+  const businessSort = tab === 'businesses' ? validSort : undefined;
 
   // Queries
   const productSearch = useInfiniteProductSearch({
     q: q || undefined,
     category: category || undefined,
     availableToday,
-    sort: validSort,
-    minPrice,
-    maxPrice,
+    ...(productSort ? { sort: productSort } : {}),
+    ...(minPrice !== undefined ? { minPrice } : {}),
+    ...(maxPrice !== undefined ? { maxPrice } : {}),
     limit: 20
   });
 
@@ -89,29 +94,30 @@ export default function SearchPage() {
     q: q || undefined,
     category: category || undefined,
     availableToday,
-    sort: validSort,
+    ...(businessSort ? { sort: businessSort } : {}),
     limit: 20
   });
 
-  const isSearching = !!(q || category || availableToday || sortParam || price);
+  const query = tab === 'products' ? productSearch : businessSearch;
+  const isSearching = !!(q || category || availableToday || validSort || searchPrice);
 
   // Save to recent searches when query resolves and q.length >= 2
   const savedQRef = useRef(new Set());
   useEffect(() => {
-    if (q.length >= 2 && !productSearch.isPending && !businessSearch.isPending && !savedQRef.current.has(q)) {
+    if (q.length >= 2 && query.isSuccess && !savedQRef.current.has(q)) {
       savedQRef.current.add(q);
       const recent = readJSON(STORAGE_KEY, []);
       const filtered = recent.filter(s => s.toLowerCase() !== q.toLowerCase());
       filtered.unshift(q);
       writeJSON(STORAGE_KEY, filtered.slice(0, 8));
     }
-  }, [q, productSearch.isPending, businessSearch.isPending]);
+  }, [q, query.isSuccess]);
 
   function handleTabChange(newTab) {
     if (newTab === tab) return;
     const next = new URLSearchParams(searchParams);
     next.set('tab', newTab);
-    
+
     // Drop incompatible sort
     const currentSort = next.get('sort');
     if (newTab === 'businesses' && (currentSort === 'price_asc' || currentSort === 'price_desc')) {
@@ -119,12 +125,12 @@ export default function SearchPage() {
     } else if (newTab === 'products' && currentSort === 'rating') {
       next.delete('sort');
     }
-    
+
     // Drop price if businesses
     if (newTab === 'businesses') {
       next.delete('price');
     }
-    
+
     setSearchParams(next, { replace: true });
   }
 
@@ -157,12 +163,11 @@ export default function SearchPage() {
   let filterCount = 0;
   if (category) filterCount++;
   if (availableToday) filterCount++;
-  if (sortParam) filterCount++;
-  if (price) filterCount++;
+  if (validSort) filterCount++;
+  if (searchPrice) filterCount++;
 
-  const query = tab === 'products' ? productSearch : businessSearch;
   const items = useMemo(() => query.data?.pages.flat() || [], [query.data]);
-  
+
   const hasMore = query.hasNextPage;
   const isFetchingNext = query.isFetchingNextPage;
 
@@ -177,13 +182,14 @@ export default function SearchPage() {
       <header className="sticky top-0 z-30 flex flex-col bg-surface shadow-sm px-screen pt-4 pb-2">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <IconButton 
-              icon={ArrowLeft} 
-              aria-label="Go back" 
-              onClick={() => navigate(-1)} 
+            <IconButton
+              label="Go back"
+              onClick={() => navigate(-1)}
               className="-ml-2"
-            />
-            
+            >
+              <ArrowLeft size={20} strokeWidth={1.75} aria-hidden="true" />
+            </IconButton>
+
             <div className="relative flex-1">
               <Search
                 size={20}
@@ -204,20 +210,20 @@ export default function SearchPage() {
                   type="button"
                   onClick={() => { setLocalQ(''); setSearchParams(prev => { prev.delete('q'); return prev; }, { replace: true }); }}
                   aria-label="Clear search"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
+                  className="absolute right-2 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
                 >
-                  <X size={18} />
+                  <X size={18} aria-hidden="true" />
                 </button>
               )}
             </div>
-            
+
             <button
               type="button"
               onClick={() => setFiltersOpen(true)}
               aria-label="Open filters"
-              className="relative p-2 -mr-2 text-ink hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
+              className="relative -mr-2 flex min-h-11 min-w-11 items-center justify-center text-ink hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
             >
-              <SlidersHorizontal size={24} strokeWidth={1.75} />
+              <SlidersHorizontal size={24} strokeWidth={1.75} aria-hidden="true" />
               {filterCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-fg">
                   {filterCount}
@@ -259,11 +265,10 @@ export default function SearchPage() {
         ) : items.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-12">
             <EmptyState
-              icon={Search}
-              title={`No results for \u201C${q || 'these filters'}\u201D`}
-              message="Try adjusting your filters or searching for something else."
-              actionLabel={filterCount > 0 ? "Reset filters" : undefined}
-              onAction={filterCount > 0 ? handleResetFilters : undefined}
+              icon={<Search size={28} strokeWidth={1.75} aria-hidden="true" />}
+              title={q ? `No results for "${q}".` : 'No results for these filters.'}
+              text="Try adjusting your filters or searching for something else."
+              action={filterCount > 0 ? { label: 'Reset filters', onClick: handleResetFilters } : undefined}
             />
           </div>
         ) : (
@@ -277,7 +282,7 @@ export default function SearchPage() {
                 )
               ))}
             </div>
-            
+
             {hasMore && (
               <Button
                 variant="outline"
@@ -296,7 +301,7 @@ export default function SearchPage() {
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
         tab={tab}
-        filters={{ category, availableToday, sort: sortParam || '', price }}
+        filters={{ category, availableToday, sort: validSort || '', price: searchPrice }}
         onChange={handleFilterChange}
       />
     </main>

@@ -29,7 +29,7 @@ export default function RecentSearches({ onSelect }) {
             <button
               type="button"
               onClick={handleClear}
-              className="p-1 -m-1 text-sm font-body font-semibold text-primary transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
+              className="-m-1 inline-flex min-h-11 min-w-11 items-center justify-center text-sm font-body font-semibold text-primary transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
             >
               Clear
             </button>
