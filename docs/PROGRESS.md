@@ -3,16 +3,26 @@
 Every AI session starts by reading **Now** and ends by adding a **Log** entry. When a tool runs out of quota mid-task, write the entry anyway (or ask the tool to) so the next tool or person can continue.
 
 ## Now
-- Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
+- Week: 2 (5–9 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `6a80e3a` (merge PR #14 — A2.2 location store)
-- In progress: — (B2.2 done on branch; needs PR)
-- Next task: B2.3 (Search page `/search`)
+- Last green commit on main: `37b4920` (merge PR #16 — B2.2 Category page)
+- Merged this week: A2.1 real-data setup, A2.2 location store, B2.1 Home, and B2.2 Category page
+- In progress: B2.3 Search in PR (`feat/b2-3-search`)
+- Next task: B2.4 cleanup after B2.3 merges
+- Deferred follow-ups: B2.4 moves `CategoryShortcuts` to `src/components/` and adds search-shaped loading skeletons; Home follow-up adds the conditional “Near you” row and distance sorting for Available today when a location is set.
 - Blocked: Cloudflare preview build requires Pages project recreation via Connect to Git on `daiwangk/TIBU_V1` (waiting on Daiwang Cloudflare GitHub app approval if needed)
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-04 - B2.3 - Antigravity (Gemini 3.1 Pro (High))
+- Done: SearchPage at /search with URL-synced q, tab, cat, today, sort, price; 300 ms debounce with replace:true; SearchFiltersSheet; RecentSearches (max 8); infinite "Load more" by offset in pages of 20; Reset filters keeps q; src/Search.jsx deleted.
+- Files: created src/pages/search/{SearchPage,SearchFiltersSheet,RecentSearches}.jsx; modified src/App.jsx and docs/PROGRESS.md; deleted src/Search.jsx.
+- How verified: npm run check green (70 tests), plus hand checks by me: debounce, Back-button sync, Reset filters keeping q, the three Home deep links, crochet search, distance sort, 390px.
+- Not done / left out (why): src/legacy/components/SearchBar.jsx kept because legacy category pages still import it (B2.2/B2.4 remove it).
+- Next step (exact): B2.4 cleanup after B2.2 merges; Home follow-up: add NearYouSection and sort Available today by distance when a location is set.
+- Gotchas for the next person: omit the `near` key so the stored origin applies; explicit `null` means no origin.
 
 ### 2026-10-04 · B2.2 · dk · Antigravity (Claude Sonnet 4.6)
 - Done:

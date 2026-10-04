@@ -27,7 +27,7 @@ import Profile from './Profile';
 import Reel from './Reel';
 import ReelsViewAll from './ReelsViewAll';
 import Saved from './Saved';
-import Search from './Search';
+import SearchPage from './pages/search/SearchPage';
 import SellerDashboard from './SellerDashboard';
 import SellerProductDetail from './SellerProductDetail';
 import SellerRegister from './SellerRegister';
@@ -195,7 +195,7 @@ function AppRoutes() {
       {/* ── Shell routes (with BottomNav) ── */}
       <Route element={<AppShell />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/search" element={L(Search)} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/saved" element={L(Saved)} />
         <Route path="/profile" element={L(Profile)} />
         <Route path="/profile/edit" element={L(EditProfile)} />
