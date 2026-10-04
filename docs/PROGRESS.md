@@ -3,16 +3,16 @@
 Every AI session starts by reading **Now** and ends by adding a **Log** entry. When a tool runs out of quota mid-task, write the entry anyway (or ask the tool to) so the next tool or person can continue.
 
 ## Now
-- Week: 2 (5–9 Oct 2026) | Milestone 1 target: end of Week 2
-- Data source on preview: `mock` | Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `6a80e3a` (merge PR #14 — A2.2 location store)
-- Merged this week: B2.1 Home and A2.2 persisted location store
+- Week: 2 (5–9 Oct 2026) · Milestone 1 target: end of Week 2
+- Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
+- Last green commit on main: `37b4920` (merge PR #16 — B2.2 Category page)
+- Merged this week: A2.1 real-data setup, A2.2 location store, B2.1 Home, and B2.2 Category page
 - In progress: B2.3 Search in PR (`feat/b2-3-search`)
-- Next task: B2.2 (Category page `/category/:slug`), then B2.4 cleanup
+- Next task: B2.4 cleanup after B2.3 merges
 - Deferred follow-ups: B2.4 moves `CategoryShortcuts` to `src/components/` and adds search-shaped loading skeletons; Home follow-up adds the conditional “Near you” row and distance sorting for Available today when a location is set.
-- Blocked: -
-- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md 3) - sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) | decisions list (docs/build/08_CLIENT_COMMS.md 2) not yet sent
-- Unavailable evenings this week: -
+- Blocked: Cloudflare preview build requires Pages project recreation via Connect to Git on `daiwangk/TIBU_V1` (waiting on Daiwang Cloudflare GitHub app approval if needed)
+- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
+- Unavailable evenings this week: —
 
 ## Log
 
@@ -24,7 +24,34 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Next step (exact): B2.4 cleanup after B2.2 merges; Home follow-up: add NearYouSection and sort Available today by distance when a location is set.
 - Gotchas for the next person: omit the `near` key so the stored origin applies; explicit `null` means no origin.
 
-### 2026-10-04 � A2.2 � Antigravity (Gemini 3.1 Pro (High))
+### 2026-10-04 · B2.2 · dk · Antigravity (Claude Sonnet 4.6)
+- Done:
+  - Built `CategoryPage` at `/category/:slug` replacing 11 legacy category pages.
+  - `CategoryPage.jsx`: reads `useParams().slug` → `useCategory(slug)`; unknown slug → `EmptyState` with "Go Home". Drives all filters through URL params (`?sub=`, `?tab=`, `?sort=`, `?today=`, `?price=`) with `replace: true`.
+  - `CategoryFilters.jsx`: tab toggle (Products/Businesses), sub-category chips row (All + children, hidden when no children), sort `<Select>` with `distance` disabled + hint when no location origin (`useSearchOrigin()` from A2.2), "Today" `Chip`, price range `<Select>` for products only.
+  - On tab change: drops `?sort=` if invalid for new tab; drops `?price=` when switching to Businesses.
+  - `ProductGrid.jsx`: `useInfiniteProductSearch` → 2-column grid of `ProductCard variant="grid"`. All 4 states (skeleton/empty/error/data). Load More button hidden when last page < 20 rows.
+  - `BusinessList.jsx`: `useInfiniteBusinessSearch` → `BusinessCard` list. Same 4 states + Load More.
+  - `CategorySkeleton.jsx`: chips + tab + filters row + 6-card grid skeleton.
+  - `src/App.jsx`: replaced 11 legacy `<Route>` elements + 11 imports with single `/category/:slug → <CategoryPage />`. Fixed 3 slug typos in `urlMap` (`resin→resin-art`, `womenfashion→womens-fashion`, `menfashion→mens-fashion`).
+  - `src/hooks/useSetPage.js`: same 3 slug fixes in `PAGE_URL_MAP`.
+  - `scripts/legacy-allowlist.json`: removed `Desserts.jsx`, `Fashion.jsx`, `Handmade.jsx`.
+  - Deleted 11 legacy files: `Candles`, `Crochet`, `Desserts`, `Embroidery`, `Fashion`, `Gifts`, `Handmade`, `Jewellery`, `MenFashion`, `Resin`, `WomenFashion`.
+- Files created (5): `src/pages/category/CategoryPage.jsx`, `src/pages/category/CategoryFilters.jsx`, `src/pages/category/ProductGrid.jsx`, `src/pages/category/BusinessList.jsx`, `src/pages/category/CategorySkeleton.jsx`.
+- Files modified (3): `src/App.jsx`, `src/hooks/useSetPage.js`, `scripts/legacy-allowlist.json`, `docs/PROGRESS.md`.
+- Files deleted (11): `src/Candles.jsx`, `src/Crochet.jsx`, `src/Desserts.jsx`, `src/Embroidery.jsx`, `src/Fashion.jsx`, `src/Gifts.jsx`, `src/Handmade.jsx`, `src/Jewellery.jsx`, `src/MenFashion.jsx`, `src/Resin.jsx`, `src/WomenFashion.jsx`.
+- How verified:
+  - `npm run check` green: guards OK (164 source files, 4 legacy allowlist entries); ESLint 0 errors / 1 pre-existing legacy warning; 13 test files / 70 tests passed; production build OK (549 kB, smaller than before due to 11 deleted files).
+- Not done / left out (why):
+  - BottomNav is NOT hidden on `/category/` — it is a hub/discovery page, not a detail page; BottomNav stays visible by design.
+  - No browser-level UI check run (localhost dev server running on port 5174).
+- Next step (exact): B2.3 (Search page `/search`).
+- Gotchas for the next person:
+  - `?sort=` is omitted from search params when absent; the hooks default to `distance` if origin is set, else `newest`.
+  - Old bookmarks to `/category/resin`, `/category/women-fashion`, `/category/men-fashion` will show the NotFound EmptyState since those aren't valid DB slugs. No redirect added (MVP scope).
+  - `availableToday: false` is always passed explicitly (not omitted) per CONTRACT §3 note that SQL treats `null` as "only available today".
+
+### 2026-10-04 · A2.2 · Antigravity (Gemini 3.1 Pro (High))
 - Done:
   - Created `src/stores/location.js` using zustand and persist middleware for `tibu.location`.
   - Added store actions `requestGps()`, `setArea()`, `setFromProfile()`, `clear()`, and `markAsked()`.
@@ -41,6 +68,27 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Next step (exact): B2.2 (Category page `/category/:slug`).
 - Gotchas for the next person:
   - `useBusiness` and `useProduct` pass `near: undefined` intentionally when the caller leaves it blank, which allows the query hook to substitute `useSearchOrigin()`. An explicit `null` overrides the origin.
+
+### 2026-10-04 · A2.1 · dk · Antigravity (Gemini 3.8 Flash)
+- Done:
+  - Verified the Supabase adapter locally (`VITE_DATA_SOURCE=supabase`, `localhost:5174`) against tibu-dev.
+  - Checked `/p/:id` (₹350, image, no phone) and `/b/:slug` (products, reviews, `?tab=reviews`), plus pending, rejected, and nonexistent slugs → not-found.
+  - No mapper changes needed. `npm run check` green.
+- Files created: —
+- Files modified (1): `docs/PROGRESS.md`.
+- Files deleted: —
+- How verified:
+  - `npm run check` green (guards OK, lint 0 errors, 12 test files / 61 tests passed, build OK).
+  - Verified local dev server connected to tibu-dev database.
+- Not done / left out (why):
+  - Home, Search, and Category (still legacy until B2.1–B2.3).
+  - Distance check waits for A2.2 (no location store yet).
+  - Preview on Cloudflare: A1.6 is open; the Pages project was created via "source repo import" (`Thipak3/tibu-v1`, `tibu-v12`), so it never builds `daiwangk/TIBU_V1`.
+- Next step (exact): Recreate the Pages project through Connect to Git on `daiwangk/TIBU_V1` (Daiwang may need to approve the Cloudflare GitHub app), then set Preview env vars and re-check `/p/<uuid>` on a phone. Next feature task is B2.2 (Category page `/category/:slug`).
+- Gotchas for the next person:
+  - Vite bakes env vars in at build time, so redeploy after changing them.
+  - The two Supabase variable names must match the code exactly (`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`).
+
 ### 2026-10-03 · B2.1 · dk · Antigravity (Gemini 3.8 Flash)
 - Done:
   - Rebuilt Home screen (`src/pages/home/HomePage.jsx`) per AGENTS.md, CONTRACT §2–§3, Feature Spec F3, and design system.

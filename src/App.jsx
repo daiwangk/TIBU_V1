@@ -14,18 +14,10 @@ import AppShell from './layouts/AppShell';
 import AboutTibu from './AboutTibu';
 import BusinessPage from './pages/business/BusinessPage';
 import BusinessViewAll from './BusinessViewAll';
-import Candles from './Candles';
-import Crochet from './Crochet';
-import Desserts from './Desserts';
+import CategoryPage from './pages/category/CategoryPage';
 import EditProfile from './EditProfile';
-import Embroidery from './Embroidery';
-import Fashion from './Fashion';
-import Gifts from './Gifts';
-import Handmade from './Handmade';
 import HelpFeedback from './HelpFeedback';
 import HomePage from './pages/home/HomePage';
-import Jewellery from './Jewellery';
-import MenFashion from './MenFashion';
 import NotificationPreferences from './NotificationPreferences';
 import Notification from './legacy/pages/Notification';
 import PrivacySecurity from './PrivacySecurity';
@@ -34,14 +26,12 @@ import ProductsViewAll from './ProductsViewAll';
 import Profile from './Profile';
 import Reel from './Reel';
 import ReelsViewAll from './ReelsViewAll';
-import Resin from './Resin';
 import Saved from './Saved';
 import SearchPage from './pages/search/SearchPage';
 import SellerDashboard from './SellerDashboard';
 import SellerProductDetail from './SellerProductDetail';
 import SellerRegister from './SellerRegister';
 import TermsConditions from './TermsConditions';
-import WomenFashion from './WomenFashion';
 import NotFound from './legacy/pages/NotFound';
 
 // Contexts
@@ -108,12 +98,12 @@ function LegacyPage({ Component, extraProps = {} }) {
       reelsviewall: '/viewall/reels',
       desserts: '/category/desserts',
       crochet: '/category/crochet',
-      resin: '/category/resin',
+      resin: '/category/resin-art',
       candles: '/category/candles',
       embroidery: '/category/embroidery',
       jewellery: '/category/jewellery',
-      womenfashion: '/category/women-fashion',
-      menfashion: '/category/men-fashion',
+      womenfashion: '/category/womens-fashion',
+      menfashion: '/category/mens-fashion',
       gifts: '/category/gifts',
       fashion: '/category/fashion',
       handmade: '/category/handmade',
@@ -227,18 +217,8 @@ function AppRoutes() {
         <Route path="/viewall/businesses" element={L(BusinessViewAll)} />
         <Route path="/viewall/reels" element={L(ReelsViewAll)} />
 
-        {/* Category hubs */}
-        <Route path="/category/desserts" element={L(Desserts)} />
-        <Route path="/category/crochet" element={L(Crochet)} />
-        <Route path="/category/resin" element={L(Resin)} />
-        <Route path="/category/candles" element={L(Candles)} />
-        <Route path="/category/embroidery" element={L(Embroidery)} />
-        <Route path="/category/jewellery" element={L(Jewellery)} />
-        <Route path="/category/women-fashion" element={L(WomenFashion)} />
-        <Route path="/category/men-fashion" element={L(MenFashion)} />
-        <Route path="/category/gifts" element={L(Gifts)} />
-        <Route path="/category/fashion" element={L(Fashion)} />
-        <Route path="/category/handmade" element={L(Handmade)} />
+        {/* Category hub — single route replaces 11 legacy pages */}
+        <Route path="/category/:slug" element={<CategoryPage />} />
 
         {/* Seller routes — BottomNav hidden via /seller/ prefix */}
         <Route path="/seller/register" element={L(SellerRegister)} />
