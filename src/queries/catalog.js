@@ -9,6 +9,7 @@ import {
   searchProducts,
 } from '../services/index.js';
 import { qk } from './keys.js';
+import { useSearchOrigin } from '../stores/location.js';
 
 const PAGE_SIZE = 20;
 
@@ -49,10 +50,15 @@ export function useCategory(slug, options = {}) {
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
 export function useBusinessSearch(params = {}, options = {}) {
+  const origin = useSearchOrigin();
+  const searchParams = { ...params };
+  if (!('near' in searchParams)) {
+    searchParams.near = origin;
+  }
   return useQuery({
     ...options,
-    queryKey: qk.businesses(params),
-    queryFn: () => searchBusinesses(params),
+    queryKey: qk.businesses(searchParams),
+    queryFn: () => searchBusinesses(searchParams),
   });
 }
 
@@ -62,10 +68,15 @@ export function useBusinessSearch(params = {}, options = {}) {
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
 export function useProductSearch(params = {}, options = {}) {
+  const origin = useSearchOrigin();
+  const searchParams = { ...params };
+  if (!('near' in searchParams)) {
+    searchParams.near = origin;
+  }
   return useQuery({
     ...options,
-    queryKey: qk.products(params),
-    queryFn: () => searchProducts(params),
+    queryKey: qk.products(searchParams),
+    queryFn: () => searchProducts(searchParams),
   });
 }
 
@@ -74,7 +85,12 @@ export function useProductSearch(params = {}, options = {}) {
  * @param {import('../services/contract.js').SearchParams} [params]
  */
 export function useInfiniteBusinessSearch(params = {}) {
-  const stable = { ...withoutOffset(params), limit: PAGE_SIZE };
+  const origin = useSearchOrigin();
+  const searchParams = { ...params };
+  if (!('near' in searchParams)) {
+    searchParams.near = origin;
+  }
+  const stable = { ...withoutOffset(searchParams), limit: PAGE_SIZE };
   return useInfiniteQuery({
     queryKey: qk.businesses(stable),
     queryFn: ({ pageParam = 0 }) =>
@@ -90,7 +106,12 @@ export function useInfiniteBusinessSearch(params = {}) {
  * @param {import('../services/contract.js').SearchParams} [params]
  */
 export function useInfiniteProductSearch(params = {}) {
-  const stable = { ...withoutOffset(params), limit: PAGE_SIZE };
+  const origin = useSearchOrigin();
+  const searchParams = { ...params };
+  if (!('near' in searchParams)) {
+    searchParams.near = origin;
+  }
+  const stable = { ...withoutOffset(searchParams), limit: PAGE_SIZE };
   return useInfiniteQuery({
     queryKey: qk.products(stable),
     queryFn: ({ pageParam = 0 }) =>
@@ -108,10 +129,12 @@ export function useInfiniteProductSearch(params = {}) {
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
 export function useBusiness(slug, near, options = {}) {
+  const origin = useSearchOrigin();
+  const effectiveNear = near === undefined ? origin : near;
   return useQuery({
     ...options,
-    queryKey: qk.business(slug, near),
-    queryFn: () => getBusinessBySlug(slug, { near }),
+    queryKey: qk.business(slug, effectiveNear),
+    queryFn: () => getBusinessBySlug(slug, { near: effectiveNear }),
     enabled: !!slug && (options.enabled ?? true),
   });
 }
@@ -123,10 +146,12 @@ export function useBusiness(slug, near, options = {}) {
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
 export function useProduct(id, near, options = {}) {
+  const origin = useSearchOrigin();
+  const effectiveNear = near === undefined ? origin : near;
   return useQuery({
     ...options,
-    queryKey: qk.product(id, near),
-    queryFn: () => getProductById(id, { near }),
+    queryKey: qk.product(id, effectiveNear),
+    queryFn: () => getProductById(id, { near: effectiveNear }),
     enabled: !!id && (options.enabled ?? true),
   });
 }
