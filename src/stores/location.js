@@ -77,6 +77,6 @@ export function toOrigin(lat, lng) {
 export function useSearchOrigin() {
   const lat = useLocationStore((state) => state.lat);
   const lng = useLocationStore((state) => state.lng);
-  
+
   return useMemo(() => toOrigin(lat, lng), [lat, lng]);
 }

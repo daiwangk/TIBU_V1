@@ -46,13 +46,13 @@ export function useCategory(slug, options = {}) {
 
 /**
  * One-shot business search.
- * @param {import('../services/contract.js').SearchParams} [params]
+ * @param {import('../services/contract.js').SearchParams} [params] undefined or omitted = use the stored origin; null = no origin.
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
 export function useBusinessSearch(params = {}, options = {}) {
   const origin = useSearchOrigin();
   const searchParams = { ...params };
-  if (!('near' in searchParams)) {
+  if (searchParams.near === undefined) {
     searchParams.near = origin;
   }
   return useQuery({
@@ -64,13 +64,13 @@ export function useBusinessSearch(params = {}, options = {}) {
 
 /**
  * One-shot product search.
- * @param {import('../services/contract.js').SearchParams} [params]
+ * @param {import('../services/contract.js').SearchParams} [params] undefined or omitted = use the stored origin; null = no origin.
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
 export function useProductSearch(params = {}, options = {}) {
   const origin = useSearchOrigin();
   const searchParams = { ...params };
-  if (!('near' in searchParams)) {
+  if (searchParams.near === undefined) {
     searchParams.near = origin;
   }
   return useQuery({
@@ -82,12 +82,12 @@ export function useProductSearch(params = {}, options = {}) {
 
 /**
  * Infinite business search — pages of 20 via offset; limit never grows.
- * @param {import('../services/contract.js').SearchParams} [params]
+ * @param {import('../services/contract.js').SearchParams} [params] undefined or omitted = use the stored origin; null = no origin.
  */
 export function useInfiniteBusinessSearch(params = {}) {
   const origin = useSearchOrigin();
   const searchParams = { ...params };
-  if (!('near' in searchParams)) {
+  if (searchParams.near === undefined) {
     searchParams.near = origin;
   }
   const stable = { ...withoutOffset(searchParams), limit: PAGE_SIZE };
@@ -103,12 +103,12 @@ export function useInfiniteBusinessSearch(params = {}) {
 
 /**
  * Infinite product search — pages of 20 via offset; limit never grows.
- * @param {import('../services/contract.js').SearchParams} [params]
+ * @param {import('../services/contract.js').SearchParams} [params] undefined or omitted = use the stored origin; null = no origin.
  */
 export function useInfiniteProductSearch(params = {}) {
   const origin = useSearchOrigin();
   const searchParams = { ...params };
-  if (!('near' in searchParams)) {
+  if (searchParams.near === undefined) {
     searchParams.near = origin;
   }
   const stable = { ...withoutOffset(searchParams), limit: PAGE_SIZE };

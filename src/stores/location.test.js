@@ -31,7 +31,7 @@ describe('location store', () => {
     it('requestGps sets location correctly', async () => {
       geo.getBrowserLocation.mockResolvedValueOnce({ lat: 10, lng: 20 });
       await useLocationStore.getState().requestGps();
-      
+
       const state = useLocationStore.getState();
       expect(state.lat).toBe(10);
       expect(state.lng).toBe(20);
@@ -42,7 +42,7 @@ describe('location store', () => {
 
     it('setArea sets predefined area', () => {
       useLocationStore.getState().setArea('Bandra West');
-      
+
       const state = useLocationStore.getState();
       expect(state.lat).toBe(19.0596);
       expect(state.lng).toBe(72.8295);
@@ -59,7 +59,7 @@ describe('location store', () => {
 
     it('setFromProfile sets profile location', () => {
       useLocationStore.getState().setFromProfile({ lat: 12.34, lng: 56.78, label: 'My Home' });
-      
+
       const state = useLocationStore.getState();
       expect(state.lat).toBe(12.34);
       expect(state.lng).toBe(56.78);
@@ -70,7 +70,7 @@ describe('location store', () => {
     it('clear resets state', () => {
       useLocationStore.setState({ lat: 1, lng: 2, label: 'foo', source: 'gps' });
       useLocationStore.getState().clear();
-      
+
       const state = useLocationStore.getState();
       expect(state.lat).toBeNull();
       expect(state.lng).toBeNull();
