@@ -3,16 +3,24 @@
 Every AI session starts by reading **Now** and ends by adding a **Log** entry. When a tool runs out of quota mid-task, write the entry anyway (or ask the tool to) so the next tool or person can continue.
 
 ## Now
-- Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
-- Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `1bc8fb3` (merge PR #11 — docs kit update; B1.7 `514dc4c` on main)
-- In progress: — (B2.1 done on branch `feat/b2-1-home`)
-- Next task: B2.2 (Category page `/category/:slug`)
-- Blocked: —
-- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
-- Unavailable evenings this week: —
+- Week: 1 (28 Sep - 2 Oct 2026) | Milestone 1 target: end of Week 2
+- Data source on preview: `mock` | Production URL: `https://tibu-v1.pages.dev`
+- Last green commit on main: A2.2 merged
+- In progress: -
+- Next task: B2.4 cleanup after B2.2 merges; Home follow-up: add NearYouSection and sort Available today by distance when a location is set.
+- Blocked: -
+- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md 3) - sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) | decisions list (docs/build/08_CLIENT_COMMS.md 2) not yet sent
+- Unavailable evenings this week: -
 
 ## Log
+
+### 2026-10-04 - B2.3 - Antigravity (Gemini 3.1 Pro (High))
+- Done: SearchPage at /search with URL-synced q, tab, cat, today, sort, price; 300 ms debounce with replace:true; SearchFiltersSheet; RecentSearches (max 8); infinite "Load more" by offset in pages of 20; Reset filters keeps q; src/Search.jsx deleted.
+- Files: created src/pages/search/{SearchPage,SearchFiltersSheet,RecentSearches}.jsx; modified src/App.jsx and docs/PROGRESS.md; deleted src/Search.jsx.
+- How verified: npm run check green (70 tests), plus hand checks by me: debounce, Back-button sync, Reset filters keeping q, the three Home deep links, crochet search, distance sort, 390px.
+- Not done / left out (why): src/legacy/components/SearchBar.jsx kept because legacy category pages still import it (B2.2/B2.4 remove it).
+- Next step (exact): B2.4 cleanup after B2.2 merges; Home follow-up: add NearYouSection and sort Available today by distance when a location is set.
+- Gotchas for the next person: omit the `near` key so the stored origin applies; explicit `null` means no origin.
 
 ### 2026-10-04 � A2.2 � Antigravity (Gemini 3.1 Pro (High))
 - Done:
