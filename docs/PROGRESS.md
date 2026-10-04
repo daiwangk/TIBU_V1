@@ -5,7 +5,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 1 (28 Sep – 2 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `52ca919` (merge PR #13 — Home page B2.1)
+- Last green commit on main: `6a80e3a` (merge PR #14 — A2.2 location store)
 - In progress: — (A2.1 verified locally on branch `chore/a2-1-real-data`)
 - Next task: Reconnect Pages project to `daiwangk/TIBU_V1` for preview build; next feature task is B2.2 (Category page `/category/:slug`)
 - Blocked: Cloudflare preview build requires Pages project recreation via Connect to Git on `daiwangk/TIBU_V1` (waiting on Daiwang Cloudflare GitHub app approval if needed)
@@ -13,6 +13,24 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-04 · A2.2 · Antigravity (Gemini 3.1 Pro (High))
+- Done:
+  - Created `src/stores/location.js` using zustand and persist middleware for `tibu.location`.
+  - Added store actions `requestGps()`, `setArea()`, `setFromProfile()`, `clear()`, and `markAsked()`.
+  - Implemented `useSearchOrigin()` to return memoized `{ lat, lng }` coordinates.
+  - Implemented a `guardedStorage` mechanism to prevent errors when `localStorage` is unavailable in the Node environment (vitest).
+  - Modified `src/queries/catalog.js` search hooks (`useBusinessSearch`, `useProductSearch`, `useInfiniteBusinessSearch`, `useInfiniteProductSearch`) and detail hooks (`useBusiness`, `useProduct`) to use `useSearchOrigin()` as the default `near` argument when not explicitly provided.
+  - Added test suite `src/stores/location.test.js` validating pure function `toOrigin` and store actions without browser dependencies.
+- Files created (2): `src/stores/location.js`, `src/stores/location.test.js`.
+- Files modified (2): `src/queries/catalog.js`, `docs/PROGRESS.md`.
+- How verified:
+  - `npm run check` green: guards OK (170 source files, 7 legacy allowlist entries); ESLint 0 errors / 1 pre-existing legacy warning; 70/70 tests pass; production build OK.
+- Not done / left out (why):
+  - "Near you" section in Home and LocationChip not modified as per constraints ("Nothing in pages or legacy").
+- Next step (exact): B2.2 (Category page `/category/:slug`).
+- Gotchas for the next person:
+  - `useBusiness` and `useProduct` pass `near: undefined` intentionally when the caller leaves it blank, which allows the query hook to substitute `useSearchOrigin()`. An explicit `null` overrides the origin.
 
 ### 2026-10-04 · A2.1 · dk · Antigravity (Gemini 3.8 Flash)
 - Done:
