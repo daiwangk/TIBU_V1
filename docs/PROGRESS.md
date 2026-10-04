@@ -3,11 +3,13 @@
 Every AI session starts by reading **Now** and ends by adding a **Log** entry. When a tool runs out of quota mid-task, write the entry anyway (or ask the tool to) so the next tool or person can continue.
 
 ## Now
-- Week: 1 (28 Sep - 2 Oct 2026) | Milestone 1 target: end of Week 2
+- Week: 2 (5–9 Oct 2026) | Milestone 1 target: end of Week 2
 - Data source on preview: `mock` | Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: A2.2 merged
-- In progress: -
-- Next task: B2.4 cleanup after B2.2 merges; Home follow-up: add NearYouSection and sort Available today by distance when a location is set.
+- Last green commit on main: `6a80e3a` (merge PR #14 — A2.2 location store)
+- Merged this week: B2.1 Home and A2.2 persisted location store
+- In progress: B2.3 Search in PR (`feat/b2-3-search`)
+- Next task: B2.2 (Category page `/category/:slug`), then B2.4 cleanup
+- Deferred follow-ups: B2.4 moves `CategoryShortcuts` to `src/components/` and adds search-shaped loading skeletons; Home follow-up adds the conditional “Near you” row and distance sorting for Available today when a location is set.
 - Blocked: -
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md 3) - sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested (Cloudflare Pages setup complete in A1.6) | decisions list (docs/build/08_CLIENT_COMMS.md 2) not yet sent
 - Unavailable evenings this week: -
