@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useLocationStore, toOrigin } from './location.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { selectSearchOrigin, toOrigin, useLocationStore } from './location.js';
 import * as geo from '../lib/geo.js';
 import { AppError } from '../services/errors.js';
 
@@ -7,15 +7,49 @@ vi.mock('../lib/geo.js', () => ({
   getBrowserLocation: vi.fn(),
   MUMBAI_AREAS: [
     { name: 'Andheri West', lat: 19.1364, lng: 72.8296 },
-    { name: 'Bandra West', lat: 19.0596, lng: 72.8295 }
-  ]
+    { name: 'Bandra West', lat: 19.0596, lng: 72.8295 },
+  ],
 }));
+
+function createMemoryStorage() {
+  const map = new Map();
+  return {
+    getItem: (key) => map.get(key) ?? null,
+    setItem: (key, value) => {
+      map.set(key, String(value));
+    },
+    removeItem: (key) => {
+      map.delete(key);
+    },
+  };
+}
+
+async function flushPersist() {
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
+function persistedLocation() {
+  const raw = localStorage.getItem('tibu.location');
+  return raw ? JSON.parse(raw) : null;
+}
 
 describe('location store', () => {
   beforeEach(() => {
-    useLocationStore.getState().clear();
-    useLocationStore.setState({ asked: false });
+    vi.stubGlobal('localStorage', createMemoryStorage());
+    toOrigin(null, null);
+    useLocationStore.setState({
+      lat: null,
+      lng: null,
+      label: null,
+      source: null,
+      asked: false,
+    });
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   describe('store actions', () => {
@@ -67,8 +101,14 @@ describe('location store', () => {
       expect(state.source).toBe('profile');
     });
 
-    it('clear resets state', () => {
-      useLocationStore.setState({ lat: 1, lng: 2, label: 'foo', source: 'gps' });
+    it('clear resets coords but keeps asked', () => {
+      useLocationStore.setState({
+        lat: 1,
+        lng: 2,
+        label: 'foo',
+        source: 'gps',
+        asked: true,
+      });
       useLocationStore.getState().clear();
 
       const state = useLocationStore.getState();
@@ -76,6 +116,7 @@ describe('location store', () => {
       expect(state.lng).toBeNull();
       expect(state.label).toBeNull();
       expect(state.source).toBeNull();
+      expect(state.asked).toBe(true);
     });
 
     it('markAsked sets asked to true', () => {
@@ -84,7 +125,37 @@ describe('location store', () => {
     });
   });
 
-  describe('toOrigin (useSearchOrigin pure logic)', () => {
+  describe('persist', () => {
+    it('writes asked with the rest of the location state', async () => {
+      useLocationStore.getState().setArea('Bandra West');
+      await flushPersist();
+
+      expect(persistedLocation()?.state).toMatchObject({
+        lat: 19.0596,
+        lng: 72.8295,
+        label: 'Bandra West',
+        source: 'area',
+        asked: true,
+      });
+    });
+
+    it('keeps asked in storage after clear', async () => {
+      useLocationStore.getState().markAsked();
+      useLocationStore.getState().setArea('Andheri West');
+      useLocationStore.getState().clear();
+      await flushPersist();
+
+      expect(persistedLocation()?.state).toMatchObject({
+        lat: null,
+        lng: null,
+        label: null,
+        source: null,
+        asked: true,
+      });
+    });
+  });
+
+  describe('toOrigin / selectSearchOrigin (useSearchOrigin logic)', () => {
     it('returns null when lat or lng is null', () => {
       expect(toOrigin(null, null)).toBeNull();
       expect(toOrigin(10, null)).toBeNull();
@@ -93,6 +164,29 @@ describe('location store', () => {
 
     it('returns object when lat and lng are provided', () => {
       expect(toOrigin(10, 20)).toEqual({ lat: 10, lng: 20 });
+    });
+
+    it('keeps the same object identity while coordinates are unchanged', () => {
+      useLocationStore.getState().setArea('Bandra West');
+      const first = selectSearchOrigin(useLocationStore.getState());
+
+      useLocationStore.getState().markAsked();
+      useLocationStore.setState({ label: 'Near Bandra West' });
+      const second = selectSearchOrigin(useLocationStore.getState());
+
+      expect(first).toEqual({ lat: 19.0596, lng: 72.8295 });
+      expect(second).toBe(first);
+    });
+
+    it('allocates a new origin when coordinates change', () => {
+      useLocationStore.getState().setArea('Bandra West');
+      const bandra = selectSearchOrigin(useLocationStore.getState());
+
+      useLocationStore.getState().setArea('Andheri West');
+      const andheri = selectSearchOrigin(useLocationStore.getState());
+
+      expect(andheri).toEqual({ lat: 19.1364, lng: 72.8296 });
+      expect(andheri).not.toBe(bandra);
     });
   });
 });
