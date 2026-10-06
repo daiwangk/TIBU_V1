@@ -1,5 +1,5 @@
 import { AppError } from '../errors.js';
-import { calculateDistance } from '../../utils/distance.js';
+import { haversineMeters } from '../../lib/geo.js';
 import { businesses, products, reviews } from './fixtures.js';
 import { CATEGORIES, descendantSlugs, getCategoryRecord } from './taxonomy.js';
 
@@ -70,7 +70,7 @@ function copyProductSummary(row, distanceM = null) {
  */
 function distanceTo(near, lat, lng) {
   if (!near) return null;
-  return calculateDistance(near.lat, near.lng, lat, lng);
+  return haversineMeters(near, { lat, lng });
 }
 
 /**

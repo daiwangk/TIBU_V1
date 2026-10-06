@@ -1,7 +1,6 @@
 {
   "_comment": "Legacy files that still start with a blanket /* eslint-disable */. Each is scheduled for deletion (see docs/build/03_ARCHITECTURE_TARGET.md §5). Remove an entry the moment its file is rewritten or deleted. Never ADD entries.",
   "blanketEslintDisable": [
-    "src/legacy/components/SearchBar.jsx",
     "src/services/mock/data/dessertBusinesses.js",
     "src/SellerDashboard.jsx",
     "src/contexts/ProfileContext.jsx"

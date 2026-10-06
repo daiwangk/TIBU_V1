@@ -8,8 +8,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import ProductCard from '../../components/ProductCard';
 import BusinessCard from '../../components/BusinessCard';
-import ProductRowSkeleton from '../home/ProductRowSkeleton';
-import BusinessRowSkeleton from '../home/BusinessRowSkeleton';
+import SearchResultsSkeleton from './SearchResultsSkeleton';
 import SearchFiltersSheet from './SearchFiltersSheet';
 import RecentSearches from './RecentSearches';
 import { useInfiniteProductSearch, useInfiniteBusinessSearch } from '../../queries/catalog';
@@ -249,15 +248,7 @@ export default function SearchPage() {
         {!isSearching ? (
           <RecentSearches onSelect={handleSearchInputSelect} />
         ) : query.isPending ? (
-          <div className="flex flex-col gap-4 px-screen py-6">
-            {Array.from({ length: 4 }).map((_, i) => (
-              tab === 'products' ? (
-                <ProductRowSkeleton key={i} />
-              ) : (
-                <BusinessRowSkeleton key={i} />
-              )
-            ))}
-          </div>
+          <SearchResultsSkeleton tab={tab} />
         ) : query.isError ? (
           <div className="flex-1 flex items-center justify-center py-12">
             <ErrorState message="We couldn't load the search results." onRetry={() => query.refetch()} />
