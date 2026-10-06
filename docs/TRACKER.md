@@ -29,7 +29,7 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ☑ | B2.1 | Home page | B | Mon | 3 | B1.7, B1.8 |
 | ☑ | A2.2 | Location store | A | Tue | 2 | — |
 | ☑ | B2.2 | Generic CategoryPage | B | Tue | 2 | B2.1 |
-| ☐ | A2.3 | WhatsApp/OG link previews (real phones) | A | Wed | 2.5 | A2.1 |
+| ◐ | A2.3 | WhatsApp/OG link previews — functions merged and tested locally; real-phone check waits for the Cloudflare project | A | Wed | 2.5 | A2.1 |
 | ☑ | B2.3 | Search page | B | Wed | 3 | — |
 | ☐ | ⏱ | Checkpoint: Fri or Mon demo decided | both | Wed | — | — |
 | ☑ | B2.6 | Location chip, area picker, first-visit prompt | B | Thu | 2 | A2.2 |

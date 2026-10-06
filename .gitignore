@@ -29,3 +29,6 @@ dist-ssr
 !.env.seed.example
 backups/
 supabase/.temp/ 
+
+# Cloudflare wrangler local cache
+.wrangler
