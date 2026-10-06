@@ -191,6 +191,14 @@ export function mapProductSummaryNested(row, business, distanceM) {
 }
 
 /**
+ * @param {number|string|null|undefined} year
+ * @returns {number|null}
+ */
+function mapEstablishedYear(year) {
+  return year == null ? null : Number(year);
+}
+
+/**
  * @param {object} row businesses nested select
  * @param {number|null} [distanceM]
  * @returns {import('../contract.js').BusinessDetail}
@@ -210,6 +218,8 @@ export function mapBusinessDetail(row, distanceM) {
     images,
     videos,
     products,
+    deliveryTime: row.delivery_time ?? null,
+    establishedYear: mapEstablishedYear(row.established_year),
   };
 }
 
@@ -252,6 +262,10 @@ export function mapProductDetail(row, distanceM) {
     images,
     details: mapDetails(row.details),
     business,
+    // v1.2 effective values: product override ?? business. `??`, never `||` — false is a real value (D37).
+    deliveryAvailable: Boolean(row.delivery_available ?? biz.delivery_available),
+    pickupAvailable: Boolean(row.pickup_available ?? biz.pickup_available),
+    deliveryTime: row.delivery_time ?? biz.delivery_time ?? null,
   };
 }
 

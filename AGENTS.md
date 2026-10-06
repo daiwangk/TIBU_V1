@@ -1,13 +1,13 @@
 # AGENTS.md — Tibu project rules (read fully before every task)
 
 Tibu is a mobile-first discovery marketplace for homegrown local businesses in India (prices in ₹).
-This repo delivers Phase 1 (MVP) as scoped in `docs/Tibu_SoW_Phase1_Final.pdf`. A two-person, part-time team builds it with AI help. You are helping one of them.
+This repo delivers Phase 1 (MVP) as scoped in `docs/Tibu_SoW_Phase1_Rev2.md` (Revision 2 — the signed scope). A two-person, part-time team builds it with AI help. You are helping one of them.
 
 ## 1. Stack (don't change it without a decision recorded in docs/DECISIONS.md)
 - React 19 + Vite 8. **JavaScript** (`.jsx`/`.js`) with JSDoc comments. No TypeScript in `src/`. No shadcn/ui.
 - react-router-dom 7 · @tanstack/react-query · zustand · @supabase/supabase-js · Tailwind CSS v4 (tokens in `src/styles/theme.css`) · lucide-react · sonner (toasts) · vitest.
 - Backend: Supabase (Postgres + PostGIS, Auth, Storage, pg_cron). The SQL in `supabase/migrations/` is the source of truth.
-- Hosting: Cloudflare Pages. Link-preview functions live in `functions/` (TypeScript is allowed there, nowhere else).
+- Hosting: Cloudflare Pages. Link-preview functions live in `functions/`. TypeScript is allowed in `functions/` (Cloudflare) and `supabase/functions/` (Edge Functions), nowhere else.
 - Adding any dependency requires my explicit OK in your plan.
 
 ## 2. Documents
@@ -43,13 +43,13 @@ This repo delivers Phase 1 (MVP) as scoped in `docs/Tibu_SoW_Phase1_Final.pdf`. 
 - Prices via `formatPrice`, distances via `formatDistance`. No `console.log` in committed code. No file-level `/* eslint-disable */` (CI fails); if you must, disable one rule on one line with a reason.
 
 ## 6. Security
-- Never put a service-role or secret key in `src/`, in any `VITE_*` variable, or in a chat. The only browser variables are `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SITE_URL`, `VITE_DATA_SOURCE`.
+- Never put a service-role or secret key in `src/`, in any `VITE_*` variable, or in a chat. The only browser variables are `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SITE_URL`, `VITE_DATA_SOURCE`, `VITE_VAPID_PUBLIC_KEY` (a public key by design).
 - Never edit a migration that has been pushed. DB changes are one new migration file, with RLS enabled and policies in the same file, each policy explained in plain English in your reply.
 - Never run commands against production. The seed script runs against dev only.
 
 ## 7. Scope
 - Phase 2 — do NOT build: cart, checkout, payments, UPI/QR, offers/coupons, a Discover/reels feed, saved reels, real-time chat/typing/presence/read receipts, advanced analytics, a desktop redesign, an address book.
-- Must keep even if a mockup lacks it: Call + WhatsApp buttons on Product and Business pages; a pre-filled WhatsApp message containing the product name, price and its `/p/` link; guests browse freely but contacting requires login; enquiries are non-real-time.
+- Must keep even if a mockup lacks it: Call + WhatsApp buttons on Product and Business pages; a pre-filled WhatsApp message containing the product name, price and its `/p/` link; guests browse freely but contacting requires login; enquiries are non-real-time; in-app chat (the enquiry system, D34); push only through the Notification settings switch (D33).
 
 ## 8. How to work (every task)
 1. Read the task, `docs/PROGRESS.md` ("Now"), and the files the task lists. Reply with a **PLAN**: files to create / modify / delete, dependencies to add, questions. Wait for my OK.

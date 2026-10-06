@@ -239,6 +239,8 @@ export async function getBusinessBySlug(slug, opts = {}) {
     images: b.images.map((img) => ({ ...img })),
     videos: b.videos.map((v) => ({ ...v })),
     products: bizProducts,
+    deliveryTime: b.deliveryTime,
+    establishedYear: b.establishedYear,
   };
 }
 
@@ -256,12 +258,17 @@ export async function getProductById(id, opts = {}) {
 
   const near = opts.near ?? null;
   const hasNear = !!(near && typeof near.lat === 'number' && typeof near.lng === 'number');
+  // v1.2 effective values: product override ?? business (`??`, never `||` — false is a real value)
+  const override = p.deliveryOverride;
 
   return {
     ...copyProductSummary(p, hasNear ? distanceTo(near, p._lat, p._lng) : null),
     description: p.description,
     images: p.images.map((img) => ({ ...img })),
     details: p.details.map((d) => ({ ...d })),
+    deliveryAvailable: override?.deliveryAvailable ?? b.deliveryAvailable,
+    pickupAvailable: override?.pickupAvailable ?? b.pickupAvailable,
+    deliveryTime: override?.deliveryTime ?? b.deliveryTime,
     business: copyBusinessSummary(
       b,
       hasNear ? distanceTo(near, b.lat, b.lng) : null,
@@ -333,3 +340,5 @@ export const markThreadRead = unavailable;
 export const listNotifications = unavailable;
 export const markNotificationsRead = unavailable;
 export const getUnreadCounts = unavailable;
+export const savePushSubscription = unavailable;
+export const deletePushSubscription = unavailable;

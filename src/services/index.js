@@ -63,4 +63,6 @@ export const {
   listNotifications,
   markNotificationsRead,
   getUnreadCounts,
+  savePushSubscription,
+  deletePushSubscription,
 } = impl;

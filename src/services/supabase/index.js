@@ -8,6 +8,7 @@ import {
   searchBusinesses,
   searchProducts,
 } from './catalog.js';
+import { deletePushSubscription, savePushSubscription } from './push.js';
 
 const notImplemented = async () => {
   throw new AppError('config', 'Supabase adapter not implemented yet');
@@ -73,3 +74,5 @@ export const markThreadRead = notImplemented;
 export const listNotifications = notImplemented;
 export const markNotificationsRead = notImplemented;
 export const getUnreadCounts = notImplemented;
+
+export { savePushSubscription, deletePushSubscription };

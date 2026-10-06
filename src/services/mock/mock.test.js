@@ -87,4 +87,53 @@ describe('mock adapter', () => {
     expect(fixtureBiz).toEqual(normBiz);
     expect(fixtureProd).toEqual(normProd);
   });
+
+  describe('Rev2 delivery fields (CONTRACT v1.2)', () => {
+    it('BusinessDetail carries deliveryTime and establishedYear (null when not stated)', async () => {
+      const stated = await mock.getBusinessBySlug('sweet-crumbs');
+      expect(stated.deliveryTime).toBe('Same day');
+      expect(stated.establishedYear).toBe(2019);
+
+      const partial = await mock.getBusinessBySlug('crochet-by-sarah');
+      expect(partial.deliveryTime).toBe('1–2 days');
+      expect(partial.establishedYear).toBeNull();
+
+      const empty = await mock.getBusinessBySlug('wax-haven');
+      expect(empty.deliveryTime).toBeNull();
+      expect(empty.establishedYear).toBeNull();
+    });
+
+    it('ProductDetail uses the product override when set', async () => {
+      const biz = await mock.getBusinessBySlug('aura-candles');
+      const product = await mock.getProductById('aura-candles-vanilla-soy-candle');
+      expect(biz.deliveryAvailable).toBe(true);
+      expect(product.deliveryAvailable).toBe(false); // false is a real override
+      expect(product.pickupAvailable).toBe(biz.pickupAvailable); // null override -> business
+      expect(product.deliveryTime).toBe('Within a week');
+      expect(product.deliveryTime).not.toBe(biz.deliveryTime);
+    });
+
+    it('ProductDetail uses the business values when the product has no override', async () => {
+      const biz = await mock.getBusinessBySlug('aura-candles');
+      const product = await mock.getProductById('lavish-glow-lavender-jar-candle');
+      expect(product.deliveryAvailable).toBe(true);
+      expect(product.deliveryTime).toBeNull();
+
+      const shop = await mock.getBusinessBySlug('sweet-crumbs');
+      const { id } = (await mock.searchProducts({ limit: 50 })).find((p) => p.businessId === 'sweet-crumbs');
+      const detail = await mock.getProductById(id);
+      expect(detail.deliveryTime).toBe(shop.deliveryTime);
+      expect(detail.deliveryAvailable).toBe(shop.deliveryAvailable);
+      expect(biz.deliveryTime).toBe('1–2 days');
+    });
+
+    it('push subscription functions need the real backend', async () => {
+      await expect(
+        mock.savePushSubscription({ endpoint: 'https://x', p256dh: 'a', auth: 'b' }),
+      ).rejects.toMatchObject({ code: 'unavailable_in_mock' });
+      await expect(mock.deletePushSubscription('https://x')).rejects.toMatchObject({
+        code: 'unavailable_in_mock',
+      });
+    });
+  });
 });

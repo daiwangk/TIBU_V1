@@ -36,7 +36,9 @@
  *   addressText: string,
  *   images: Image[],
  *   videos: Video[],
- *   products: ProductSummary[]
+ *   products: ProductSummary[],
+ *   deliveryTime: string|null,
+ *   establishedYear: number|null
  * }} BusinessDetail
  */
 
@@ -63,7 +65,10 @@
  *   description: string,
  *   images: Image[],
  *   details: Array<{ label: string, value: string }>,
- *   business: BusinessSummary
+ *   business: BusinessSummary,
+ *   deliveryAvailable: boolean,
+ *   pickupAvailable: boolean,
+ *   deliveryTime: string|null
  * }} ProductDetail
  */
 
@@ -142,9 +147,13 @@
  * @property {string} instagramHandle
  * @property {boolean} deliveryAvailable
  * @property {boolean} pickupAvailable
+ * @property {string|null} deliveryTime
+ * @property {number|null} establishedYear
  */
 
-/** @typedef {ProductDetail & { isActive: boolean, sortOrder: number }} MyProduct */
+/** @typedef {{ deliveryAvailable: boolean, pickupAvailable: boolean, deliveryTime: string|null }} DeliveryOverride */
+
+/** @typedef {ProductDetail & { isActive: boolean, sortOrder: number, deliveryOverride: DeliveryOverride|null }} MyProduct */
 
 /**
  * @typedef {Object} ProductInput
@@ -156,6 +165,7 @@
  * @property {Array<{label:string,value:string}>} details
  * @property {boolean} availableToday
  * @property {boolean} isActive
+ * @property {DeliveryOverride|null} deliveryOverride
  */
 
 /**
@@ -275,4 +285,6 @@ export const FUNCTION_NAMES = [
   'listNotifications',
   'markNotificationsRead',
   'getUnreadCounts',
+  'savePushSubscription',
+  'deletePushSubscription',
 ];
