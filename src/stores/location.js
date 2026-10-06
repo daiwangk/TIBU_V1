@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { useMemo } from 'react';
 import { getBrowserLocation, MUMBAI_AREAS } from '../lib/geo.js';
 import { AppError } from '../services/errors.js';
 
@@ -26,7 +25,7 @@ const guardedStorage = {
     } catch {
       return;
     }
-  }
+  },
 };
 
 export const useLocationStore = create(
@@ -44,7 +43,7 @@ export const useLocationStore = create(
       },
 
       setArea: (name) => {
-        const area = MUMBAI_AREAS.find(a => a.name === name);
+        const area = MUMBAI_AREAS.find((a) => a.name === name);
         if (!area) {
           throw new AppError('validation', 'Unknown area selected.');
         }
@@ -61,22 +60,43 @@ export const useLocationStore = create(
 
       markAsked: () => {
         set({ asked: true });
-      }
+      },
     }),
     {
       name: 'tibu.location',
       storage: createJSONStorage(() => guardedStorage),
-    }
-  )
+    },
+  ),
 );
 
+/** Same `{ lat, lng }` object until coordinates change — otherwise query keys churn. */
+let originCache = null;
+
+/**
+ * @param {number|null|undefined} lat
+ * @param {number|null|undefined} lng
+ * @returns {{ lat: number, lng: number }|null}
+ */
 export function toOrigin(lat, lng) {
-  return (lat != null && lng != null) ? { lat, lng } : null;
+  if (lat == null || lng == null) {
+    originCache = null;
+    return null;
+  }
+  if (originCache && originCache.lat === lat && originCache.lng === lng) {
+    return originCache;
+  }
+  originCache = { lat, lng };
+  return originCache;
+}
+
+/**
+ * @param {{ lat: number|null, lng: number|null }} state
+ * @returns {{ lat: number, lng: number }|null}
+ */
+export function selectSearchOrigin(state) {
+  return toOrigin(state.lat, state.lng);
 }
 
 export function useSearchOrigin() {
-  const lat = useLocationStore((state) => state.lat);
-  const lng = useLocationStore((state) => state.lng);
-
-  return useMemo(() => toOrigin(lat, lng), [lat, lng]);
+  return useLocationStore(selectSearchOrigin);
 }

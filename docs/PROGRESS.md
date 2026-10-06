@@ -5,16 +5,24 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 2 (5–9 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `37b4920` (merge PR #16 — B2.2 Category page)
-- Merged this week: A2.1 real-data setup, A2.2 location store, B2.1 Home, and B2.2 Category page
-- In progress: B2.3 Search in PR (`feat/b2-3-search`)
-- Next task: B2.4 cleanup after B2.3 merges
+- Last green commit on main: `19d5ac6` (merge PR #17 — B2.3 Search page)
+- Merged this week: A2.1 real-data setup, A2.2 location store, B2.1 Home, B2.2 Category page, and B2.3 Search page
+- In progress: A2.2 origin-stability gap-close on `feat/a2-2-location-store`
+- Next task: B2.4 cleanup after A2.2 gap-close merges
 - Deferred follow-ups: B2.4 moves `CategoryShortcuts` to `src/components/` and adds search-shaped loading skeletons; Home follow-up adds the conditional “Near you” row and distance sorting for Available today when a location is set.
 - Blocked: Cloudflare preview build requires Pages project recreation via Connect to Git on `daiwangk/TIBU_V1` (waiting on Daiwang Cloudflare GitHub app approval if needed)
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-06 · A2.2 · dk · Cursor Grok 4.6
+- Done: Gap-close on the persisted location store. `toOrigin` / `selectSearchOrigin` now cache `{ lat, lng }` so object identity only changes when coordinates change (`useSearchOrigin` is a zustand selector, no `useMemo`). Tests stub `localStorage` with `vi.stubGlobal`, assert persist includes `asked`, and assert `clear()` resets coords/label/source while keeping `asked`.
+- Files: `src/stores/location.js`, `src/stores/location.test.js`, `docs/PROGRESS.md`
+- How verified: `npm run check` green — guards OK (166 source files, 4 legacy allowlist entries); ESLint 0 errors / 1 pre-existing legacy warning; 13 test files / 74 tests passed; production build OK.
+- Not done / left out (why): Pages and catalog hooks untouched (already default `near` only when the caller passes `undefined`). No LocationChip / first-visit sheet (B2.6). No Home “Near you” row (Home follow-up).
+- Next step (exact): Merge `feat/a2-2-location-store`; then continue to B2.4 cleanup.
+- Gotchas for the next person: `useSearchOrigin()` returns the cached origin object — do not wrap it in a new `{ lat, lng }` in callers. Omit `near` to use the store; pass `near: null` to disable origin. Persist key is `tibu.location` and includes `asked`.
 
 ### 2026-10-04 - B2.3 - Antigravity (Gemini 3.1 Pro (High))
 - Done: SearchPage at /search with URL-synced q, tab, cat, today, sort, price; 300 ms debounce with replace:true; SearchFiltersSheet; RecentSearches (max 8); infinite "Load more" by offset in pages of 20; Reset filters keeps q; src/Search.jsx deleted.
