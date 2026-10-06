@@ -51,6 +51,7 @@ describe('mapSupabaseError (CONTRACT §11)', () => {
     expect(mapSupabaseError({ message: 'duplicate', code: '23505' }).code).toBe('conflict');
     expect(mapSupabaseError({ message: 'check failed', code: '23514' }).code).toBe('validation');
     expect(mapSupabaseError({ message: 'bad input', code: '22P02' }).code).toBe('validation');
+    expect(mapSupabaseError({ message: 'JWT expired', code: 'PGRST301' }).code).toBe('auth_required');
     expect(mapSupabaseError({ message: 'reason_required' })).toMatchObject({
       code: 'validation',
       message: 'Add a reason',
@@ -74,5 +75,22 @@ describe('mapSupabaseError (CONTRACT §11)', () => {
     });
     const existing = new AppError('config', 'already mapped');
     expect(mapSupabaseError(existing)).toBe(existing);
+  });
+
+  it('never puts Postgres text in the user-facing message (CONTRACT section 1.3)', () => {
+    const raw = 'new row for relation "business_contacts" violates check constraint "business_contacts_phone_check"';
+    for (const code of ['23514', '22P02', '23505', 'P0002']) {
+      const err = mapSupabaseError({ message: raw, code });
+      expect(err.message, code).not.toMatch(/relation|constraint|violates|business_contacts/i);
+      expect(err.cause.message).toBe(raw);
+    }
+    const incomplete = mapSupabaseError({ message: 'incomplete_application:logo,location' });
+    expect(incomplete.message).toBe('Complete your application first');
+    expect(incomplete.cause.missing).toEqual(['logo', 'location']);
+  });
+
+  it('only treats TypeErrors as offline when the message says the request failed', () => {
+    expect(mapSupabaseError({ name: 'TypeError', message: 'Load failed' }).code).toBe('network');
+    expect(mapSupabaseError({ name: 'TypeError', message: "Cannot read properties of undefined (reading 'x')" }).code).toBe('unknown');
   });
 });

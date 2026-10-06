@@ -32,7 +32,7 @@ export default function PageHeader({ title, titleAs: TitleTag = 'h1', fallbackTo
   return (
     <header
       className={`
-        flex items-center gap-2 px-screen py-3
+        flex h-14 items-center gap-2 px-screen
         bg-surface border-b border-border
         sticky top-0 z-10
         ${className}

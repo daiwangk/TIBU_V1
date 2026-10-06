@@ -14,7 +14,7 @@ export default function Chip({ active = false, onToggle, children, className = '
     <button
       type="button"
       role="button"
-      aria-pressed={active}
+      aria-pressed={rest.role === 'tab' ? undefined : active}
       onClick={onToggle}
       className={`
         inline-flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-1.5

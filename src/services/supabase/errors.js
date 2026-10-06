@@ -18,7 +18,8 @@ export function mapSupabaseError(err) {
   );
 
   // Message-prefix matches first (shared errcodes like P0002).
-  if (message.startsWith('login_required') || code === '28000') {
+  // PGRST301 / PGRST303: expired or invalid JWT, treated like a missing login.
+  if (message.startsWith('login_required') || code === '28000' || code === 'PGRST301' || code === 'PGRST303') {
     return new AppError('auth_required', message || 'Login required', err);
   }
   if (message.startsWith('business_not_available')) {
@@ -54,7 +55,7 @@ export function mapSupabaseError(err) {
     const keys = message.slice('incomplete_application:'.length);
     const missing = keys.split(',').map((k) => k.trim()).filter(Boolean);
     if (err && typeof err === 'object') err.missing = missing;
-    return new AppError('validation', message, err);
+    return new AppError('validation', 'Complete your application first', err);
   }
   if (message.startsWith('reason_required')) {
     return new AppError('validation', 'Add a reason', err);
@@ -74,13 +75,14 @@ export function mapSupabaseError(err) {
     || message.startsWith('no_business')
     || code === 'PGRST116'
   ) {
-    return new AppError('not_found', message || 'Not found', err);
+    return new AppError('not_found', "We couldn't find that", err);
   }
+  // Never surface Postgres text (constraint and column names) — the original stays on `cause`.
   if (code === '23505') {
-    return new AppError('conflict', message || 'Already exists', err);
+    return new AppError('conflict', 'That already exists', err);
   }
   if (code === '23514' || code === '22P02') {
-    return new AppError('validation', message || 'Invalid input', err);
+    return new AppError('validation', "That value isn't valid", err);
   }
   if (
     code === 'P0002'
@@ -88,12 +90,11 @@ export function mapSupabaseError(err) {
     && !message.startsWith('not_found')
   ) {
     // Shared Postgres "no_data_found"-style code without a known prefix.
-    return new AppError('not_found', message || 'Not found', err);
+    return new AppError('not_found', "We couldn't find that", err);
   }
 
-  const looksNetwork =
-    (err && typeof err === 'object' && 'name' in err && err.name === 'TypeError')
-    || /failed to fetch|networkerror|load failed|network request failed/i.test(message);
+  // A TypeError is only "offline" when the browser says the request failed; other TypeErrors are bugs.
+  const looksNetwork = /failed to fetch|networkerror|load failed|network request failed/i.test(message);
   if (looksNetwork) {
     return new AppError(
       'network',

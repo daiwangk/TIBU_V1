@@ -16,6 +16,14 @@ describe('format helpers (CONTRACT §9)', () => {
     expect(formatDistance(800)).toBe('800 m');
     expect(formatDistance(2400)).toBe('2.4 km');
     expect(formatDistance(null)).toBe('');
+    expect(formatDistance(undefined)).toBe('');
+    expect(formatDistance(NaN)).toBe('');
+    expect(formatDistance(949)).toBe('900 m');
+    expect(formatDistance(950)).toBe('1.0 km');
+    expect(formatDistance(999)).toBe('1.0 km');
+    expect(formatDistance(1000)).toBe('1.0 km');
+    expect(formatDistance(20)).toBe('100 m'); // never "0 m"
+    expect(formatDistance(0)).toBe('100 m');
   });
 
   it('formatRating', () => {

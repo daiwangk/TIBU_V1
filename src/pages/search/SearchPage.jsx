@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, X, SlidersHorizontal, ArrowLeft } from 'lucide-react';
 import Tabs from '../../components/ui/Tabs';
@@ -24,31 +24,38 @@ export default function SearchPage() {
   const origin = useSearchOrigin();
 
   // URL State extraction
-  const q = searchParams.get('q') || '';
+  const q = (searchParams.get('q') || '').trim();
   const tab = searchParams.get('tab') === 'businesses' ? 'businesses' : 'products';
   const category = searchParams.get('cat') || '';
   const availableToday = searchParams.get('today') === '1';
   const sortParam = searchParams.get('sort') || undefined;
   const price = searchParams.get('price') || '';
-  const searchPrice = tab === 'products' ? price : '';
+  const searchPrice = tab === 'products' && /^(\d{1,7})?-(\d{1,7})?$/.test(price) && price !== '-' ? price : '';
 
   // Local state
   const [localQ, setLocalQ] = useState(q);
   const [prevQ, setPrevQ] = useState(q);
+  const [pushedQ, setPushedQ] = useState(q);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Sync back button / external changes to local input
+  // Sync back button / external changes to the input — but not our own debounced push coming back
+  // (the user may already have typed more by then).
   if (q !== prevQ) {
     setPrevQ(q);
-    setLocalQ(q);
+    if (q !== pushedQ) {
+      setPushedQ(q);
+      setLocalQ(q);
+    }
   }
 
   // Debounce input to URL
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (localQ !== q) {
+      const typed = localQ.trim();
+      if (typed !== q) {
+        setPushedQ(typed);
         const next = new URLSearchParams(searchParams);
-        if (localQ) next.set('q', localQ);
+        if (typed) next.set('q', typed);
         else next.delete('q');
         setSearchParams(next, { replace: true });
       }
@@ -58,11 +65,12 @@ export default function SearchPage() {
 
   // Parse price
   const [minPrice, maxPrice] = useMemo(() => {
-    if (!price || tab !== 'products') return [undefined, undefined];
-    const [min, max] = price.split('-');
+    // Only "min-max", "min-" or "-max" with whole rupees; anything else is ignored.
+    const match = /^(\d{1,7})?-(\d{1,7})?$/.exec(price);
+    if (!match || tab !== 'products' || (!match[1] && !match[2])) return [undefined, undefined];
     return [
-      min ? parseInt(min, 10) : undefined,
-      max ? parseInt(max, 10) : undefined
+      match[1] ? parseInt(match[1], 10) : undefined,
+      match[2] ? parseInt(match[2], 10) : undefined,
     ];
   }, [price, tab]);
 
@@ -79,7 +87,8 @@ export default function SearchPage() {
   const productSort = tab === 'products' ? validSort : undefined;
   const businessSort = tab === 'businesses' ? validSort : undefined;
 
-  // Queries
+  // Queries — idle screen (recent searches) makes no requests
+  const isSearching = !!(q || category || availableToday || validSort || searchPrice);
   const productSearch = useInfiniteProductSearch({
     q: q || undefined,
     category: category || undefined,
@@ -88,7 +97,7 @@ export default function SearchPage() {
     ...(minPrice !== undefined ? { minPrice } : {}),
     ...(maxPrice !== undefined ? { maxPrice } : {}),
     limit: 20
-  });
+  }, { enabled: isSearching });
 
   const businessSearch = useInfiniteBusinessSearch({
     q: q || undefined,
@@ -96,22 +105,20 @@ export default function SearchPage() {
     availableToday,
     ...(businessSort ? { sort: businessSort } : {}),
     limit: 20
-  });
+  }, { enabled: isSearching });
 
   const query = tab === 'products' ? productSearch : businessSearch;
-  const isSearching = !!(q || category || availableToday || validSort || searchPrice);
 
-  // Save to recent searches when query resolves and q.length >= 2
-  const savedQRef = useRef(new Set());
-  useEffect(() => {
-    if (q.length >= 2 && query.isSuccess && !savedQRef.current.has(q)) {
-      savedQRef.current.add(q);
-      const recent = readJSON(STORAGE_KEY, []);
-      const filtered = recent.filter(s => s.toLowerCase() !== q.toLowerCase());
-      filtered.unshift(q);
-      writeJSON(STORAGE_KEY, filtered.slice(0, 8));
-    }
-  }, [q, query.isSuccess]);
+  // Remember a search only when the user commits to it (Enter or opening a result),
+  // so typing "c", "ca", "cak" doesn't fill the list with prefixes.
+  function saveRecent(text) {
+    const term = text.trim();
+    if (term.length < 2) return;
+    const recent = readJSON(STORAGE_KEY, []);
+    const filtered = recent.filter((s) => s.toLowerCase() !== term.toLowerCase());
+    filtered.unshift(term);
+    writeJSON(STORAGE_KEY, filtered.slice(0, 8));
+  }
 
   function handleTabChange(newTab) {
     if (newTab === tab) return;
@@ -154,6 +161,7 @@ export default function SearchPage() {
 
   function handleSearchInputSelect(selectedQ) {
     setLocalQ(selectedQ);
+    setPushedQ(selectedQ);
     const next = new URLSearchParams(searchParams);
     next.set('q', selectedQ);
     setSearchParams(next, { replace: true });
@@ -178,8 +186,9 @@ export default function SearchPage() {
   }
 
   return (
-    <main className="flex flex-col min-h-screen pb-safe">
+    <main className="flex flex-col min-h-screen pb-4">
       <header className="sticky top-0 z-30 flex flex-col bg-surface shadow-sm px-screen pt-4 pb-2">
+        <h1 className="sr-only">Search</h1>
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <IconButton
@@ -200,10 +209,13 @@ export default function SearchPage() {
               <input
                 type="search"
                 autoFocus
-                placeholder="Search cakes, crochet, candles?"
+                enterKeyHint="search"
+                aria-label="Search products and businesses"
+                placeholder="Search cakes, crochet, candles…"
                 value={localQ}
                 onChange={e => setLocalQ(e.target.value)}
-                className="w-full min-h-12 rounded-btn border border-border bg-surface pl-10 pr-10 font-body text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-safe:transition-shadow motion-safe:duration-150"
+                onKeyDown={(e) => { if (e.key === 'Enter') saveRecent(localQ); }}
+                className="w-full min-h-12 [&::-webkit-search-cancel-button]:hidden rounded-btn border border-border bg-surface pl-10 pr-10 font-body text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-safe:transition-shadow motion-safe:duration-150"
               />
               {localQ && (
                 <button
@@ -268,7 +280,10 @@ export default function SearchPage() {
             />
           </div>
         ) : (
-          <div className="flex flex-col gap-6 px-screen py-6">
+          <div
+            className="flex flex-col gap-6 px-screen py-6"
+            onClickCapture={(e) => { if (e.target instanceof Element && e.target.closest('a')) saveRecent(q); }}
+          >
             <div className="flex flex-col gap-4">
               {items.map(item => (
                 tab === 'products' ? (
@@ -281,7 +296,7 @@ export default function SearchPage() {
 
             {hasMore && (
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => query.fetchNextPage()}
                 disabled={isFetchingNext}
                 className="w-full"

@@ -244,7 +244,7 @@ Filtering by a parent slug includes its children.
 /**
  * @typedef {Object} Notification
  * @property {string} id
- * @property {'enquiry_new'|'enquiry_reply'|'business_approved'|'business_rejected'|'business_unpublished'|'review_new'|'digest_new_businesses'} type
+ * @property {'enquiry_new'|'enquiry_reply'|'business_approved'|'business_rejected'|'business_unpublished'|'review_new'|'digest_new_businesses' | 'system'} type
  * @property {string} title  @property {string} body  @property {string|null} link   // in-app route
  * @property {string} createdAt  @property {string|null} readAt
  */
@@ -345,6 +345,8 @@ export const qk = {
   notifications: ['notifications'], unread: ['unread'], myStats: ['myStats'],
 };
 ```
+
+Note (v1.2.1): the two infinite-search hooks append `'infinite'` to the key (`['businesses', params, 'infinite']`) so their `{ pages, pageParams }` cache entry can never collide with a one-shot search that has the same params.
 
 ## 9. Formatting helpers (`src/lib/format.js`)
 

@@ -1,5 +1,6 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import BottomNav from './BottomNav';
+import { isBottomNavHidden } from './navVisibility';
 
 /**
  * AppShell — centered mobile column layout.
@@ -9,34 +10,22 @@ import BottomNav from './BottomNav';
  *
  * Provides:
  * - Safe-area padding via env(safe-area-inset-*)
- * - Bottom padding so content is not hidden under BottomNav (~68px)
- * - BottomNav (conditionally shown based on route, handled inside BottomNav)
+ * - Bottom padding so content is not hidden under BottomNav (~76px) — only on routes that show it
+ * - BottomNav (conditionally shown based on route)
  */
 export default function AppShell() {
+  const { pathname } = useLocation();
+  const navVisible = !isBottomNavHidden(pathname);
+
   return (
     <>
       {/* Outer full-viewport layer — cream bg on desktop */}
-      <div
-        style={{
-          minHeight: '100svh',
-          backgroundColor: 'var(--color-bg)',
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
+      <div className="flex min-h-svh justify-center bg-bg">
         {/* Inner 480px column — white card on desktop */}
         <div
-          style={{
-            width: '100%',
-            maxWidth: '480px',
-            backgroundColor: 'var(--color-surface)',
-            minHeight: '100svh',
-            position: 'relative',
-            paddingBottom: '76px', /* room for BottomNav */
-            paddingTop: 'env(safe-area-inset-top)',
-            paddingLeft: 'env(safe-area-inset-left)',
-            paddingRight: 'env(safe-area-inset-right)',
-          }}
+          className={`relative min-h-svh w-full max-w-[480px] bg-surface pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] ${
+            navVisible ? 'pb-[76px]' : ''
+          }`}
         >
           <Outlet />
         </div>

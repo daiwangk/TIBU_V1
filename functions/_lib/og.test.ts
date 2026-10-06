@@ -27,11 +27,14 @@ describe('id and slug validation', () => {
   it('accepts kebab-case slugs of 2–80 characters for businesses', () => {
     expect(SLUG_RE.test('sweet-crumbs-4f2a')).toBe(true);
     expect(SLUG_RE.test('whisk')).toBe(true);
-    expect(SLUG_RE.test('a')).toBe(false);
+    // everything the database accepts, including generated slugs from long or odd names
+    expect(SLUG_RE.test('a')).toBe(true);
+    expect(SLUG_RE.test('-ab12')).toBe(true);
+    expect(SLUG_RE.test('sweet--crumbs')).toBe(true);
+    expect(SLUG_RE.test(`${'x'.repeat(80)}-ab12`)).toBe(true);
     expect(SLUG_RE.test('Sweet-Crumbs')).toBe(false);
-    expect(SLUG_RE.test('sweet--crumbs')).toBe(false);
-    expect(SLUG_RE.test('-sweet')).toBe(false);
-    expect(SLUG_RE.test('x'.repeat(81))).toBe(false);
+    expect(SLUG_RE.test('')).toBe(false);
+    expect(SLUG_RE.test('x'.repeat(101))).toBe(false);
     expect(SLUG_RE.test('a&select=*')).toBe(false);
     expect(SLUG_RE.test('cocoa corner')).toBe(false);
   });

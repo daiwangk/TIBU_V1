@@ -51,6 +51,7 @@ export default function Dialog({ open, onClose, title, children, className = '' 
   return (
     <dialog
       ref={dialogRef}
+      aria-label={title}
       onClick={handleDialogClick}
       onCancel={handleCancel}
       className={`

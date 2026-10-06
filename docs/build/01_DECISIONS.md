@@ -1,3 +1,5 @@
+> **SUPERSEDED (6 Oct 2026):** this is the original kit copy. The live, maintained version is `docs/DECISIONS.md` (decisions D32–D38 and contract v1.2 live there). Do not follow this file.
+
 # 01 · Decisions (copy to the repo as docs/DECISIONS.md)
 
 Locked unless both of you agree to change one; record the change here in the same PR. **[CLIENT]** = confirm with Laiba in writing (messages in `08_CLIENT_COMMS.md` §2).

@@ -29,7 +29,7 @@ This repo delivers Phase 1 (MVP) as scoped in `docs/Tibu_SoW_Phase1_Rev2.md` (Re
 7. Server data lives in TanStack Query (query keys from `src/queries/keys.js`, params inside the key). Client state lives in zustand stores in `src/stores/`. Don't create React contexts for server data.
 
 ## 4. Legacy code — the strangler rule
-- Legacy = the `.jsx` files directly in `src/`, everything in `src/legacy/`, `src/hooks/useAsync.js`, `src/hooks/useSetPage.js`, `src/contexts/`, the old `src/services/*Service.js` files, `src/services/mock/normalize.js`, and `LegacyPage` in `src/App.jsx`.
+- Legacy = the `.jsx` files directly in `src/`, everything in `src/legacy/`, `src/hooks/useAsync.js`, `src/contexts/`, the old `src/services/*Service.js` files, `src/services/mock/normalize.js`, and `LegacyPage` in `src/App.jsx`.
 - Do not refactor, restyle, lint-fix or extend legacy files. To replace a screen: build it new under `src/pages/`, point the route at it, then delete the legacy file(s) in the same task and remove them from `scripts/legacy-allowlist.json`.
 - The only exception is a legacy fix that the task explicitly asks for.
 

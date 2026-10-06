@@ -59,7 +59,7 @@ export default function CategoryFilters({
   const sorts = tab === 'products' ? PRODUCT_SORTS : BUSINESS_SORTS;
 
   return (
-    <div className="flex flex-col gap-0 border-b border-border sticky top-[52px] z-10 bg-bg">
+    <div className="flex flex-col gap-0 border-b border-border sticky top-14 z-10 bg-bg">
       {/* Tab toggle */}
       <div className="flex gap-2 px-screen py-2" role="tablist" aria-label="View products or businesses">
         <Chip

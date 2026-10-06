@@ -44,7 +44,8 @@ const codeFiles = srcFiles.filter((f) => /\.(jsx?|mjs|cjs|tsx?)$/.test(f));
 // 1. blanket eslint-disable
 for (const f of codeFiles) {
   const head = fs.readFileSync(f, 'utf8').slice(0, 300);
-  if (/^\s*\/\*\s*eslint-disable\s*\*\//.test(head) && !allowlist.includes(rel(f))) {
+  // Any file-level disable (blanket or with rules) — only the line-scoped -next-line / -line forms are allowed.
+  if (/^\s*\/\*\s*eslint-disable(?!-)/.test(head) && !allowlist.includes(rel(f))) {
     errors.push(`[blanket-eslint-disable] ${rel(f)} — remove the file-level disable and fix the errors (or disable one rule on one line).`);
   }
 }
@@ -81,19 +82,49 @@ for (const envFile of ['.env', '.env.local', '.env.example', '.env.production'])
 }
 
 // 4 + 5. new-structure rules
-const NEW_DIRS = ['src/pages/', 'src/components/', 'src/app/'];
+const NEW_DIRS = ['src/pages/', 'src/components/', 'src/app/', 'src/layouts/'];
+// Only src/services/ may know about adapters or the Supabase client; everything else goes through src/queries -> services/index.js.
+const ADAPTER_FREE_DIRS = [...NEW_DIRS, 'src/queries/', 'src/stores/', 'src/lib/'];
+const MAX_COMPONENT_LINES = 250;
 for (const f of codeFiles) {
   const r = rel(f);
-  if (!NEW_DIRS.some((d) => r.startsWith(d))) continue;
-  const lines = fs.readFileSync(f, 'utf8').split('\n');
+  const adapterFree = ADAPTER_FREE_DIRS.some((d) => r.startsWith(d)) && !/\.test\.[jt]sx?$/.test(r);
+  const isNew = NEW_DIRS.some((d) => r.startsWith(d));
+  if (!adapterFree && !isNew) continue;
+  const text = fs.readFileSync(f, 'utf8');
+  const lines = text.split('\n');
   lines.forEach((line, i) => {
-    if (/from\s+['"][^'"]*services\/(mock|supabase)/.test(line)) {
-      errors.push(`[adapter-import] ${r}:${i + 1} imports a data adapter directly. Use src/queries/* (or src/services/index.js).`);
+    if (adapterFree && (/(?:from\s+|import\s*\(\s*|import\s+)['"][^'"]*services\/(mock|supabase)/.test(line)
+        || /['"]@supabase\/supabase-js['"]/.test(line))) {
+      errors.push(`[adapter-import] ${r}:${i + 1} imports a data adapter or the Supabase client directly. Use src/queries/* (or src/services/index.js).`);
     }
-    if (/style=\{\{/.test(line) && !/allow-inline-style/.test(line)) {
+    if (isNew && /style=\{\{/.test(line) && !/allow-inline-style/.test(line)) {
       errors.push(`[inline-style] ${r}:${i + 1} uses style={{}} in new code. Use Tailwind classes with the theme.css tokens.`);
     }
   });
+  // AGENTS.md §5: components stay under 250 lines. A warning, not a failure, until the existing offenders are split.
+  if (isNew && /\.jsx$/.test(r) && !r.startsWith('src/pages/dev/') && lines.length > MAX_COMPONENT_LINES) {
+    warnings.push(`[size] ${r} has ${lines.length} lines (limit ${MAX_COMPONENT_LINES}) — split it.`);
+  }
+}
+
+// 6. a privileged key pasted into a VITE_* variable by VALUE (names are checked above; CI sets these at build time)
+function looksPrivileged(value) {
+  const key = String(value ?? '').trim();
+  if (key.startsWith(['sb', 'secret', ''].join('_'))) return true;
+  const payload = key.split('.')[1];
+  if (!payload) return false;
+  try {
+    const json = JSON.parse(Buffer.from(payload.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
+    return json?.role === ['service', 'role'].join('_');
+  } catch {
+    return false;
+  }
+}
+for (const [name, value] of Object.entries(process.env)) {
+  if (name.startsWith('VITE_') && looksPrivileged(value)) {
+    errors.push(`[secret] ${name} holds a privileged Supabase key. Vite would ship it to every browser. Use the public anon key and rotate this one.`);
+  }
 }
 
 for (const w of warnings) console.warn('WARN ' + w);

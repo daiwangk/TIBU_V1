@@ -80,7 +80,7 @@ export default function SearchFiltersSheet({ open, onClose, tab, filters, onChan
   }
 
   return (
-    <Sheet open={open} onClose={onClose}>
+    <Sheet open={open} onClose={onClose} label="Filters">
       <div className="flex h-full flex-col bg-surface sm:mx-auto sm:max-w-[480px]">
         <div className="flex items-center justify-between border-b border-border px-screen py-4">
           <h2 className="font-heading text-lg font-bold text-ink">Filters</h2>
@@ -131,7 +131,8 @@ export default function SearchFiltersSheet({ open, onClose, tab, filters, onChan
                   value={localSort}
                   onChange={e => setLocalSort(e.target.value)}
                 >
-                  <option value="">Newest</option>
+                  <option value="">Recommended</option>
+                  <option value="newest">Newest</option>
                   {origin ? (
                     <option value="distance">Nearest</option>
                   ) : (

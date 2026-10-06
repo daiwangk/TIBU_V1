@@ -29,8 +29,8 @@ export interface OgTags {
 }
 
 export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-/** Kebab-case business slug, 2–80 chars (CONTRACT §12). */
-export const SLUG_RE = /^(?=.{2,80}$)[a-z0-9]+(?:-[a-z0-9]+)*$/;
+/** Same shape the database accepts (`^[a-z0-9-]+$`, CONTRACT §12); generated slugs can be ~85 chars. Safe to put in a PostgREST filter. */
+export const SLUG_RE = /^[a-z0-9-]{1,100}$/;
 
 const DESCRIPTION_MAX = 160;
 const SITE_NAME = 'Tibu';
@@ -139,9 +139,7 @@ export async function fetchFirstRow<T>(env: OgEnv, path: string): Promise<T | nu
   const response = await fetch(`${env.SUPABASE_URL.replace(/\/+$/, '')}/rest/v1/${path}`, {
     headers: { apikey: env.SUPABASE_ANON_KEY, Authorization: `Bearer ${env.SUPABASE_ANON_KEY}` },
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    // Workers-only hint; ignored elsewhere.
-    cf: { cacheTtl: 300, cacheEverything: true },
-  } as RequestInit);
+  });
   if (!response.ok) return null;
   const rows = (await response.json()) as T[];
   return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
@@ -167,6 +165,9 @@ export function withOgTags(shell: Response, og: OgTags): Response {
     .transform(shell);
 
   const out = new Response(rewritten.body, rewritten);
+  // The body is per item now: drop the shell's validators and set our own (single 5-minute cache, no stacking).
+  out.headers.delete('ETag');
+  out.headers.delete('Last-Modified');
   out.headers.set('Cache-Control', CACHE_CONTROL);
   return out;
 }
