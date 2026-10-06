@@ -16,6 +16,14 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-10-06 · A2.4 · dk · Claude Code (Sonnet 5.5)
+- Done: Global error toasts. `QueryCache` and `MutationCache` `onError` in `src/app/providers.jsx` toast via the new `src/lib/errors.js`: `userMessage(error)` (fixed text per CONTRACT §11; `validation`/`conflict` pass their user-safe message through; everything else “Something went wrong”) and `shouldToast(error, meta)`. Toasts for `network`, `rate_limited`, `forbidden`, `business_not_available`, `unknown` and non-AppErrors; none for `auth_required` (login gate) or `not_found`/`validation`/`conflict`/`config`/`unavailable_in_mock`. Toast id = message, so repeated failures don't stack. All catalog hooks set `meta: { silent: true }` because every view that uses them renders `ErrorState`. `ErrorState` takes an optional `error` and shows `message ?? userMessage(error)`; Product, Business and Reviews pass it.
+- Files: new `src/lib/errors.js`, `src/lib/errors.test.js`; modified `src/app/providers.jsx`, `src/queries/catalog.js`, `src/components/ui/ErrorState.jsx`, `src/pages/product/ProductPage.jsx`, `src/pages/business/BusinessPage.jsx`, `src/pages/business/ReviewsTab.jsx`, `docs/PROGRESS.md`.
+- How verified: `npm run check` green — guards OK, ESLint 0 errors / 1 pre-existing legacy warning, 14 test files / 96 tests passed (22 new for `userMessage` / `shouldToast`), build OK. Not exercised in a browser; toast wiring is straight TanStack `onError`.
+- Not done / left out (why): Category, Home and Search keep their own “We couldn't load …” messages (not switched to `userMessage`). No retry-after text for `rate_limited` (contract wording used: “Too many requests — try again in a bit”, not the “in a minute” wording in the task prompt). No mutations exist yet; future mutations that handle their own errors should set `meta: { silent: true }`.
+- Next step (exact): Open the PR for `feat/a2-4-errors`; then B2.6 (location chip, area picker, first-visit prompt).
+- Gotchas for the next person: A new query whose view renders its own error UI must set `meta: { silent: true }` or users get both. This entry and the B2.4 entry both insert at the top of the Log — expect a trivial conflict on whichever PR merges second.
+
 ### 2026-10-06 · A2.2 · dk · Cursor Grok 4.6
 - Done: Gap-close on the persisted location store. `toOrigin` / `selectSearchOrigin` now cache `{ lat, lng }` so object identity only changes when coordinates change (`useSearchOrigin` is a zustand selector, no `useMemo`). Tests stub `localStorage` with `vi.stubGlobal`, assert persist includes `asked`, and assert `clear()` resets coords/label/source while keeping `asked`.
 - Files: `src/stores/location.js`, `src/stores/location.test.js`, `docs/PROGRESS.md`
