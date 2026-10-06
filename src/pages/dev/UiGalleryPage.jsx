@@ -34,6 +34,7 @@ import BusinessCard from '../../components/BusinessCard';
 import SectionHeader from '../../components/SectionHeader';
 import HorizontalScroller from '../../components/HorizontalScroller';
 import CategoryChips from '../../components/CategoryChips';
+import FulfilmentInfo from '../../components/FulfilmentInfo';
 
 // ─── Fake data (no mock adapter imports) ────────────────────────────────────
 
@@ -359,6 +360,15 @@ export default function UiGalleryPage() {
             <Distance distanceM={2400} />
             <Distance distanceM={null} />
           </div>
+        </div>
+      </Section>
+
+      {/* ── FulfilmentInfo ── */}
+      <Section id="fulfilment-info" title="FulfilmentInfo" description="Delivery + time · pick-up only · neither">
+        <div className="flex flex-col gap-3 px-screen">
+          <FulfilmentInfo deliveryAvailable pickupAvailable deliveryTime="Same day" />
+          <FulfilmentInfo deliveryAvailable={false} pickupAvailable deliveryTime={null} />
+          <FulfilmentInfo deliveryAvailable={false} pickupAvailable={false} deliveryTime={null} />
         </div>
       </Section>
 
