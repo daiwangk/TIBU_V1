@@ -2,6 +2,7 @@ import { PackageX, Share2 } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ContactButtons from '../../components/ContactButtons';
+import FulfilmentInfo from '../../components/FulfilmentInfo';
 import Distance from '../../components/Distance';
 import ImageGallery from '../../components/ImageGallery';
 import Price from '../../components/Price';
@@ -108,7 +109,6 @@ export default function ProductPage() {
               <div className="flex items-center gap-2 text-xs text-muted mt-0.5">
                 <span className="truncate">{business.locality}</span>
                 <Distance distanceM={business.distanceM} />
-                <Rating rating={business.rating} reviewCount={business.reviewCount} />
               </div>
             </div>
           </Link>
@@ -125,6 +125,26 @@ export default function ProductPage() {
               <Badge tone="success">Available today</Badge>
             )}
           </div>
+          {business && (
+            <Link
+              to={`/b/${business.slug}?tab=reviews`}
+              className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label={`${business.name} reviews`}
+            >
+              <Rating rating={business.rating} />
+              <span className="font-body text-sm text-muted">
+                {business.reviewCount > 0
+                  ? `(${business.reviewCount} ${business.reviewCount === 1 ? 'review' : 'reviews'})`
+                  : '(no reviews yet)'}
+              </span>
+            </Link>
+          )}
+          <FulfilmentInfo
+            className="mt-1"
+            deliveryAvailable={product.deliveryAvailable}
+            pickupAvailable={product.pickupAvailable}
+            deliveryTime={product.deliveryTime}
+          />
         </div>
 
         {/* Product Details List (key-values) */}

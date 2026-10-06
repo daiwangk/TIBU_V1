@@ -1,9 +1,10 @@
 import { useState, useRef, useLayoutEffect } from 'react';
-import { MapPin, Truck, Store, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import Avatar from '../../components/ui/Avatar';
 import Badge from '../../components/ui/Badge';
 import ImagePlaceholder from '../../components/ui/ImagePlaceholder';
 import Distance from '../../components/Distance';
+import FulfilmentInfo from '../../components/FulfilmentInfo';
 import Rating from '../../components/Rating';
 
 /**
@@ -51,9 +52,14 @@ export default function BusinessHeader({ business }) {
           <h1 className="font-heading font-bold text-ink text-2xl leading-tight">
             {business.name}
           </h1>
-          <p className="font-body text-sm font-semibold text-primary mt-0.5">
-            {business.categoryName}
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <p className="font-body text-sm font-semibold text-primary">
+              {business.categoryName}
+            </p>
+            {business.establishedYear != null && (
+              <Badge tone="neutral">Est. {business.establishedYear}</Badge>
+            )}
+          </div>
 
           <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2 text-sm">
             <span className="flex items-center gap-1 text-muted">
@@ -70,20 +76,12 @@ export default function BusinessHeader({ business }) {
             <Rating rating={business.rating} reviewCount={business.reviewCount} />
           </div>
 
-          <div className="flex gap-2 mt-3">
-            {business.deliveryAvailable && (
-              <Badge tone="success" className="gap-1 px-2.5 py-1">
-                <Truck size={12} aria-hidden="true" />
-                Delivery
-              </Badge>
-            )}
-            {business.pickupAvailable && (
-              <Badge tone="neutral" className="gap-1 px-2.5 py-1">
-                <Store size={12} aria-hidden="true" />
-                Pickup
-              </Badge>
-            )}
-          </div>
+          <FulfilmentInfo
+            className="mt-3"
+            deliveryAvailable={business.deliveryAvailable}
+            pickupAvailable={business.pickupAvailable}
+            deliveryTime={business.deliveryTime}
+          />
 
           {business.description && (
             <div className="mt-4 space-y-1">

@@ -234,6 +234,19 @@ for (const [id, values] of Object.entries(REV2_BUSINESSES)) {
   const biz = businessMap.get(id);
   if (biz) Object.assign(biz, values);
 }
+// D36 detail rows (candles template). Other products keep an empty list so the Details section stays hidden.
+const REV2_PRODUCT_DETAILS = {
+  'aura-candles-vanilla-soy-candle': [
+    { label: 'Burn time', value: '40 hours' },
+    { label: 'Wax', value: 'Soy' },
+    { label: 'Fragrance', value: 'Vanilla' },
+  ],
+};
+
+for (const [id, details] of Object.entries(REV2_PRODUCT_DETAILS)) {
+  const product = productMap.get(id);
+  if (product) product.details = details;
+}
 for (const [id, override] of Object.entries(REV2_PRODUCT_OVERRIDES)) {
   const product = productMap.get(id);
   if (product) product.deliveryOverride = override;

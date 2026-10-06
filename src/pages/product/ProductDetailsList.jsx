@@ -1,6 +1,6 @@
 /**
- * Key-value details grid for a product.
- * Hidden if details array is empty.
+ * Label / value rows for a product, as a two-column description list.
+ * Hidden if the details array is empty.
  *
  * @param {{
  *   details?: Array<{ label: string, value: string }>,
@@ -15,17 +15,17 @@ export default function ProductDetailsList({ details = [], className = '' }) {
       <h2 className="text-xs font-semibold uppercase tracking-wider text-muted mb-2">
         Details
       </h2>
-      <div className="grid grid-cols-2 gap-2">
+      <dl className="rounded-card border border-border bg-surface">
         {details.map((item, idx) => (
           <div
-            key={item.label || idx}
-            className="p-3 rounded-card bg-surface border border-border flex flex-col justify-center"
+            key={`${item.label}-${idx}`}
+            className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-3 border-b border-border px-3 py-2.5 last:border-b-0"
           >
-            <span className="text-xs text-muted font-medium truncate">{item.label}</span>
-            <span className="text-sm font-semibold text-ink mt-0.5 truncate">{item.value}</span>
+            <dt className="font-body text-sm text-muted break-words">{item.label}</dt>
+            <dd className="font-body text-sm font-semibold text-ink break-words">{item.value}</dd>
           </div>
         ))}
-      </div>
+      </dl>
     </section>
   );
 }

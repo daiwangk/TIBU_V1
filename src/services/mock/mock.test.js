@@ -127,6 +127,17 @@ describe('mock adapter', () => {
       expect(biz.deliveryTime).toBe('1–2 days');
     });
 
+    it('product details are label/value rows; most products have none', async () => {
+      const withDetails = await mock.getProductById('aura-candles-vanilla-soy-candle');
+      expect(withDetails.details).toEqual([
+        { label: 'Burn time', value: '40 hours' },
+        { label: 'Wax', value: 'Soy' },
+        { label: 'Fragrance', value: 'Vanilla' },
+      ]);
+      const without = await mock.getProductById('lavish-glow-lavender-jar-candle');
+      expect(without.details).toEqual([]);
+    });
+
     it('push subscription functions need the real backend', async () => {
       await expect(
         mock.savePushSubscription({ endpoint: 'https://x', p256dh: 'a', auth: 'b' }),
