@@ -5,8 +5,8 @@ import { useProductSearch } from '../../queries/catalog';
 import HomeSection from './HomeSection';
 import ProductRowSkeleton from './ProductRowSkeleton';
 
-// TODO(A2.2): add `near` from useSearchOrigin() once src/stores/location.js exists.
-// radiusKm: null keeps this row city-wide while still returning distances (DECISIONS D30).
+// radiusKm: null keeps this row city-wide while still returning distances (DECISIONS D30);
+// `near` defaults to the stored origin, so distances appear once a location is set.
 const PARAMS = { sort: 'newest', limit: 8, radiusKm: null };
 
 /** "New products" row. */

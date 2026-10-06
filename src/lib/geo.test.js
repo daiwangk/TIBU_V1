@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AppError } from '../services/errors.js';
-import { getBrowserLocation, haversineMeters, MUMBAI_AREAS } from './geo.js';
+import { filterAreas, getBrowserLocation, haversineMeters, MUMBAI_AREAS } from './geo.js';
 
 describe('geo helpers', () => {
   it('calculates the Bandra West to Andheri West distance', () => {
@@ -61,5 +61,28 @@ describe('geo helpers', () => {
       message: 'Location request timed out.',
     });
     vi.unstubAllGlobals();
+  });
+
+  describe('filterAreas', () => {
+    it('returns every area for an empty or blank query', () => {
+      expect(filterAreas(MUMBAI_AREAS, '')).toHaveLength(MUMBAI_AREAS.length);
+      expect(filterAreas(MUMBAI_AREAS, '   ')).toHaveLength(MUMBAI_AREAS.length);
+    });
+
+    it('matches case-insensitively on any part of the name', () => {
+      expect(filterAreas(MUMBAI_AREAS, 'WEST').length).toBeGreaterThan(1);
+      expect(filterAreas(MUMBAI_AREAS, 'andheri').map((a) => a.name)).toEqual(['Andheri West']);
+      expect(filterAreas(MUMBAI_AREAS, ' juhu ').map((a) => a.name)).toEqual(['Juhu']);
+    });
+
+    it('returns an empty list when nothing matches', () => {
+      expect(filterAreas(MUMBAI_AREAS, 'zzz')).toEqual([]);
+    });
+
+    it('does not mutate or return the frozen source list', () => {
+      const result = filterAreas(MUMBAI_AREAS, '');
+      expect(result).not.toBe(MUMBAI_AREAS);
+      expect(Object.isFrozen(result)).toBe(false);
+    });
   });
 });

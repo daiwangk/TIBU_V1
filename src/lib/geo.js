@@ -21,6 +21,18 @@ export const MUMBAI_AREAS = Object.freeze([
 ]);
 
 /**
+ * Case-insensitive "contains" filter for the area picker.
+ * @param {ReadonlyArray<{ name: string, lat: number, lng: number }>} areas
+ * @param {string} query
+ * @returns {Array<{ name: string, lat: number, lng: number }>}
+ */
+export function filterAreas(areas, query) {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [...areas];
+  return areas.filter((area) => area.name.toLowerCase().includes(needle));
+}
+
+/**
  * @param {{ lat: number, lng: number }} a
  * @param {{ lat: number, lng: number }} b
  * @returns {number}

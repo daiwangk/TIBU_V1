@@ -2,17 +2,19 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarCheck } from 'lucide-react';
 import ProductCard from '../../components/ProductCard';
 import { useProductSearch } from '../../queries/catalog';
+import { useSearchOrigin } from '../../stores/location';
 import HomeSection from './HomeSection';
 import ProductRowSkeleton from './ProductRowSkeleton';
 
-// TODO(A2.2): add `near` from useSearchOrigin() and use sort: near ? 'distance' : 'newest'.
 // radiusKm: null keeps this row city-wide while still returning distances (DECISIONS D30).
-const PARAMS = { availableToday: true, sort: 'newest', limit: 8, radiusKm: null };
+// `near` defaults to the stored origin; nearest first once a location is set.
+const PARAMS = { availableToday: true, limit: 8, radiusKm: null };
 
 /** "Available today" row. */
 export default function AvailableTodaySection() {
   const navigate = useNavigate();
-  const query = useProductSearch(PARAMS);
+  const origin = useSearchOrigin();
+  const query = useProductSearch({ ...PARAMS, sort: origin ? 'distance' : 'newest' });
 
   return (
     <HomeSection

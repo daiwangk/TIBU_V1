@@ -9,6 +9,7 @@ import ErrorState from '../../components/ui/ErrorState';
 import ProductCard from '../../components/ProductCard';
 import BusinessCard from '../../components/BusinessCard';
 import SearchResultsSkeleton from './SearchResultsSkeleton';
+import LocationChip from '../../components/LocationChip';
 import SearchFiltersSheet from './SearchFiltersSheet';
 import RecentSearches from './RecentSearches';
 import { useInfiniteProductSearch, useInfiniteBusinessSearch } from '../../queries/catalog';
@@ -229,6 +230,10 @@ export default function SearchPage() {
                 </span>
               )}
             </button>
+          </div>
+
+          <div className="-mt-1 flex">
+            <LocationChip className="-ml-2" />
           </div>
 
           {isSearching && (

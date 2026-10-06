@@ -1,9 +1,11 @@
 import HomeHeader from './HomeHeader';
 import HomeHero from './HomeHero';
+import LocationPrompt from './LocationPrompt';
 import CategoryShortcuts from '../../components/CategoryShortcuts';
 import NewBusinessesSection from './NewBusinessesSection';
 import NewProductsSection from './NewProductsSection';
 import AvailableTodaySection from './AvailableTodaySection';
+import NearYouSection from './NearYouSection';
 
 /**
  * Home `/` — brand header, hero search, category shortcuts and discovery rows.
@@ -14,12 +16,12 @@ export default function HomePage() {
       <HomeHeader />
       <main className="flex flex-col gap-6 pb-6 w-full min-w-0">
         <HomeHero />
+        <LocationPrompt />
         <CategoryShortcuts />
         <NewBusinessesSection />
         <NewProductsSection />
         <AvailableTodaySection />
-        {/* TODO(A2.2): add NearYouSection — useBusinessSearch({ sort: 'distance', limit: 8, near })
-            (default 15 km radius), rendered only when useSearchOrigin() returns a location. */}
+        <NearYouSection />
       </main>
     </div>
   );
