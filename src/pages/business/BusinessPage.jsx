@@ -24,7 +24,7 @@ export default function BusinessPage() {
   const validTabs = ['products', 'videos', 'reviews'];
   const activeTab = validTabs.includes(rawTab) ? rawTab : 'products';
 
-  const { data: business, isLoading, isError, refetch } = useBusiness(slug, null);
+  const { data: business, isLoading, isError, error, refetch } = useBusiness(slug, null);
 
   if (isLoading) {
     return <BusinessSkeleton />;
@@ -34,7 +34,7 @@ export default function BusinessPage() {
     return (
       <div className="min-h-screen bg-bg">
         <PageHeader title="Business" fallbackTo="/" />
-        <ErrorState onRetry={() => refetch()} />
+        <ErrorState error={error} onRetry={() => refetch()} />
       </div>
     );
   }

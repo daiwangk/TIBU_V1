@@ -24,7 +24,7 @@ import ProductSkeleton from './ProductSkeleton';
 export default function ProductPage() {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { data: product, isLoading, isError, refetch } = useProduct(productId);
+  const { data: product, isLoading, isError, error, refetch } = useProduct(productId);
 
   if (isLoading) {
     return <ProductSkeleton />;
@@ -34,7 +34,7 @@ export default function ProductPage() {
     return (
       <div className="min-h-screen bg-bg">
         <PageHeader title="Product" fallbackTo="/" />
-        <ErrorState onRetry={() => refetch()} />
+        <ErrorState error={error} onRetry={() => refetch()} />
       </div>
     );
   }

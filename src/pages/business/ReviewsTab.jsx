@@ -11,7 +11,7 @@ import Skeleton from '../../components/ui/Skeleton';
  * @param {{ business: import('../../services/contract').BusinessDetail }} props
  */
 export default function ReviewsTab({ business }) {
-  const { data: reviews, isLoading, isError, refetch } = useReviews(business.id);
+  const { data: reviews, isLoading, isError, error, refetch } = useReviews(business.id);
 
   function handleWriteReview() {
     toast('Reviews open with accounts');
@@ -65,7 +65,7 @@ export default function ReviewsTab({ business }) {
           </div>
         )}
 
-        {isError && <ErrorState onRetry={() => refetch()} />}
+        {isError && <ErrorState error={error} onRetry={() => refetch()} />}
 
         {!isLoading && !isError && reviews?.length === 0 && (
           <EmptyState

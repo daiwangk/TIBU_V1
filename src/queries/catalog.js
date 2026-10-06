@@ -13,6 +13,9 @@ import { useSearchOrigin } from '../stores/location.js';
 
 const PAGE_SIZE = 20;
 
+/** Every hook here backs a view that renders its own ErrorState, so the global error toast stays off. */
+const PAGE_QUERY_META = { silent: true };
+
 /**
  * @param {Record<string, unknown>} [params]
  * @returns {Record<string, unknown>}
@@ -25,6 +28,7 @@ function withoutOffset(params = {}) {
 /** All active categories. */
 export function useCategories() {
   return useQuery({
+    meta: PAGE_QUERY_META,
     queryKey: qk.categories,
     queryFn: () => listCategories(),
   });
@@ -38,6 +42,7 @@ export function useCategories() {
 export function useCategory(slug, options = {}) {
   return useQuery({
     ...options,
+    meta: PAGE_QUERY_META,
     queryKey: [...qk.categories, slug],
     queryFn: () => getCategory(slug),
     enabled: !!slug && (options.enabled ?? true),
@@ -57,6 +62,7 @@ export function useBusinessSearch(params = {}, options = {}) {
   }
   return useQuery({
     ...options,
+    meta: PAGE_QUERY_META,
     queryKey: qk.businesses(searchParams),
     queryFn: () => searchBusinesses(searchParams),
   });
@@ -75,6 +81,7 @@ export function useProductSearch(params = {}, options = {}) {
   }
   return useQuery({
     ...options,
+    meta: PAGE_QUERY_META,
     queryKey: qk.products(searchParams),
     queryFn: () => searchProducts(searchParams),
   });
@@ -92,6 +99,7 @@ export function useInfiniteBusinessSearch(params = {}) {
   }
   const stable = { ...withoutOffset(searchParams), limit: PAGE_SIZE };
   return useInfiniteQuery({
+    meta: PAGE_QUERY_META,
     queryKey: qk.businesses(stable),
     queryFn: ({ pageParam = 0 }) =>
       searchBusinesses({ ...stable, limit: PAGE_SIZE, offset: pageParam }),
@@ -113,6 +121,7 @@ export function useInfiniteProductSearch(params = {}) {
   }
   const stable = { ...withoutOffset(searchParams), limit: PAGE_SIZE };
   return useInfiniteQuery({
+    meta: PAGE_QUERY_META,
     queryKey: qk.products(stable),
     queryFn: ({ pageParam = 0 }) =>
       searchProducts({ ...stable, limit: PAGE_SIZE, offset: pageParam }),
@@ -133,6 +142,7 @@ export function useBusiness(slug, near, options = {}) {
   const effectiveNear = near === undefined ? origin : near;
   return useQuery({
     ...options,
+    meta: PAGE_QUERY_META,
     queryKey: qk.business(slug, effectiveNear),
     queryFn: () => getBusinessBySlug(slug, { near: effectiveNear }),
     enabled: !!slug && (options.enabled ?? true),
@@ -150,6 +160,7 @@ export function useProduct(id, near, options = {}) {
   const effectiveNear = near === undefined ? origin : near;
   return useQuery({
     ...options,
+    meta: PAGE_QUERY_META,
     queryKey: qk.product(id, effectiveNear),
     queryFn: () => getProductById(id, { near: effectiveNear }),
     enabled: !!id && (options.enabled ?? true),
@@ -165,6 +176,7 @@ export function useProduct(id, near, options = {}) {
 export function useReviews(businessId, page = {}, options = {}) {
   return useQuery({
     ...options,
+    meta: PAGE_QUERY_META,
     queryKey: qk.reviews(businessId, page),
     queryFn: () => listReviews(businessId, page),
     enabled: !!businessId && (options.enabled ?? true),
