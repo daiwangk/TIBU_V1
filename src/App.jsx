@@ -11,28 +11,24 @@ const UiGalleryPage = import.meta.env.DEV
 import AppShell from './layouts/AppShell';
 
 // Pages — alphabetical
-import AboutTibu from './AboutTibu';
+import AboutPage from './pages/static/AboutPage';
 import BusinessPage from './pages/business/BusinessPage';
-import BusinessViewAll from './BusinessViewAll';
 import CategoryPage from './pages/category/CategoryPage';
 import EditProfile from './EditProfile';
-import HelpFeedback from './HelpFeedback';
+import HelpPage from './pages/static/HelpPage';
 import HomePage from './pages/home/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
 import NotificationPreferences from './NotificationPreferences';
 import Notification from './legacy/pages/Notification';
-import PrivacySecurity from './PrivacySecurity';
+import PrivacyPage from './pages/static/PrivacyPage';
 import ProductPage from './pages/product/ProductPage';
-import ProductsViewAll from './ProductsViewAll';
 import Profile from './Profile';
-import Reel from './Reel';
-import ReelsViewAll from './ReelsViewAll';
 import Saved from './Saved';
 import SearchPage from './pages/search/SearchPage';
 import SellerDashboard from './SellerDashboard';
 import SellerProductDetail from './SellerProductDetail';
 import SellerRegister from './SellerRegister';
-import TermsConditions from './TermsConditions';
-import NotFound from './legacy/pages/NotFound';
+import TermsPage from './pages/static/TermsPage';
 
 // Contexts
 import { useSaved } from './contexts/SavedContext';
@@ -54,12 +50,9 @@ function LegacyPage({ Component, extraProps = {} }) {
   const state = location.state ?? {};
   const selectedProductRef = React.useRef(null);
   const selectedBusinessRef = React.useRef(null);
-  
-  // searchText needs to be held locally so Home/Search don't crash when calling toLowerCase()
-  const [searchText, setSearchText] = React.useState('');
 
   const { savedProducts, setSavedProducts, savedBusinesses, setSavedBusinesses, savedReels, setSavedReels } = useSaved();
-  const { profile, setProfile, filters, setFilters, profileStats } = useProfile();
+  const { profile, setProfile, profileStats } = useProfile();
 
   /** Shim: translate old page strings to navigate() calls */
   function setPage(pageKey, entityState) {
@@ -92,10 +85,6 @@ function LegacyPage({ Component, extraProps = {} }) {
       editprofile: '/profile/edit',
       notification: '/notifications',
       notificationPreferences: '/notifications/preferences',
-      productsviewall: '/viewall/products',
-      businessViewAll: '/viewall/businesses',
-      reel: '/reel/view',
-      reelsviewall: '/viewall/reels',
       desserts: '/category/desserts',
       crochet: '/category/crochet',
       resin: '/category/resin-art',
@@ -129,20 +118,6 @@ function LegacyPage({ Component, extraProps = {} }) {
 
   const legacyProps = {
     setPage,
-    // selected entities from location state (set by the calling page)
-    selectedProduct: state.selectedProduct ?? null,
-    selectedBusiness: state.selectedBusiness ?? null,
-    selectedReel: state.selectedReel ?? null,
-    currentReels: state.currentReels ?? [],
-    // view-all payloads
-    viewAllTitle: state.viewAllTitle ?? '',
-    viewAllProducts: state.viewAllProducts ?? [],
-    viewAllBusinesses: state.viewAllBusinesses ?? [],
-    viewAllBusinessTitle: state.viewAllBusinessTitle ?? '',
-    viewAllReels: state.viewAllReels ?? [],
-    viewAllReelsTitle: state.viewAllReelsTitle ?? '',
-    previousPage: state.previousPage ?? 'home',
-    availableTodayCategory: state.availableTodayCategory ?? 'All',
     // navigation state setters (forwarded as location state on next navigate)
     setSelectedProduct: (p) => {
       selectedProductRef.current = p;
@@ -152,20 +127,11 @@ function LegacyPage({ Component, extraProps = {} }) {
       selectedBusinessRef.current = b;
       navigate(location.pathname, { replace: true, state: { ...state, selectedBusiness: b } });
     },
+    // Saved.jsx still calls these until it is rebuilt (B3.5); the Reel page is gone.
     setSelectedReel: (r) => navigate(location.pathname, { replace: true, state: { ...state, selectedReel: r } }),
     setCurrentReels: (rs) => navigate(location.pathname, { replace: true, state: { ...state, currentReels: rs } }),
-    setViewAllTitle: (t) => navigate(location.pathname, { replace: true, state: { ...state, viewAllTitle: t } }),
-    setViewAllProducts: (ps) => navigate(location.pathname, { replace: true, state: { ...state, viewAllProducts: ps } }),
-    setViewAllBusinesses: (bs) => navigate(location.pathname, { replace: true, state: { ...state, viewAllBusinesses: bs } }),
-    setViewAllBusinessTitle: (t) => navigate(location.pathname, { replace: true, state: { ...state, viewAllBusinessTitle: t } }),
-    setViewAllReels: (rs) => navigate(location.pathname, { replace: true, state: { ...state, viewAllReels: rs } }),
-    setViewAllReelsTitle: (t) => navigate(location.pathname, { replace: true, state: { ...state, viewAllReelsTitle: t } }),
     setPreviousPage: (p) => navigate(location.pathname, { replace: true, state: { ...state, previousPage: p } }),
-    setAvailableTodayCategory: (c) => navigate(location.pathname, { replace: true, state: { ...state, availableTodayCategory: c } }),
     setSellerMode: () => {},   // dead prop per audit; keep stub to avoid crashes
-    sellerMode: false,
-    searchText,
-    setSearchText,
     // contexts
     savedProducts,
     setSavedProducts,
@@ -176,8 +142,6 @@ function LegacyPage({ Component, extraProps = {} }) {
     profile,
     setProfile,
     profileStats,
-    filters,
-    setFilters,
     ...extraProps,
   };
 
@@ -201,21 +165,14 @@ function AppRoutes() {
         <Route path="/profile/edit" element={L(EditProfile)} />
         <Route path="/notifications" element={L(Notification)} />
         <Route path="/notifications/preferences" element={L(NotificationPreferences)} />
-        <Route path="/privacy" element={L(PrivacySecurity)} />
-        <Route path="/help" element={L(HelpFeedback)} />
-        <Route path="/terms" element={L(TermsConditions)} />
-        <Route path="/about" element={L(AboutTibu)} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/help" element={<HelpPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/about" element={<AboutPage />} />
 
         {/* Entity detail — BottomNav hidden via prefix matching in BottomNav.jsx */}
         <Route path="/p/:productId" element={<ProductPage />} />
         <Route path="/b/:slug" element={<BusinessPage />} />
-        <Route path="/reel/:reelId" element={L(Reel)} />
-        <Route path="/reel/view" element={L(Reel)} />
-
-        {/* View-all — BottomNav hidden via prefix matching */}
-        <Route path="/viewall/products" element={L(ProductsViewAll)} />
-        <Route path="/viewall/businesses" element={L(BusinessViewAll)} />
-        <Route path="/viewall/reels" element={L(ReelsViewAll)} />
 
         {/* Category hub — single route replaces 11 legacy pages */}
         <Route path="/category/:slug" element={<CategoryPage />} />
@@ -244,7 +201,7 @@ function AppRoutes() {
         )}
 
         {/* 404 */}
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   );

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { readJSON, writeJSON } from '../../lib/storage';
 import { Clock } from 'lucide-react';
-import CategoryShortcuts from '../home/CategoryShortcuts';
+import CategoryShortcuts from '../../components/CategoryShortcuts';
 
 const STORAGE_KEY = 'tibu.recentSearches';
 

@@ -1,6 +1,6 @@
 import HomeHeader from './HomeHeader';
 import HomeHero from './HomeHero';
-import CategoryShortcuts from './CategoryShortcuts';
+import CategoryShortcuts from '../../components/CategoryShortcuts';
 import NewBusinessesSection from './NewBusinessesSection';
 import NewProductsSection from './NewProductsSection';
 import AvailableTodaySection from './AvailableTodaySection';

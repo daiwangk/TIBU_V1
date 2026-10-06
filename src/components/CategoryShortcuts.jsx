@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import HorizontalScroller from '../../components/HorizontalScroller';
-import ErrorState from '../../components/ui/ErrorState';
-import { useCategories } from '../../queries/catalog';
-import { getCategoryIcon } from '../../lib/categoryIcons';
+import HorizontalScroller from './HorizontalScroller';
+import ErrorState from './ui/ErrorState';
+import { useCategories } from '../queries/catalog';
+import { getCategoryIcon } from '../lib/categoryIcons';
 
 /** Pastel tile colours, cycled by position. */
 const TILE_BG = ['bg-lavender', 'bg-blush', 'bg-lime', 'bg-mint'];
