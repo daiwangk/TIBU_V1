@@ -97,7 +97,7 @@ export default function BusinessHeader({ business }) {
                 <button
                   type="button"
                   onClick={() => setIsClamped(!isClamped)}
-                  className="flex items-center gap-1 text-primary text-sm font-semibold hover:opacity-80 active:opacity-70 transition-opacity"
+                  className="flex min-h-11 items-center gap-1 rounded-btn text-primary text-sm font-semibold hover:opacity-80 active:opacity-70 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   {isClamped ? (
                     <>Read more <ChevronDown size={16} aria-hidden="true" /></>

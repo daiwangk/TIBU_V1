@@ -2,14 +2,15 @@
 
 Tick a box only when the PR is **merged** and its Verify list passed by hand. ◐ = partly done (note says what is left). Owners include the rebalancing from the deep dives (A takes R2, B2.4, B4.4 and B5.2). Est = AI-assisted hours; real time is about 1.5×. Commit the ticks with your normal PRs.
 
-Done before 2 Oct: B1.1 · B1.2 · B1.3 · B1.4 · B1.5 · B1.6 · A1.2 · A1.3 · A1.4 · A1.6
+Done before 2 Oct: B1.1 · B1.2 · B1.3 · B1.4 · B1.5 · B1.6 · A1.2 · A1.3 · A1.4
+A1.6 (Cloudflare Pages) is still open: the project was imported from another repo and must be recreated through Connect to Git on `daiwangk/TIBU_V1` (see PROGRESS).
 Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2.3 · B2.4 · B2.6 · R1-2 · R2 (merged by 6 Oct)
 
 ## Today — Fri 2 Oct (no code)
 - [ ] Repo made private (`10_REPO_REVIEW` F1)
 - [ ] Client message `11_SOW_REV2_CHANGES.md` §6.1 sent (decisions, M1/M2, advance payment, **domain**)
-- [ ] Update kit applied (`apply-update.sh`) and merged
-- [ ] PROGRESS "Now" updated (last green `5212f7e`)
+- [x] Update kit applied (`apply-update.sh`) and merged (PR #11)
+- [x] PROGRESS "Now" updated (kept current in docs/PROGRESS.md)
 
 ## Weekend 3–4 Oct — close Week 1 (`WEEK2_DEEP_DIVE.md` → Weekend)
 | ✓ | ID | Task | Who | Est | Needs |

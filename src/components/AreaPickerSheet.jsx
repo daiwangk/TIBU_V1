@@ -116,7 +116,7 @@ function AreaPickerContent({ onClose, notice = '' }) {
  */
 export default function AreaPickerSheet({ open, onClose, notice }) {
   return (
-    <Sheet open={open} onClose={onClose}>
+    <Sheet open={open} onClose={onClose} label="Choose your location">
       {open && <AreaPickerContent onClose={onClose} notice={notice} />}
     </Sheet>
   );

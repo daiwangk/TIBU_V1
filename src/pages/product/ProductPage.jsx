@@ -68,9 +68,13 @@ export default function ProductPage() {
           url: window.location.href,
         })
         .catch(() => {});
+    } else if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(window.location.href).then(
+        () => toast('Link copied to clipboard'),
+        () => toast("Couldn't copy the link"),
+      );
     } else {
-      navigator.clipboard?.writeText(window.location.href);
-      toast('Link copied to clipboard');
+      toast("Couldn't copy the link — copy it from the address bar");
     }
   }
 
@@ -99,7 +103,7 @@ export default function ProductPage() {
         {business && (
           <Link
             to={`/b/${business.slug}`}
-            className="flex items-center gap-3 p-3 rounded-card bg-surface border border-border hover:bg-lavender/30 transition-colors"
+            className="flex items-center gap-3 p-3 rounded-card bg-surface border border-border hover:bg-lavender/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <Avatar src={business.logoUrl} name={business.name} size={40} />
             <div className="flex-1 min-w-0">

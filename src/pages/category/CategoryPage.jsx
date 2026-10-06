@@ -3,6 +3,7 @@ import { Tag } from 'lucide-react';
 import { useCategory, useCategories } from '../../queries/catalog';
 import PageHeader from '../../components/ui/PageHeader';
 import LocationChip from '../../components/LocationChip';
+import { useSearchOrigin } from '../../stores/location';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import CategorySkeleton from './CategorySkeleton';
@@ -13,6 +14,7 @@ import BusinessList from './BusinessList';
 /** Valid sort values per tab. Anything outside this set is dropped on tab change. */
 const PRODUCT_SORT_VALUES = new Set(['distance', 'newest', 'price_asc', 'price_desc']);
 const BUSINESS_SORT_VALUES = new Set(['distance', 'newest', 'rating']);
+const PRICE_VALUES = new Set(['u500', '500-1000', 'a1000']);
 
 /**
  * Parse a `?price=` param value into { minPrice, maxPrice } rupee numbers.
@@ -42,11 +44,12 @@ export default function CategoryPage() {
   const navigate = useNavigate();
 
   // URL param reads
-  const sub = searchParams.get('sub') || null;
+  const subParam = searchParams.get('sub') || null;
   const tab = searchParams.get('tab') === 'businesses' ? 'businesses' : 'products';
-  const sortParam = searchParams.get('sort') || '';
+  const rawSort = searchParams.get('sort') || '';
   const today = searchParams.get('today') === '1';
-  const priceParam = searchParams.get('price') || '';
+  const rawPrice = searchParams.get('price') || '';
+  const origin = useSearchOrigin();
 
   // Category data
   const {
@@ -61,6 +64,13 @@ export default function CategoryPage() {
 
   // Children of this category
   const children = (allCategories ?? []).filter((c) => c.parentSlug === slug);
+
+  // Ignore URL values the page can't honour (unknown sub-category, sort from the other tab,
+  // Nearest without a location, unknown price band) instead of sending them to the API.
+  const sub = subParam && (allCategories === undefined || children.some((c) => c.slug === subParam)) ? subParam : null;
+  const validSorts = tab === 'products' ? PRODUCT_SORT_VALUES : BUSINESS_SORT_VALUES;
+  const sortParam = validSorts.has(rawSort) && !(rawSort === 'distance' && !origin) ? rawSort : '';
+  const priceParam = tab === 'products' && PRICE_VALUES.has(rawPrice) ? rawPrice : '';
 
   // ── URL param setters (all replace: true) ──
 
@@ -124,7 +134,7 @@ export default function CategoryPage() {
   if (catPending) {
     return (
       <div className="flex flex-col">
-        <div className="h-[52px] bg-surface border-b border-border animate-pulse" aria-hidden="true" />
+        <div className="h-14 bg-surface border-b border-border animate-pulse" aria-hidden="true" />
         <CategorySkeleton />
       </div>
     );

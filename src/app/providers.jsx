@@ -1,6 +1,7 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster, toast } from 'sonner';
 import { shouldToast, userMessage } from '../lib/errors';
+import { isAppError } from '../services/errors';
 
 /**
  * Global failure handler for queries and mutations.
@@ -15,13 +16,21 @@ function handleError(error, source) {
   toast.error(message, { id: message });
 }
 
+const NO_RETRY_CODES = new Set(['rate_limited', 'forbidden', 'auth_required', 'validation', 'conflict', 'not_found', 'business_not_available', 'config', 'unavailable_in_mock']);
+
+/** One retry for transient failures only — never re-send a rate-limited or rejected request. */
+function shouldRetry(failureCount, error) {
+  if (isAppError(error) && NO_RETRY_CODES.has(error.code)) return false;
+  return failureCount < 1;
+}
+
 const queryClient = new QueryClient({
   queryCache: new QueryCache({ onError: handleError }),
   mutationCache: new MutationCache({ onError: handleError }),
   defaultOptions: {
     queries: {
       staleTime: 60_000,
-      retry: 1,
+      retry: shouldRetry,
       refetchOnWindowFocus: true,
     },
   },

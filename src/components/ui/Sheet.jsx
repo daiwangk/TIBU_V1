@@ -11,12 +11,14 @@ import { useEffect, useRef } from 'react';
  * @param {{
  *   open: boolean,
  *   onClose: () => void,
+ *   label?: string,      // accessible name of the dialog
  *   children: React.ReactNode,
  *   className?: string,
  * }} props
  */
-export default function Sheet({ open, onClose, children, className = '' }) {
+export default function Sheet({ open, onClose, label, children, className = '' }) {
   const dialogRef = useRef(null);
+  const panelRef = useRef(null);
   const triggerRef = useRef(null);
 
   // Open / close the dialog imperatively
@@ -27,6 +29,8 @@ export default function Sheet({ open, onClose, children, className = '' }) {
     if (open) {
       triggerRef.current = document.activeElement;
       if (!dialog.open) dialog.showModal();
+      // showModal() focuses the first control ("Reset", "Use my location"), which Enter would fire by accident.
+      panelRef.current?.focus();
       document.body.style.overflow = 'hidden';
     } else {
       if (dialog.open) dialog.close();
@@ -53,6 +57,7 @@ export default function Sheet({ open, onClose, children, className = '' }) {
   return (
     <dialog
       ref={dialogRef}
+      aria-label={label}
       onClick={handleDialogClick}
       onCancel={handleCancel}
       className={`
@@ -63,8 +68,10 @@ export default function Sheet({ open, onClose, children, className = '' }) {
     >
       {/* Inner panel — stays within 480px column */}
       <div
+        ref={panelRef}
+        tabIndex={-1}
         className={`
-          w-full max-w-[480px]
+          w-full max-w-[480px] outline-none
           bg-surface rounded-t-card-lg
           overflow-y-auto overscroll-contain
           max-h-[90dvh]

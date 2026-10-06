@@ -3,7 +3,6 @@ import Price from './Price';
 import Distance from './Distance';
 import ImagePlaceholder from './ui/ImagePlaceholder';
 import Badge from './ui/Badge';
-import { formatPrice } from '../lib/format';
 
 /**
  * Product card.
@@ -40,7 +39,6 @@ export default function ProductCard({ product, variant = 'grid', action, classNa
         ${isRow ? 'w-40' : 'w-full'}
         ${className}
       `}
-      aria-label={`${name}, ${formatPrice(price)}`}
     >
       {/* Image */}
       <div className="relative w-full aspect-square overflow-hidden">

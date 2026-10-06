@@ -26,9 +26,16 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SEED_ALLOWED_REF) {
   process.exit(1);
 }
 
-if (!SUPABASE_URL.includes(SEED_ALLOWED_REF)) {
+// Exact host match (<ref>.supabase.co) — a substring check would also accept e.g. "<ref>.evil.com/…".
+let seedHost = '';
+try {
+  seedHost = new URL(SUPABASE_URL).hostname;
+} catch {
+  seedHost = '';
+}
+if (seedHost !== `${SEED_ALLOWED_REF}.supabase.co`) {
   console.error(
-    `❌ Safety: SUPABASE_URL does not contain SEED_ALLOWED_REF ("${SEED_ALLOWED_REF}").\n` +
+    `❌ Safety: SUPABASE_URL host is not <SEED_ALLOWED_REF>.supabase.co for SEED_ALLOWED_REF ("${SEED_ALLOWED_REF}").\n` +
     '   This guard prevents accidentally seeding production. Check .env.seed.',
   );
   process.exit(1);

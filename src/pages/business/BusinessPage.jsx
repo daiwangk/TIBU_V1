@@ -24,7 +24,7 @@ export default function BusinessPage() {
   const validTabs = ['products', 'videos', 'reviews'];
   const activeTab = validTabs.includes(rawTab) ? rawTab : 'products';
 
-  const { data: business, isLoading, isError, error, refetch } = useBusiness(slug, null);
+  const { data: business, isLoading, isError, error, refetch } = useBusiness(slug);
 
   if (isLoading) {
     return <BusinessSkeleton />;
@@ -65,9 +65,13 @@ export default function BusinessPage() {
           url: window.location.href,
         })
         .catch(() => {});
+    } else if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(window.location.href).then(
+        () => toast('Link copied to clipboard'),
+        () => toast("Couldn't copy the link"),
+      );
     } else {
-      navigator.clipboard?.writeText(window.location.href);
-      toast('Link copied to clipboard');
+      toast("Couldn't copy the link — copy it from the address bar");
     }
   }
 
@@ -95,7 +99,7 @@ export default function BusinessPage() {
       <main>
         <BusinessHeader business={business} />
 
-        <div className="sticky top-[61px] z-10 bg-surface">
+        <div className="sticky top-14 z-10 bg-surface">
           <Tabs
             value={activeTab}
             onChange={handleTabChange}

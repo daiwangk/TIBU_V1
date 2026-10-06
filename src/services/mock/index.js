@@ -92,6 +92,8 @@ function resolveSort(sort, hasNear, kind) {
   const businessOk = new Set(['distance', 'newest', 'rating']);
   const productOk = new Set(['distance', 'newest', 'price_asc', 'price_desc']);
   const allowed = kind === 'business' ? businessOk : productOk;
+  // SQL only sorts by distance when an origin is given; otherwise it falls back to newest.
+  if (sort === 'distance' && !hasNear) return 'newest';
   if (sort && allowed.has(sort)) return sort;
   if (sort) return 'newest';
   return hasNear ? 'distance' : 'newest';
@@ -125,8 +127,8 @@ function sortItems(items, sort) {
 }
 
 function matchesQ(haystacks, q) {
-  if (!q) return true;
-  const needle = q.toLowerCase();
+  const needle = (q ?? '').trim().toLowerCase();
+  if (!needle) return true;
   return haystacks.some((h) => h && String(h).toLowerCase().includes(needle));
 }
 

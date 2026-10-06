@@ -33,6 +33,13 @@ describe('buildSearchArgs', () => {
     expect(buildSearchArgs({ availableToday: true }).p_available_today).toBe(true);
   });
 
+  it('treats an empty category and a blank query as no filter (same as the mock)', () => {
+    const args = buildSearchArgs({ category: '', q: '   ' });
+    expect(args.p_category).toBeNull();
+    expect(args.p_query).toBeNull();
+    expect(buildSearchArgs({ category: 'handmade', q: ' cake ' })).toMatchObject({ p_category: 'handmade', p_query: 'cake' });
+  });
+
   it('passes an empty-string sort through unchanged', () => {
     expect(buildSearchArgs({ sort: '' }).p_sort).toBe('');
   });

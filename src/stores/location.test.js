@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { selectSearchOrigin, toOrigin, useLocationStore } from './location.js';
+import { sanitizePersistedLocation, selectSearchOrigin, toOrigin, useLocationStore } from './location.js';
 import * as geo from '../lib/geo.js';
 import { AppError } from '../services/errors.js';
 
@@ -187,6 +187,70 @@ describe('location store', () => {
 
       expect(andheri).toEqual({ lat: 19.1364, lng: 72.8296 });
       expect(andheri).not.toBe(bandra);
+    });
+  });
+
+  describe('GPS race and rounding', () => {
+    it('rounds GPS fixes to 3 decimals', async () => {
+      geo.getBrowserLocation.mockResolvedValueOnce({ lat: 19.136412345, lng: 72.829678901 });
+      await useLocationStore.getState().requestGps();
+      const state = useLocationStore.getState();
+      expect(state.lat).toBe(19.136);
+      expect(state.lng).toBe(72.83);
+    });
+
+    it('a slow GPS answer does not overwrite an area picked meanwhile', async () => {
+      let resolveGps;
+      geo.getBrowserLocation.mockReturnValueOnce(new Promise((resolve) => { resolveGps = resolve; }));
+      const pending = useLocationStore.getState().requestGps();
+      useLocationStore.getState().setArea('Bandra West');
+      resolveGps({ lat: 1, lng: 2 });
+      await pending;
+      expect(useLocationStore.getState()).toMatchObject({ label: 'Bandra West', source: 'area', lat: 19.0596 });
+    });
+
+    it('a slow GPS answer does not undo clear()', async () => {
+      let resolveGps;
+      geo.getBrowserLocation.mockReturnValueOnce(new Promise((resolve) => { resolveGps = resolve; }));
+      const pending = useLocationStore.getState().requestGps();
+      useLocationStore.getState().clear();
+      resolveGps({ lat: 1, lng: 2 });
+      await pending;
+      expect(useLocationStore.getState().lat).toBeNull();
+    });
+
+    it('the latest GPS request wins over an earlier one', async () => {
+      let first;
+      geo.getBrowserLocation.mockReturnValueOnce(new Promise((resolve) => { first = resolve; }));
+      geo.getBrowserLocation.mockResolvedValueOnce({ lat: 10, lng: 20 });
+      const slow = useLocationStore.getState().requestGps();
+      await useLocationStore.getState().requestGps();
+      first({ lat: 1, lng: 2 });
+      await slow;
+      expect(useLocationStore.getState().lat).toBe(10);
+    });
+  });
+
+  describe('sanitizePersistedLocation', () => {
+    it('keeps a well-formed value', () => {
+      expect(sanitizePersistedLocation({ lat: 19.1, lng: 72.8, label: 'Juhu', source: 'area', asked: true }))
+        .toEqual({ lat: 19.1, lng: 72.8, label: 'Juhu', source: 'area', asked: true });
+    });
+
+    it('drops string, NaN, out-of-range and half-set coordinates (all or nothing)', () => {
+      const empty = { lat: null, lng: null, label: null, source: null, asked: false };
+      expect(sanitizePersistedLocation({ lat: '19.1', lng: 'x', label: 'A', source: 'gps' })).toEqual(empty);
+      expect(sanitizePersistedLocation({ lat: 19, lng: null, label: 'A', source: 'gps' })).toEqual(empty);
+      expect(sanitizePersistedLocation({ lat: NaN, lng: 72 })).toEqual(empty);
+      expect(sanitizePersistedLocation({ lat: 123, lng: 72 })).toEqual(empty);
+    });
+
+    it('keeps asked even when the coordinates are bad, and ignores junk', () => {
+      expect(sanitizePersistedLocation({ lat: 'x', asked: true }).asked).toBe(true);
+      expect(sanitizePersistedLocation({ asked: 'yes' }).asked).toBe(false);
+      expect(sanitizePersistedLocation(null)).toEqual({ lat: null, lng: null, label: null, source: null, asked: false });
+      expect(sanitizePersistedLocation('garbage').lat).toBeNull();
+      expect(sanitizePersistedLocation({ lat: 19, lng: 72, source: 'bogus', label: 5 })).toMatchObject({ source: null, label: null });
     });
   });
 });

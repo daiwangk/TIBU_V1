@@ -13,6 +13,13 @@ describe('WhatsApp helpers (CONTRACT §10)', () => {
     expect(normalizeIndianMobile('+91 98765 43210')).toBe('919876543210');
     expect(normalizeIndianMobile('09876543210')).toBe('919876543210');
     expect(normalizeIndianMobile('5123456789')).toBeNull();
+    // 10-digit mobiles that merely start with 91 are valid and keep every digit
+    expect(normalizeIndianMobile('9123456789')).toBe('919123456789');
+    expect(normalizeIndianMobile('919123456789')).toBe('919123456789');
+    expect(normalizeIndianMobile('+91 91234 56789')).toBe('919123456789');
+    expect(normalizeIndianMobile('09123456789')).toBe('919123456789');
+    expect(normalizeIndianMobile('9112345678')).toBe('919112345678');
+    expect(normalizeIndianMobile('91123456789')).toBeNull(); // 11 digits, not a mobile
     expect(normalizeIndianMobile('98765 4321')).toBeNull();
   });
 

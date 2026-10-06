@@ -41,7 +41,7 @@ export default function ImageGallery({ images = [], name = 'Product', className 
       >
         {images.map((img, i) => (
           <div
-            key={img.url || i}
+            key={`${img.id ?? img.url}-${i}`}
             className="min-w-full flex-shrink-0 snap-center aspect-square bg-surface"
           >
             <img

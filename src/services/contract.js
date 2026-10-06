@@ -218,7 +218,7 @@
 /**
  * @typedef {Object} Notification
  * @property {string} id
- * @property {'enquiry_new'|'enquiry_reply'|'business_approved'|'business_rejected'|'business_unpublished'|'review_new'|'digest_new_businesses'} type
+ * @property {'enquiry_new'|'enquiry_reply'|'business_approved'|'business_rejected'|'business_unpublished'|'review_new'|'digest_new_businesses'|'system'} type
  * @property {string} title
  * @property {string} body
  * @property {string|null} link

@@ -44,8 +44,8 @@ export function buildSearchArgs(params = {}, kind = 'business') {
   const args = {
     p_lat: hasNear ? near.lat : null,
     p_lng: hasNear ? near.lng : null,
-    p_category: params.category ?? null,
-    p_query: params.q ?? null,
+    p_category: params.category || null,
+    p_query: params.q?.trim() || null,
     p_available_today: params.availableToday === true,
     p_sort: sort,
     p_limit: Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT),

@@ -16,11 +16,12 @@ export function formatPrice(rupees) {
  * @returns {string}
  */
 export function formatDistance(m) {
-  if (m == null) return '';
-  if (m < 1000) {
-    return `${Math.round(m / 100) * 100} m`;
-  }
-  return `${(m / 1000).toFixed(1)} km`;
+  if (m == null || !Number.isFinite(Number(m))) return '';
+  const metres = Math.max(0, Number(m));
+  // Round to the nearest 100 m first, so 950–999 m reads "1.0 km" rather than "1000 m".
+  const rounded = Math.round(metres / 100) * 100;
+  if (rounded < 1000) return `${Math.max(rounded, 100)} m`;
+  return `${(rounded / 1000).toFixed(1)} km`;
 }
 
 /**

@@ -1,3 +1,5 @@
+> **SUPERSEDED (6 Oct 2026):** this is the original kit copy. The live, maintained version is `docs/CONTRACT.md` (decisions D32–D38 and contract v1.2 live there). Do not follow this file.
+
 # 04 · Service contract v1.1 (copy to the repo as docs/CONTRACT.md)
 
 > v1.1 (27 Sep 2026): reconciled against the dev kit's real migrations and tested on Postgres + PostGIS — see `09_SQL_RECONCILIATION.md`. Changes from v1.0: sort values, `approvedAt`, radius/limit/availableToday rules, enquiry functions, unread counts, stats, admin rows, and new §11–§13.

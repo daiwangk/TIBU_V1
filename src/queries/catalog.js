@@ -90,8 +90,9 @@ export function useProductSearch(params = {}, options = {}) {
 /**
  * Infinite business search — pages of 20 via offset; limit never grows.
  * @param {import('../services/contract.js').SearchParams} [params] undefined or omitted = use the stored origin; null = no origin.
+ * @param {{ enabled?: boolean }} [options]
  */
-export function useInfiniteBusinessSearch(params = {}) {
+export function useInfiniteBusinessSearch(params = {}, options = {}) {
   const origin = useSearchOrigin();
   const searchParams = { ...params };
   if (searchParams.near === undefined) {
@@ -99,8 +100,10 @@ export function useInfiniteBusinessSearch(params = {}) {
   }
   const stable = { ...withoutOffset(searchParams), limit: PAGE_SIZE };
   return useInfiniteQuery({
+    ...options,
     meta: PAGE_QUERY_META,
-    queryKey: qk.businesses(stable),
+    // 'infinite' keeps this cache entry ({ pages, pageParams }) apart from a one-shot search with the same params.
+    queryKey: [...qk.businesses(stable), 'infinite'],
     queryFn: ({ pageParam = 0 }) =>
       searchBusinesses({ ...stable, limit: PAGE_SIZE, offset: pageParam }),
     initialPageParam: 0,
@@ -112,8 +115,9 @@ export function useInfiniteBusinessSearch(params = {}) {
 /**
  * Infinite product search — pages of 20 via offset; limit never grows.
  * @param {import('../services/contract.js').SearchParams} [params] undefined or omitted = use the stored origin; null = no origin.
+ * @param {{ enabled?: boolean }} [options]
  */
-export function useInfiniteProductSearch(params = {}) {
+export function useInfiniteProductSearch(params = {}, options = {}) {
   const origin = useSearchOrigin();
   const searchParams = { ...params };
   if (searchParams.near === undefined) {
@@ -121,8 +125,9 @@ export function useInfiniteProductSearch(params = {}) {
   }
   const stable = { ...withoutOffset(searchParams), limit: PAGE_SIZE };
   return useInfiniteQuery({
+    ...options,
     meta: PAGE_QUERY_META,
-    queryKey: qk.products(stable),
+    queryKey: [...qk.products(stable), 'infinite'],
     queryFn: ({ pageParam = 0 }) =>
       searchProducts({ ...stable, limit: PAGE_SIZE, offset: pageParam }),
     initialPageParam: 0,

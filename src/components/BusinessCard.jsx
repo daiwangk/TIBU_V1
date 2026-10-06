@@ -33,14 +33,13 @@ export default function BusinessCard({ business, className = '' }) {
         transition-shadow hover:shadow-sm
         ${className}
       `}
-      aria-label={name}
     >
       {/* Logo */}
       <div className="w-14 h-14 rounded-card overflow-hidden flex-shrink-0">
         {logoUrl ? (
           <img src={logoUrl} alt={`${name} logo`} className="w-full h-full object-cover" />
         ) : (
-          <ImagePlaceholder aspectRatio="1/1" bg="mint" iconSize={20} className="w-full h-full" />
+          <ImagePlaceholder aspect="1/1" bg="mint" iconSize={20} className="w-full h-full" />
         )}
       </div>
 

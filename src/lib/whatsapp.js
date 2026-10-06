@@ -14,7 +14,8 @@ import { formatPrice } from './format.js';
 export function normalizeIndianMobile(number) {
   let digits = String(number ?? '').replace(/\D/g, '');
   digits = digits.replace(/^00/, '');
-  if (digits.startsWith('91')) digits = digits.slice(2);
+  // Country code only when the number is long enough to carry one: 9123456789 is a valid 10-digit mobile.
+  if (digits.length === 12 && digits.startsWith('91')) digits = digits.slice(2);
   digits = digits.replace(/^0+/, '');
 
   return /^[6-9]\d{9}$/.test(digits) ? `91${digits}` : null;

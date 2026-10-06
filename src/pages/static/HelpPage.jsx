@@ -36,11 +36,10 @@ export default function HelpPage() {
       setError('Please enter your message.');
       return;
     }
-    // Sending to a backend is wired up later; for now the message is only acknowledged.
+    // Nothing is sent yet — the backend/inbox is connected before launch. Keep the text so it isn't lost.
     setError('');
     setSubmitted(true);
-    setMessage('');
-    toast.success('Thank you for your feedback.');
+    toast('Sending feedback is not switched on yet.');
   }
 
   return (
@@ -70,7 +69,7 @@ export default function HelpPage() {
         </Button>
         {submitted && (
           <p role="status" className="font-body text-sm font-semibold text-ink">
-            Thank you for your feedback. We’ve received your message.
+            Sending feedback is not switched on yet, so your message has not been sent. We&apos;ll connect it before launch.
           </p>
         )}
       </form>

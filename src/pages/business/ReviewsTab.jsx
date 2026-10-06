@@ -89,6 +89,7 @@ export default function ReviewsTab({ business }) {
                   </span>
                 </div>
                 <div className="flex text-primary">
+                  <span className="sr-only">{`${rev.rating} out of 5 stars`}</span>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
