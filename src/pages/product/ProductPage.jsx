@@ -88,7 +88,7 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen bg-bg pb-28">
-      <PageHeader title="Tibu" fallbackTo="/" actions={headerActions} />
+      <PageHeader title="Tibu" titleAs="p" fallbackTo="/" actions={headerActions} />
 
       <main className="px-screen pt-3 space-y-4">
         {/* Image Gallery */}

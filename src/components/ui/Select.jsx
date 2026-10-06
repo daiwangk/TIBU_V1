@@ -22,7 +22,7 @@ export default function Select({ id, label, hint, error, children, className = '
       <select
         id={id}
         className={`
-          w-full px-3 py-2.5 rounded-btn appearance-none
+          w-full min-h-11 px-3 py-2.5 rounded-btn appearance-none
           bg-surface border font-body text-sm text-ink
           focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1
           transition-colors duration-150

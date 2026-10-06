@@ -42,7 +42,7 @@ export default function ReviewsTab({ business }) {
             </span>
           </div>
         </div>
-        <Button variant="secondary" size="sm" onClick={handleWriteReview}>
+        <Button variant="secondary" onClick={handleWriteReview}>
           Write a review
         </Button>
       </div>

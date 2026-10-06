@@ -62,10 +62,10 @@ export default function LocationPrompt() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" loading={locating} onClick={handleGps}>
+            <Button loading={locating} onClick={handleGps}>
               Use my location
             </Button>
-            <Button size="sm" variant="secondary" onClick={handleChooseArea}>
+            <Button variant="secondary" onClick={handleChooseArea}>
               Choose area
             </Button>
           </div>

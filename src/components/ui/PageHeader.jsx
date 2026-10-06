@@ -11,12 +11,13 @@ import IconButton from './IconButton';
  *
  * @param {{
  *   title: string,
+ *   titleAs?: 'h1' | 'p',   // use 'p' when the page body has its own h1
  *   fallbackTo?: string,
  *   actions?: React.ReactNode,
  *   className?: string,
  * }} props
  */
-export default function PageHeader({ title, fallbackTo = '/', actions, className = '' }) {
+export default function PageHeader({ title, titleAs: TitleTag = 'h1', fallbackTo = '/', actions, className = '' }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -41,9 +42,9 @@ export default function PageHeader({ title, fallbackTo = '/', actions, className
         <ChevronLeft size={22} strokeWidth={2} aria-hidden="true" />
       </IconButton>
 
-      <h1 className="flex-1 font-heading font-bold text-ink text-lg leading-tight truncate">
+      <TitleTag className="flex-1 font-heading font-bold text-ink text-lg leading-tight truncate">
         {title}
-      </h1>
+      </TitleTag>
 
       {actions && (
         <div className="flex items-center gap-1 flex-shrink-0">{actions}</div>

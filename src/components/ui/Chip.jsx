@@ -17,9 +17,9 @@ export default function Chip({ active = false, onToggle, children, className = '
       aria-pressed={active}
       onClick={onToggle}
       className={`
-        inline-flex items-center gap-1.5 px-3 py-1.5
+        inline-flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap px-3 py-1.5
         rounded-full text-sm font-body font-semibold
-        min-h-[36px] transition-colors duration-150
+        min-h-11 min-w-11 justify-center transition-colors duration-150
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
         ${
           active

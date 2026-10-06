@@ -48,29 +48,31 @@
 
 ## 3. Audit bug closure table (show this at Milestone 1)
 
-| Audit bug (CODEBASE_AUDIT §5) | Status at M1 | How |
+Evidence as of **6 Oct 2026** (`main` after B2.4/A2.4/B2.6/R1, B2.5 QA sweep). “Fixed” means fixed in everything a user can reach today; where a legacy screen still carries the problem, it says so and names the task that removes it.
+
+| Audit bug (CODEBASE_AUDIT §5) | Status at M1 | Evidence |
 |---|---|---|
-| Undefined `selectedSellerProduct` | Eliminated | Router rewrite; seller pages rebuilt in Week 4 read the URL |
-| Missing seller sub-routes | Fixed (routes exist) | Real seller pages in B4.3 |
-| Catalog WhatsApp/Call unusable (no phone) | Resolved by design | Phones come from `revealContact` after login (live in Week 3; buttons present at M1) |
-| Fashion price/distance filters broken | Eliminated | One CategoryPage with numeric filters (B2.2) |
-| Handmade price filter broken (`priceValue`) | Eliminated | Same |
-| Splash screen broken | Removed | File no longer in the codebase |
+| Undefined `selectedSellerProduct` | Guarded; page rebuilt in Week 4 | `src/SellerProductDetail.jsx` still reads the prop but shows an empty state when it is missing (no crash). Replaced by real seller pages in B4.3 |
+| Missing seller sub-routes | Fixed (routes exist) | `src/App.jsx`: `/seller/register`, `/dashboard`, `/products/view`, `/products/:id`, `/products/new`, `/videos/new`, `/posts`, `/reviews`. Real pages in B4.3 |
+| Catalog WhatsApp/Call unusable (no phone) | Resolved by design | Public shapes carry no phone keys (`mock.test.js` “(d) no returned object has phone/whatsapp keys”). Buttons on Product and Business pages show “Contact opens after login”; live in Week 3 (A3.2, B3.3) |
+| Fashion price/distance filters broken | Eliminated | One `CategoryPage` + `CategoryFilters` with numeric price ranges and a Nearest sort (B2.2); nearest-first order checked in the B2.6 browser run (3.8 → 12.8 km) |
+| Handmade price filter broken (`priceValue`) | Eliminated | `git grep priceValue src` → nothing; same `CategoryPage` |
+| Splash screen broken | Removed | No splash file in `git ls-files` |
 | Seller registration not connected | Scheduled | Real onboarding in B4.2 |
-| Crochet missing from Search | Eliminated | Search queries all categories through one service (B2.3) |
-| Discover heart no-op | Removed | Discover is Phase 2 (B1.3) |
-| Reel actions no-op | Removed | Reel page removed; Videos tab embeds Instagram (B1.8, B2.4) |
+| Crochet missing from Search | Eliminated | `SearchPage` queries all categories through one service (B2.3); crochet search checked by hand in B2.3; “Handmade” category returns crochet/embroidery/resin-art/candles (`mock.test.js` “(a)”) |
+| Discover heart no-op | Removed | Discover is Phase 2 (B1.3, PR #3) |
+| Reel actions no-op | Removed | `Reel`/`ReelsViewAll` deleted in B2.4 (`8e1694c`); Videos tab embeds Instagram (B1.8). The mock has no reels — the Videos tab shows its empty state until the preview runs on seeded data with `REELS` set (A2.1) |
 | OfferDetails buttons | Removed | Offers are Phase 2 (B1.3) |
-| Notification vs Offers data mismatch | Removed | Offers removed; notifications rebuilt in Week 5 |
-| `profileStats.addresses` always 0 | Removed | Address book is out of scope (B1.3) |
-| Leftover `console.log` | Fixed | Rewritten screens; lint rule |
-| Bottom nav on all screens | Fixed | Per-route hiding (AppShell/BottomNav) |
-| `sellerMode` unused | Removed | Dead prop gone with LegacyPage |
-| ID casing inconsistency | Fixed | Lowercase kebab slugs; uuids in the DB |
+| Notification vs Offers data mismatch | Removed | Offers removed (B1.3, `f234296`); notifications rebuilt in Week 5 (B5.3) |
+| `profileStats.addresses` always 0 | Removed | Address book out of scope (B1.3) |
+| Leftover `console.log` | Partly fixed | None in any rebuilt screen or in `src/pages|components|queries|lib|services`. Four remain in legacy files (`Saved.jsx`, `legacy/components/ProductCard.jsx`, `legacy/pages/Notification.jsx`); they go with B3.5 and B5.3 |
+| Bottom nav on all screens | Fixed | `BottomNav` hides on `/p/`, `/b/`, `/seller/`, `/dev/` (and legacy prefixes); B2.5 sweep confirmed it on Product/Business pages |
+| `sellerMode` unused | Removed | `git grep sellerMode src` → nothing (only a stub setter prop remains in `LegacyPage`) |
+| ID casing inconsistency | Fixed for real data | Slugs are lowercase kebab, ids are uuids in the DB. One mock fixture id still contains a space (`cocoa corner`); it is URL-encoded and routes correctly. Mock-only |
 | Export name ≠ filename | Moot | Raw data only used by the mock adapter |
-| Horizontal overflow (`minWidth: 260px`) | Fixed | New responsive cards (B1.6) |
-| Arial hardcoded | Fixed | Nunito / Nunito Sans via tokens in all rebuilt screens |
-| **Found in re-check:** Linux build failure, white screen, hidden lint errors, state-only entity pages, service signature mismatch, four category taxonomies, random distances | Fixed | `00_STATUS_VERIFIED.md`, patches, B1.x |
+| Horizontal overflow (`minWidth: 260px`) | Fixed on every rebuilt screen | B2.5 sweep: 0 px overflow on 20 pages × 360/390/430 px. The legacy `ProductCard` (used by Saved and SellerDashboard) still has `minWidth: 260px` until B3.5 |
+| Arial hardcoded | Fixed on every rebuilt screen | Nunito / Nunito Sans via theme tokens. Still hard-coded in legacy `NotificationPreferences`, `SellerDashboard`, `SellerProductDetail` (Weeks 4–5) |
+| **Found in re-check:** Linux build failure, white screen, hidden lint errors, state-only entity pages, service signature mismatch, four category taxonomies, random distances | Fixed | Case-collision and blanket-eslint-disable guards (`scripts/check-guards.mjs`, run in `npm run check` and CI); `ErrorBoundary` (B1.5); entity pages load from the URL (`/p/:id`, `/b/:slug`, `/category/:slug`); contract test checks both adapters export every function; one taxonomy (`mock/taxonomy.js` = DB seed); deterministic mock distances (`mock.test.js` “(b)”) and real haversine in the Supabase adapter |
 
 ## 4. Milestone 1 demo script (15 minutes, on a phone)
 1. Open the preview link on your phone in front of her (or screen-share a phone). Home: hero, search, categories, three sections with real seeded data.
