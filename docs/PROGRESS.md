@@ -5,7 +5,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 2 (5–9 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: updated after the B2.6 merge (see log entry below)
+- Last green commit on main: `5ef62f5` (local merge of B2.4, A2.4 and B2.6 on top of PR #18; not yet pushed)
 - Merged this week: A2.1 real-data setup (local only), A2.2 location store, B2.1 Home, B2.2 Category page, B2.3 Search page, B2.4 cleanup, A2.4 error toasts, B2.6 location UX
 - In progress: —
 - Next task: B2.5 QA pass (real phone, 360/390/430) → audit closure table → M1 demo prep. Also open: A2.3 OG previews (needs the Cloudflare Pages project recreated), R1 (migrations 0008/0009 from the update kit) → R2, A1.7 auth URLs, F5 hosted DB checks.
