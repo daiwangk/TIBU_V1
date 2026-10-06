@@ -3,7 +3,7 @@
 Tick a box only when the PR is **merged** and its Verify list passed by hand. ◐ = partly done (note says what is left). Owners include the rebalancing from the deep dives (A takes R2, B2.4, B4.4 and B5.2). Est = AI-assisted hours; real time is about 1.5×. Commit the ticks with your normal PRs.
 
 Done before 2 Oct: B1.1 · B1.2 · B1.3 · B1.4 · B1.5 · B1.6 · A1.2 · A1.3 · A1.4 · A1.6
-Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2.3 · B2.4 · B2.6 (Week 2, merged by 6 Oct)
+Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2.3 · B2.4 · B2.6 · R1-2 (merged by 6 Oct)
 
 ## Today — Fri 2 Oct (no code)
 - [ ] Repo made private (`10_REPO_REVIEW` F1)
@@ -15,7 +15,7 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ✓ | ID | Task | Who | Est | Needs |
 |---|---|---|---|---|---|
 | ☐ | F5 | Hosted DB checks: 0007 applied, zero-RLS query, psql smoke test → PROGRESS | A | 0.25 | — |
-| ☐ | R1-1 | R1 Part 1: push migrations 0008/0009 to dev | A | 0.3 | F5 |
+| ☐ | R1-1 | R1 Part 1: push migrations 0008/0009 to dev — files are in supabase/migrations; `npx supabase db push` still to run by you | A | 0.3 | F5 |
 | ☑ | A1.5 | Supabase catalog adapter — merged as PR #10, hand-tested on tibu-dev (PROGRESS 2 Oct); R1-2 still adds the v1.2 fields | A | 0.5 | R1-1 |
 | ☑ | R1-2 | R1 Part 2: contract v1.2, D32–D38, AGENTS.md, v1.2 fields in the adapter (code merged; live only after R1-1) | A | 1.5 | A1.5 |
 | ☐ | A1.7 | Auth URLs on dev | A | 0.5 | — |
@@ -36,7 +36,7 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ☐ | R2 | Rev2 fields on Product + Business pages | A | Thu | 1.5 | R1, B1.8 |
 | ☑ | A2.4 | Error toasts | A | Thu | 1 | A1.5 |
 | ☑ | B2.4 | Static pages, 404, delete legacy view-all/reel/services | A | Thu | 2 | B2.1–B2.3 |
-| ☐ | B2.5 | QA pass, audit closure table, rehearsal | both | Fri | 2 | all |
+| ◐ | B2.5 | QA pass ✓ (0 blockers/majors, report in docs/build/qa/), audit closure table ✓; real-phone rehearsal still to do | both | Fri | 2 | all |
 | ☐ | **M1** | **Demo + invoice 40% ₹4,800** (`11` §6.2) | both | Fri 9 / Mon 12 | 1 | — |
 
 ## Week 3 — 12–16 Oct (`WEEK3_DEEP_DIVE.md`)

@@ -90,7 +90,7 @@ export default function BusinessPage() {
 
   return (
     <div className="min-h-screen bg-bg pb-28">
-      <PageHeader title={business.name} fallbackTo="/" actions={headerActions} />
+      <PageHeader title={business.name} titleAs="p" fallbackTo="/" actions={headerActions} />
 
       <main>
         <BusinessHeader business={business} />

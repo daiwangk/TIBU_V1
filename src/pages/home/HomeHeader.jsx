@@ -12,7 +12,7 @@ export default function HomeHeader() {
       <Link
         to="/"
         aria-label="Tibu home"
-        className="inline-flex items-center min-h-11 rounded-btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="inline-flex items-center min-h-11 min-w-11 rounded-btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <Logo className="h-8" />
       </Link>
