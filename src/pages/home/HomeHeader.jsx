@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import Logo from '../../components/brand/Logo';
+import LocationChip from '../../components/LocationChip';
 
 /**
- * Home brand header: logo on the left; location slot + notifications bell on the right.
+ * Home brand header: logo on the left; location chip + notifications bell on the right.
  */
 export default function HomeHeader() {
   return (
@@ -17,7 +18,7 @@ export default function HomeHeader() {
       </Link>
 
       <div className="flex items-center gap-1">
-        {/* TODO(B2.6): render <LocationChip /> here once src/components/LocationChip.jsx exists. */}
+        <LocationChip />
         {/* Bell placeholder — unread badge arrives with notifications (Week 5). */}
         <Link
           to="/notifications"

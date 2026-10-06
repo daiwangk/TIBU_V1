@@ -2,6 +2,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Tag } from 'lucide-react';
 import { useCategory, useCategories } from '../../queries/catalog';
 import PageHeader from '../../components/ui/PageHeader';
+import LocationChip from '../../components/LocationChip';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import CategorySkeleton from './CategorySkeleton';
@@ -175,7 +176,7 @@ export default function CategoryPage() {
 
   return (
     <div className="flex flex-col pb-4">
-      <PageHeader title={category.name} fallbackTo="/" />
+      <PageHeader title={category.name} fallbackTo="/" actions={<LocationChip />} />
 
       <CategoryFilters
         tab={tab}
