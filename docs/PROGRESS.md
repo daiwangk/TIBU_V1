@@ -5,7 +5,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 2 (5–9 Oct 2026) · Milestone 1 target: end of Week 2
 - Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
-- Last green commit on main: `5ef62f5` (local merge of B2.4, A2.4 and B2.6 on top of PR #18; not yet pushed)
+- Last green commit on main: `cfa6b4d` (local merge of R1 part 2 and B2.5 on top of the pushed `38c2536`; not yet pushed)
 - Merged this week: A2.1 real-data setup (local only), A2.2 location store, B2.1 Home, B2.2 Category page, B2.3 Search page, B2.4 cleanup, A2.4 error toasts, B2.6 location UX, R1 part 2 (contract v1.2, code), B2.5 QA sweep + fixes
 - In progress: —
 - Needs you (cannot be done from the repo): **R1 part 1** — push migrations 0008/0009 to `tibu-dev` (`npx supabase projects list` → `migration list` → `db push`, then the SQL checks and regenerate `docs/kit/rpc-signatures.txt`). Until then do not run the Supabase data source against `tibu-dev`. Also: recreate the Cloudflare Pages project via Connect to Git (A1.6/A2.1), send the client message in `docs/build/11_SOW_REV2_CHANGES.md` §6.1, collect 3–4 public Instagram reel links.
