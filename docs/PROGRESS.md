@@ -8,6 +8,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Last green commit on main: `2b593bb` (local merge of A2.3 and the review fixes; push pending)
 - Merged this week: A2.1 real-data setup (local only), A2.2 location store, B2.1 Home, B2.2 Category page, B2.3 Search page, B2.4 cleanup, A2.4 error toasts, B2.6 location UX, R1 part 2 (contract v1.2, code), B2.5 QA sweep + fixes, R2 Rev2 page fields, A2.3 OG link previews (code, tested locally), review fixes (below)
 - In progress: —
+- **Handoff for the partner: `docs/build/PARTNER_HANDOFF_2026-10-07.md`** (ordered runbook for the database, Auth URLs, Cloudflare, real data, link previews, demo).
 - Needs you (cannot be done from the repo): **R1 part 1** — push migrations 0008/0009 to `tibu-dev` (`npx supabase projects list` → `migration list` → `db push`, then the SQL checks and regenerate `docs/kit/rpc-signatures.txt`). Until then do not run the Supabase data source against `tibu-dev`. Also: recreate the Cloudflare Pages project via Connect to Git (A1.6/A2.1), send the client message in `docs/build/11_SOW_REV2_CHANGES.md` §6.1, collect 3–4 public Instagram reel links.
 - Next task: A2.1 preview/prod env (after the Cloudflare project; A2.3's functions need the same project and three runtime variables) → rehearse the M1 demo on a real phone → M1. Also open: A1.7 auth URLs on dev, F5 hosted DB checks.
 - Deferred follow-ups: none from Week 2 pages. Saved reel taps are a no-op until Saved is rebuilt (B3.5); legacy Saved “View All →” is 24 px high (B3.5).
