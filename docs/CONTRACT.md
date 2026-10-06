@@ -1,4 +1,6 @@
-# 04 · Service contract v1.1 (copy to the repo as docs/CONTRACT.md)
+# Service contract v1.2
+
+> v1.2 (2 Oct 2026): SOW Rev2 — delivery time, est. year, per-product delivery override, push subscription functions, details storage rule. Migrations 0008, 0009.
 
 > v1.1 (27 Sep 2026): reconciled against the dev kit's real migrations and tested on Postgres + PostGIS — see `09_SQL_RECONCILIATION.md`. Changes from v1.0: sort values, `approvedAt`, radius/limit/availableToday rules, enquiry functions, unread counts, stats, admin rows, and new §11–§13.
 
@@ -75,6 +77,8 @@ Filtering by a parent slug includes its children.
  *   images: Image[],          // gallery, excluding logo/banner
  *   videos: Video[],
  *   products: ProductSummary[] // active products only — mapper filters is_active (owners would otherwise see inactive ones)
+ *   deliveryTime: string|null,      // v1.2 e.g. "Same day"; null = not stated
+ *   establishedYear: number|null,   // v1.2 "Est. 2019"; null = not stated
  * }} BusinessDetail
  * distanceM on detail shapes is computed in the adapter with haversine from the business lat/lng when `near` is given (table selects don't return a distance).
  */
@@ -101,8 +105,11 @@ Filtering by a parent slug includes its children.
  * @typedef {ProductSummary & {
  *   description: string,
  *   images: Image[],
- *   details: Array<{ label: string, value: string }>,  // from products.details jsonb
- *   business: BusinessSummary
+ *   details: Array<{ label: string, value: string }>,  // products.details jsonb; read array or legacy object form (D36)
+ *   business: BusinessSummary,
+ *   deliveryAvailable: boolean,     // v1.2 effective: product override ?? business
+ *   pickupAvailable: boolean,       // v1.2 effective
+ *   deliveryTime: string|null,      // v1.2 effective
  * }} ProductDetail
  */
 
@@ -165,6 +172,7 @@ Filtering by a parent slug includes its children.
 ## 5. Seller shapes
 
 ```js
+/** @typedef {{ deliveryAvailable: boolean, pickupAvailable: boolean, deliveryTime: string|null }} DeliveryOverride   // v1.2 */
 /**
  * @typedef {BusinessDetail & {
  *   status: 'draft'|'pending'|'approved'|'rejected'|'unpublished',
@@ -183,8 +191,11 @@ Filtering by a parent slug includes its children.
  * @property {string} addressText  @property {string} locality  @property {string} city
  * @property {number|null} lat  @property {number|null} lng  @property {string} instagramHandle
  * @property {boolean} deliveryAvailable  @property {boolean} pickupAvailable
+ * @property {string|null} deliveryTime
+ * @property {number|null} establishedYear
  */
-/** @typedef {ProductDetail & { isActive: boolean, sortOrder: number }} MyProduct */
+/** @typedef {ProductDetail & { isActive: boolean, sortOrder: number, deliveryOverride: DeliveryOverride|null }} MyProduct
+ *  deliveryOverride is null when all three product columns are NULL (= same as the business). */
 /**
  * @typedef {Object} ProductInput
  * @property {string} [id]  omit to create
@@ -192,6 +203,7 @@ Filtering by a parent slug includes its children.
  * @property {string} description  @property {string|null} categorySlug
  * @property {Array<{label:string,value:string}>} details
  * @property {boolean} availableToday  @property {boolean} isActive
+ * @property {DeliveryOverride|null} deliveryOverride   null = same as my shop
  */
 /**
  * @typedef {{ ok: boolean, missing: Array<{ key: string, label: string, step: number }> }} SubmitChecklist
@@ -291,6 +303,8 @@ Filtering by a parent slug includes its children.
 | notifications | `listNotifications({ limit, offset })` | `Notification[]` | user | ❌ |
 | | `markNotificationsRead(ids \| 'all')` (only `read_at` is writable) | `void` | user | ❌ |
 | | `getUnreadCounts()` (`unread_counts`) | `{ notifications: number, enquiries: number }` — enquiries counts both roles | user | ❌ |
+| push | `savePushSubscription({ endpoint, p256dh, auth })` → `rpc('save_push_subscription', { p_endpoint, p_p256dh, p_auth, p_user_agent: navigator.userAgent })` | `void` | user | ❌ |
+| | `deletePushSubscription(endpoint)` → `rpc('delete_push_subscription', { p_endpoint })` | `void` | user | ❌ |
 
 Mock functions marked ❌ throw `AppError('unavailable_in_mock')`. The contract test (`src/services/contract.test.js`) checks that both adapters export every name in `FUNCTION_NAMES`.
 
@@ -384,6 +398,10 @@ Match on the **message prefix first** (several share an errcode), then the code.
 | Enquiry message | 1–2000 chars after trim |
 | Full name | ≤ 80 chars |
 | Creating a business | profile role must be `seller` (call `becomeSeller()` first) |
+| Delivery time (business or product) | 1–40 chars after trim; empty → `null` |
+| Established year | 1900 – current year; empty → `null` |
+| Product details | ≤ 12 rows; label ≤ 40, value ≤ 200; rows with an empty label or value are dropped |
+| Business lat/lng | rounded to 3 decimals before saving (D38) |
 
 ## 13. Storage (from 0005)
 

@@ -155,6 +155,7 @@ export async function getBusinessBySlug(slug, opts = {}) {
     .select(`
       id, slug, name, description, address_text, locality, city, lat, lng,
       logo_url, banner_url, available_today, delivery_available, pickup_available,
+      delivery_time, established_year,
       rating_avg, rating_count, approved_at,
       categories ( slug, name ),
       business_images ( id, url, sort_order ),
@@ -188,11 +189,13 @@ export async function getProductById(id, opts = {}) {
       .from('products')
       .select(`
       id, name, price_paise, description, details, available_today, is_active, created_at,
+      delivery_available, pickup_available, delivery_time,
       product_images ( id, url, sort_order ),
       categories ( slug ),
       businesses!inner (
         id, slug, name, description, address_text, locality, city, lat, lng,
         logo_url, banner_url, available_today, delivery_available, pickup_available,
+        delivery_time, established_year,
         rating_avg, rating_count, approved_at,
         categories ( slug, name )
       )

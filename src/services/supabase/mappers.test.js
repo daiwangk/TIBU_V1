@@ -338,4 +338,81 @@ describe('supabase mappers', () => {
     expect(keys.has('whatsapp')).toBe(false);
     expect(keys.has('business_contacts')).toBe(false);
   });
+
+  describe('Rev2 delivery fields (CONTRACT v1.2)', () => {
+    const business = (overrides = {}) => ({
+      id: 'b1',
+      slug: 'sweet',
+      name: 'Sweet',
+      locality: 'Bandra West',
+      city: 'Mumbai',
+      available_today: false,
+      delivery_available: true,
+      pickup_available: false,
+      delivery_time: 'Same day',
+      established_year: 2019,
+      rating_avg: 0,
+      rating_count: 0,
+      categories: { slug: 'desserts', name: 'Desserts' },
+      ...overrides,
+    });
+
+    const product = (overrides = {}, biz = {}) => ({
+      id: 'p1',
+      name: 'Cookies',
+      price_paise: 10000,
+      description: '',
+      details: [],
+      available_today: false,
+      is_active: true,
+      created_at: '2026-01-01T00:00:00Z',
+      product_images: [],
+      categories: { slug: 'desserts' },
+      delivery_available: null,
+      pickup_available: null,
+      delivery_time: null,
+      businesses: business(biz),
+      ...overrides,
+    });
+
+    it('maps businesses.delivery_time and established_year onto BusinessDetail', () => {
+      const detail = mapBusinessDetail(business());
+      expect(detail.deliveryTime).toBe('Same day');
+      expect(detail.establishedYear).toBe(2019);
+    });
+
+    it('returns null when the business states neither', () => {
+      const detail = mapBusinessDetail(business({ delivery_time: null, established_year: null }));
+      expect(detail.deliveryTime).toBeNull();
+      expect(detail.establishedYear).toBeNull();
+    });
+
+    it('falls back to the business when every product column is NULL', () => {
+      const detail = mapProductDetail(product());
+      expect(detail.deliveryAvailable).toBe(true);
+      expect(detail.pickupAvailable).toBe(false);
+      expect(detail.deliveryTime).toBe('Same day');
+    });
+
+    it('uses a product override, including false (?? not ||)', () => {
+      const detail = mapProductDetail(
+        product({ delivery_available: false, pickup_available: true, delivery_time: '2–3 days' }),
+      );
+      expect(detail.deliveryAvailable).toBe(false);
+      expect(detail.pickupAvailable).toBe(true);
+      expect(detail.deliveryTime).toBe('2–3 days');
+    });
+
+    it('overrides each field independently', () => {
+      const detail = mapProductDetail(product({ delivery_available: false }));
+      expect(detail.deliveryAvailable).toBe(false);
+      expect(detail.pickupAvailable).toBe(false);
+      expect(detail.deliveryTime).toBe('Same day');
+    });
+
+    it('is null when neither the product nor the business states a delivery time', () => {
+      const detail = mapProductDetail(product({}, { delivery_time: null }));
+      expect(detail.deliveryTime).toBeNull();
+    });
+  });
 });

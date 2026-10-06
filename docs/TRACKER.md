@@ -17,7 +17,7 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ☐ | F5 | Hosted DB checks: 0007 applied, zero-RLS query, psql smoke test → PROGRESS | A | 0.25 | — |
 | ☐ | R1-1 | R1 Part 1: push migrations 0008/0009 to dev | A | 0.3 | F5 |
 | ☑ | A1.5 | Supabase catalog adapter — merged as PR #10, hand-tested on tibu-dev (PROGRESS 2 Oct); R1-2 still adds the v1.2 fields | A | 0.5 | R1-1 |
-| ☐ | R1-2 | R1 Part 2: contract v1.2, D32–D38, AGENTS.md, v1.2 fields in the adapter | A | 1.5 | A1.5 |
+| ☑ | R1-2 | R1 Part 2: contract v1.2, D32–D38, AGENTS.md, v1.2 fields in the adapter (code merged; live only after R1-1) | A | 1.5 | A1.5 |
 | ☐ | A1.7 | Auth URLs on dev | A | 0.5 | — |
 | ☑ | B1.7 | Product page `/p/:productId` | B | 2 | — |
 | ☑ | B1.8 | Business page `/b/:slug` | B | 3 | B1.7 |

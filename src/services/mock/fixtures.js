@@ -128,6 +128,8 @@ rawBusinesses.forEach((b, index) => {
     pickupAvailable: !!(b.pickup && String(b.pickup).toLowerCase().includes('pickup available')),
     availableToday: false,
     approvedAt: isoDaysBefore(index),
+    deliveryTime: null,
+    establishedYear: null,
     images: [],
     videos: [],
   };
@@ -170,6 +172,8 @@ rawProducts.forEach((p, index) => {
     description: p.about || '',
     images: [],
     details: [],
+    // v1.2: null = same as the business; otherwise { deliveryAvailable, pickupAvailable, deliveryTime } (each may be null)
+    deliveryOverride: null,
     // internal for distance when near is set
     _lat: biz ? biz.lat : MOCK_USER_LOCATION.lat,
     _lng: biz ? biz.lng : MOCK_USER_LOCATION.lng,
@@ -212,3 +216,25 @@ rawBusinesses.forEach((b, index) => {
     reviewIdCounter += 1;
   });
 });
+
+// SOW Rev2 (CONTRACT v1.2) sample values. Most businesses and products stay null so empty states get exercised.
+const REV2_BUSINESSES = {
+  'sweet-crumbs': { deliveryTime: 'Same day', establishedYear: 2019 },
+  'whisk-wonders': { deliveryTime: 'Same day', establishedYear: 2021 },
+  'aura-candles': { deliveryTime: '1–2 days', establishedYear: 2021 },
+  'crochet-by-sarah': { deliveryTime: '1–2 days', establishedYear: null },
+};
+
+// aura-candles' vanilla candle overrides its shop: no delivery, and a longer lead time when it is offered.
+const REV2_PRODUCT_OVERRIDES = {
+  'aura-candles-vanilla-soy-candle': { deliveryAvailable: false, pickupAvailable: null, deliveryTime: 'Within a week' },
+};
+
+for (const [id, values] of Object.entries(REV2_BUSINESSES)) {
+  const biz = businessMap.get(id);
+  if (biz) Object.assign(biz, values);
+}
+for (const [id, override] of Object.entries(REV2_PRODUCT_OVERRIDES)) {
+  const product = productMap.get(id);
+  if (product) product.deliveryOverride = override;
+}

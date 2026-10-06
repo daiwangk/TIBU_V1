@@ -102,6 +102,26 @@ describe('catalog visibility guards', () => {
     ]);
   });
 
+  it('selects the Rev2 delivery columns, and never the contacts table', async () => {
+    const businessQuery = createSingleQuery([]);
+    getSupabaseMock.mockReturnValue({ from: vi.fn(() => businessQuery) });
+    await getBusinessBySlug('sweet-crumbs');
+    const businessSelect = businessQuery.select.mock.calls[0][0];
+    expect(businessSelect).toContain('delivery_time');
+    expect(businessSelect).toContain('established_year');
+
+    const productQuery = createSingleQuery([]);
+    getSupabaseMock.mockReturnValue({ from: vi.fn(() => productQuery) });
+    await getProductById(VALID_PRODUCT_ID);
+    const productSelect = productQuery.select.mock.calls[0][0];
+    // product override columns on the product row, shop values inside businesses!inner
+    expect(productSelect).toMatch(/created_at,\s*delivery_available, pickup_available, delivery_time,/);
+    expect(productSelect).toMatch(/delivery_time, established_year,/);
+    for (const select of [businessSelect, productSelect]) {
+      expect(select).not.toContain('business_contacts');
+    }
+  });
+
   it('returns null for non-uuid product ids without calling Supabase', async () => {
     await expect(getProductById('nope')).resolves.toBeNull();
     expect(getSupabaseMock).not.toHaveBeenCalled();
