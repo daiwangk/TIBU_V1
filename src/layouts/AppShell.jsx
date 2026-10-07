@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import Spinner from '../components/ui/Spinner';
 import BottomNav from './BottomNav';
 import { isBottomNavHidden } from './navVisibility';
 
@@ -27,7 +29,16 @@ export default function AppShell() {
             navVisible ? 'pb-[76px]' : ''
           }`}
         >
-          <Outlet />
+          {/* Lazy pages show a spinner here while their chunk downloads; the nav stays put. */}
+          <Suspense
+            fallback={
+              <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-label="Loading">
+                <Spinner size={32} />
+              </div>
+            }
+          >
+            <Outlet />
+          </Suspense>
         </div>
       </div>
 
