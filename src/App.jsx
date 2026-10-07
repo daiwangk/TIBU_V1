@@ -10,25 +10,28 @@ const UiGalleryPage = import.meta.env.DEV
 // Layout
 import AppShell from './layouts/AppShell';
 
-// Pages — alphabetical
-import AboutPage from './pages/static/AboutPage';
-import BusinessPage from './pages/business/BusinessPage';
-import CategoryPage from './pages/category/CategoryPage';
-import EditProfile from './EditProfile';
-import HelpPage from './pages/static/HelpPage';
+// Pages. Home is bundled with the app (it is the first screen); every other page is a separate chunk
+// that downloads when first visited. A failed chunk download is handled by ErrorBoundary and by the
+// `vite:preloadError` reload in main.jsx.
 import HomePage from './pages/home/HomePage';
-import NotFoundPage from './pages/NotFoundPage';
-import NotificationPreferences from './NotificationPreferences';
-import Notification from './legacy/pages/Notification';
-import PrivacyPage from './pages/static/PrivacyPage';
-import ProductPage from './pages/product/ProductPage';
-import Profile from './Profile';
-import Saved from './Saved';
-import SearchPage from './pages/search/SearchPage';
-import SellerDashboard from './SellerDashboard';
-import SellerProductDetail from './SellerProductDetail';
-import SellerRegister from './SellerRegister';
-import TermsPage from './pages/static/TermsPage';
+
+const AboutPage = lazy(() => import('./pages/static/AboutPage'));
+const BusinessPage = lazy(() => import('./pages/business/BusinessPage'));
+const CategoryPage = lazy(() => import('./pages/category/CategoryPage'));
+const EditProfile = lazy(() => import('./EditProfile'));
+const HelpPage = lazy(() => import('./pages/static/HelpPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const NotificationPreferences = lazy(() => import('./NotificationPreferences'));
+const Notification = lazy(() => import('./legacy/pages/Notification'));
+const PrivacyPage = lazy(() => import('./pages/static/PrivacyPage'));
+const ProductPage = lazy(() => import('./pages/product/ProductPage'));
+const Profile = lazy(() => import('./Profile'));
+const Saved = lazy(() => import('./Saved'));
+const SearchPage = lazy(() => import('./pages/search/SearchPage'));
+const SellerDashboard = lazy(() => import('./SellerDashboard'));
+const SellerProductDetail = lazy(() => import('./SellerProductDetail'));
+const SellerRegister = lazy(() => import('./SellerRegister'));
+const TermsPage = lazy(() => import('./pages/static/TermsPage'));
 
 // Contexts
 import { useSaved } from './contexts/SavedContext';
