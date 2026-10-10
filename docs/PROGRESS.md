@@ -18,6 +18,17 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-10-10 · B2.6 — Location chip, area picker & first-visit prompt verification · dk · Antigravity (Gemini Flash)
+- Done: **Verified** Task B2.6 (Location chip, area picker and first-visit prompt, using location store A2.2). Verified all requirements against codebase and browser runtime (390×844): `LocationChip.jsx` (MapPin, truncated label, fallback to "Set location", opens `AreaPickerSheet`), `AreaPickerSheet.jsx` (calls `requestGps`, inline GPS error handling with sheet staying open, filterable `MUMBAI_AREAS` list, selection updating location and closing sheet, "Clear location"), `LocationPrompt.jsx` (first-visit card on Home when `asked === false` under hero, "See what's near you", "Use my location", "Choose area", dismiss X, calls `markAsked`, never auto-triggers browser geolocation prompt on load), and header integrations on `HomeHeader`, `SearchPage`, and `CategoryPage`. Added `.wrangler` to `eslint.config.js` `globalIgnores`.
+- Files: updated `eslint.config.js`, `docs/PROGRESS.md`.
+- How verified:
+  1. `npx vitest run src/stores/location.test.js` — **20/20 store tests passed**.
+  2. Full test suite: `npx vitest run` — **17 test files / 150 tests passed**.
+  3. Full check: `npm run check` — guards OK (165 source files), ESLint 0 errors, Vitest 150/150 passed, Vite build OK (289 modules).
+  4. Browser automated flow on `http://localhost:5173` (390×844): first-visit prompt card display, dismiss action, area search and selection ("Bandra West"), distance display update on feeds, sheet clear location, and header chips verified on Home, Search, and Category pages.
+- Not done / left out (why): Live GPS permission granted test depends on device hardware; simulated denial error path verified inline.
+- Next step: A2.1 / A1.6 — Cloudflare Pages setup & preview/prod environment runtime variables, or F5 hosted DB checks.
+
 ### 2026-10-09 · A2.3 — OG functions verification & local runtime test · dk · Antigravity (Claude Sonnet / Gemini Flash)
 - Done: **Verified** Task A2.3 (per-item Open Graph tags via Cloudflare Pages Functions, DECISIONS D19) both via test suite and locally with `wrangler pages dev` against live Supabase dev data using public anon key. All three function files (`functions/_lib/og.ts`, `functions/p/[id].ts`, `functions/b/[slug].ts`) and test suites are working as expected.
 - Files: updated `docs/PROGRESS.md`.
