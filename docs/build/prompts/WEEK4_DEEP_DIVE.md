@@ -176,4 +176,4 @@ Then send `11_SOW_REV2_CHANGES.md` §6.3 with the **₹3,600 (30%)** invoice. Lo
 
 1. PROGRESS: RLS matrix results; every remaining legacy file in `scripts/legacy-allowlist.json` (it should be down to the notification screens, contexts and `LegacyPage`).
 2. Waiting on client: domain (critical now — production is next week), privacy policy and terms text, support phone/email, logo, launch sellers.
-3. Next week has production. If the domain isn't bought by Monday, production goes live on `tibu-v1.pages.dev` with a promise to switch — say it plainly in the update.
+3. Next week has production. If the domain isn't bought by Monday, production goes live on `tibu-app.pages.dev` with a promise to switch — say it plainly in the update.

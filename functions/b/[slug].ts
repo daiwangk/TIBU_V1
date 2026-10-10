@@ -5,6 +5,7 @@
 import {
   SLUG_RE,
   businessOg,
+  fallbackShell,
   fetchFirstRow,
   siteOrigin,
   withOgTags,
@@ -14,11 +15,12 @@ import {
 const SELECT = 'name,description,locality,banner_url,logo_url,categories(name)';
 
 export const onRequest = async ({ params, env, request }: OgContext): Promise<Response> => {
-  const shell = await env.ASSETS.fetch(new URL('/', request.url));
-  const slug = String(params.slug ?? '');
-  if (!SLUG_RE.test(slug)) return shell;
-
+  let shell: Response | undefined;
   try {
+    shell = await env.ASSETS.fetch(new URL('/', request.url));
+    const slug = String(params.slug ?? '');
+    if (!SLUG_RE.test(slug)) return shell;
+
     const row = await fetchFirstRow<Parameters<typeof businessOg>[0]>(
       env,
       `businesses?slug=eq.${slug}&status=eq.approved&select=${SELECT}&limit=1`,
@@ -26,6 +28,6 @@ export const onRequest = async ({ params, env, request }: OgContext): Promise<Re
     if (!row) return shell;
     return withOgTags(shell, businessOg(row, siteOrigin(env, request), `/b/${slug}`));
   } catch {
-    return shell;
+    return shell ?? fallbackShell(env, request);
   }
 };

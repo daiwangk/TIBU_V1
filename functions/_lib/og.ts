@@ -169,5 +169,18 @@ export function withOgTags(shell: Response, og: OgTags): Response {
   out.headers.delete('ETag');
   out.headers.delete('Last-Modified');
   out.headers.set('Cache-Control', CACHE_CONTROL);
+  out.headers.set('Content-Type', 'text/html; charset=utf-8');
   return out;
+}
+
+/** Last resort when the shell itself could not be fetched or rewritten: try "/" once more, else an empty page. Never throws. */
+export async function fallbackShell(env: OgEnv, request: Request): Promise<Response> {
+  try {
+    return await env.ASSETS.fetch(new URL('/', request.url));
+  } catch {
+    return new Response('<!doctype html><meta charset="utf-8"><title>Tibu</title>', {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    });
+  }
 }

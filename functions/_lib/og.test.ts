@@ -1,15 +1,17 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   SLUG_RE,
   UUID_RE,
   absoluteUrl,
   businessOg,
   esc,
+  fallbackShell,
   formatRupees,
   productOg,
   renderMeta,
   siteOrigin,
   truncate,
+  withOgTags,
   type OgEnv,
 } from './og';
 
@@ -162,5 +164,38 @@ describe('renderMeta', () => {
     expect(html).not.toContain('og:image');
     expect(html).not.toContain('twitter:image');
     expect(html).toContain('summary_large_image');
+  });
+});
+
+describe('withOgTags response headers', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('sets an explicit utf-8 Content-Type and a single Cache-Control', () => {
+    // HTMLRewriter only exists in the Workers runtime: a pass-through fake is enough to test the headers.
+    class FakeRewriter {
+      on() { return this; }
+      transform(response: Response) { return response; }
+    }
+    vi.stubGlobal('HTMLRewriter', FakeRewriter);
+    const shell = new Response('<html></html>', { headers: { 'Content-Type': 'text/html', ETag: 'abc' } });
+    const out = withOgTags(shell, { type: 'website', title: 'T', description: '₹350', image: null, url: ORIGIN });
+    expect(out.headers.get('Content-Type')).toBe('text/html; charset=utf-8');
+    expect(out.headers.get('Cache-Control')).toBe('public, max-age=300');
+    expect(out.headers.get('ETag')).toBeNull();
+  });
+});
+
+describe('fallbackShell', () => {
+  const request = new Request('https://example.test/p/x');
+
+  it('returns the shell from a second attempt', async () => {
+    const res = await fallbackShell(env({ ASSETS: { fetch: async () => new Response('shell') } }), request);
+    expect(await res.text()).toBe('shell');
+  });
+
+  it('returns a 200 utf-8 page, never throws, when assets are unavailable', async () => {
+    const res = await fallbackShell(env({ ASSETS: { fetch: async () => { throw new Error('down'); } } }), request);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/html; charset=utf-8');
   });
 });

@@ -70,7 +70,7 @@ cp ../tibu-update-2026-10-02/reference/src/services/supabase/details.* src/servi
 
 ### A: A1.7 — Auth URLs (30 min)
 
-Supabase → Authentication → URL configuration: Site URL `https://tibu-v1.pages.dev`; redirect URLs `http://localhost:5173/**` and `https://*.tibu-v1.pages.dev/**` and `https://tibu-v1.pages.dev/**`. SMTP waits for the domain (Week 3).
+Supabase → Authentication → URL configuration: Site URL `https://tibu-app.pages.dev`; redirect URLs `http://localhost:5173/**` and `https://*.tibu-app.pages.dev/**` and `https://tibu-app.pages.dev/**`. SMTP waits for the domain (Week 3).
 
 ### B: B1.7 — Product page (2 h), then B1.8 — Business page (3 h)
 
@@ -88,12 +88,12 @@ Build on mock data (`VITE_DATA_SOURCE=mock`) — don't wait for A1.5. If R1 merg
 
 ### A: A2.1 — Real data on the preview (1.5 h)
 
-**What this is:** the moment the hosted app stops showing fake data. Cloudflare Pages → Settings → Environment variables. Set **both Preview and Production** (Production is what `tibu-v1.pages.dev` serves from `main`, and that's the URL you'll demo):
+**What this is:** the moment the hosted app stops showing fake data. Cloudflare Pages → Settings → Environment variables. Set **both Preview and Production** (Production is what `tibu-app.pages.dev` serves from `main`, and that's the URL you'll demo):
 ```
 VITE_DATA_SOURCE = supabase
 VITE_SUPABASE_URL = https://<dev-ref>.supabase.co
 VITE_SUPABASE_ANON_KEY = <anon key>
-VITE_SITE_URL = https://tibu-v1.pages.dev
+VITE_SITE_URL = https://tibu-app.pages.dev
 ```
 Redeploy (Deployments → ⋯ → Retry deployment). `VITE_*` values are baked in at build time — changing them without a rebuild does nothing.
 
@@ -145,7 +145,7 @@ Add to Cloudflare Pages env (Preview and Production): `SUPABASE_URL`, `SUPABASE_
 
 **Verify — on real phones, not just curl:**
 ```bash
-curl -s -A "WhatsApp/2.23.20" https://tibu-v1.pages.dev/p/<seeded-uuid> | grep -E "og:(title|image|description)"
+curl -s -A "WhatsApp/2.23.20" https://tibu-app.pages.dev/p/<seeded-uuid> | grep -E "og:(title|image|description)"
 ```
 Then send the link to yourself on WhatsApp from an Android phone and an iPhone. You need a card with the photo, name and price. WhatsApp caches previews per URL: after any change, test with `?v=2`, `?v=3`. The seed's images are JPEGs, so they should preview; real uploads (WebP) are tested again in A4.2 (D18).
 
@@ -187,7 +187,7 @@ The B2.4 verify item that's easy to skip: `node scripts/check-guards.mjs` must p
 
 ### Both: B2.5 — QA pass (2 h)
 
-Run the Antigravity browser-agent prompt from `W2…` against `https://tibu-v1.pages.dev` at 360, 390 and 430 px. Fix **blockers and majors only**, each as a small S7 task. Minor issues go into PROGRESS for Week 3 — don't polish on demo day.
+Run the Antigravity browser-agent prompt from `W2…` against `https://tibu-app.pages.dev` at 360, 390 and 430 px. Fix **blockers and majors only**, each as a small S7 task. Minor issues go into PROGRESS for Week 3 — don't polish on demo day.
 
 Then fill the audit closure table (`07_QA_AND_SIGNOFF.md` §3): every bug from the original review, with "fixed (PR #)", "eliminated by rebuild (PR #)" or "removed as Phase 2 (PR #)". **This table is the 40% payment.** Rev2 §8 ties the first payment to "all identified bugs fixed"; the table is how she checks it in two minutes.
 
@@ -208,7 +208,7 @@ After the call: send `11_SOW_REV2_CHANGES.md` §6.2 with the **₹4,800 (40%)** 
 
 ## End-of-week review (Saturday, 20 minutes)
 
-1. **Exit check:** on a phone, incognito, `https://tibu-v1.pages.dev`: Home → set area → Category → Search → Business (three tabs) → Product → paste the link into WhatsApp. All real data, no console errors.
+1. **Exit check:** on a phone, incognito, `https://tibu-app.pages.dev`: Home → set area → Category → Search → Business (three tabs) → Product → paste the link into WhatsApp. All real data, no console errors.
 2. RLS zero-rows query once more.
 3. PROGRESS: tick what's merged; "Waiting on client" — domain (date asked), decisions (date asked), reel links, logo.
 4. **Domain check:** if she hasn't bought it by now, say plainly this week that customer sign-up testing in Week 3 is limited to your own email addresses until she does (`10` F6).

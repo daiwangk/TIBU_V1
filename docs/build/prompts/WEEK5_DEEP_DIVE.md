@@ -25,7 +25,7 @@ Fri 30   A: A5.3 ops + push on prod                                 B: B5.4 a11y
 
 ## Before Monday
 
-- **Domain:** bought, and you have DNS access. If not, production goes live on `tibu-v1.pages.dev` this week and moves to the domain later. Links people share keep working because the `pages.dev` address stays live after a custom domain is added.
+- **Domain:** bought, and you have DNS access. If not, production goes live on `tibu-app.pages.dev` this week and moves to the domain later. Links people share keep working because the `pages.dev` address stays live after a custom domain is added.
 - **Legal text:** her privacy policy, terms, and support phone/email are needed by Friday (static pages from B2.4 still show "Draft"). The privacy policy must mention three things you built: admins can read chat messages (D31), push notifications are optional, and seller locations are shown approximately (D38). You can help her draft it in Claude.ai, but she owns the text and should have it checked — you aren't lawyers.
 - **Icons for push and the home-screen install:** `icon-192.png`, `icon-512.png`, `icon-512-maskable.png`, `badge-72.png` from the final logo (R6).
 
@@ -66,7 +66,7 @@ Step by step, with the traps:
    ```
    **No seed script and no smoke test on prod** — the smoke test creates fake users.
 3. Enable pg_cron, run `supabase/cron.sql`.
-4. **Auth:** Site URL `https://<domain>`; redirect URLs `https://<domain>/**` (and `https://tibu-v1.pages.dev/**` while both exist). SMTP exactly as dev (Resend, same verified domain). Copy the branded templates.
+4. **Auth:** Site URL `https://<domain>`; redirect URLs `https://<domain>/**` (and `https://tibu-app.pages.dev/**` while both exist). SMTP exactly as dev (Resend, same verified domain). Copy the branded templates.
 5. **Cloudflare Pages → Production environment** (it pointed at dev since A2.1): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` → prod; `VITE_SITE_URL` and `SITE_URL` → `https://<domain>`. Preview keeps pointing at dev — that's your staging. Redeploy `main`.
    **Whose Cloudflare account is this?** If the Pages project lives in your account rather than Laiba's, decide now: as far as I know Pages projects can't be moved between accounts, so the clean path is to create the production Pages project in her account (connected to this repo, same build settings and env vars) and attach her domain there. Doing it now avoids redoing DNS on handover night (`WEEK6_DEEP_DIVE.md`, transfers step 2).
 6. **Custom domain:** Pages → Custom domains → add `<domain>` and `www.<domain>`. An apex domain (no `www`) needs the domain's nameservers on Cloudflare (free). If you move the nameservers, check that the Resend SPF/DKIM records came across in Cloudflare DNS before you switch — otherwise sign-up emails stop.
