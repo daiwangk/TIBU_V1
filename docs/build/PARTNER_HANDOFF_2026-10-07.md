@@ -116,7 +116,7 @@ Run the query from `docs/build/06_BACKEND_RUNBOOK.md` §4 item 3 (list of functi
 ## 3. Auth URLs on dev (A1.7, 30 minutes)
 
 Supabase dashboard → **Authentication → URL configuration**:
-- **Site URL:** `https://tibu-v1.pages.dev` (or the new Cloudflare production URL if step 4 gives you a different name — update it afterwards).
+- **Site URL:** `https://tibu-app.pages.dev` (or the new Cloudflare production URL if step 4 gives you a different name — update it afterwards).
 - **Redirect URLs** (add all three, using your Cloudflare project's name — not a bare `*.pages.dev`, which is too broad): `http://localhost:5173/**`, `https://*.<your-pages-project>.pages.dev/**` and `https://<your-pages-project>.pages.dev/**`.
 - Providers: email + password **on**; **Confirm email stays ON** (decision D12).
 
@@ -139,7 +139,7 @@ Why now: sign-up and "forgot password" land in Week 3 and silently fail if these
 |---|---|---|---|
 | `NODE_VERSION` | `22` | build | |
 | `VITE_DATA_SOURCE` | **`mock` for now** | build | switched to `supabase` in step 5 |
-| `VITE_SITE_URL` | the project's URL, e.g. `https://tibu-v1.pages.dev` | build | |
+| `VITE_SITE_URL` | the project's URL, e.g. `https://tibu-app.pages.dev` | build | |
 | `VITE_SUPABASE_URL` | `https://<tibu-dev ref>.supabase.co` | build | public |
 | `VITE_SUPABASE_ANON_KEY` | the **anon / publishable** key | build | Project settings → API. If this ever holds a `service_role` or `sb_secret_…` key the app throws and CI fails — rotate that key immediately |
 | `SUPABASE_URL` | same URL | **runtime** (Functions) | read by the link-preview functions |

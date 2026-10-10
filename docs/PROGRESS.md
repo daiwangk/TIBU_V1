@@ -4,19 +4,29 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Now
 - Week: 2 (5–9 Oct 2026) · Milestone 1 target: end of Week 2
-- Data source on preview: `mock` · Production URL: `https://tibu-v1.pages.dev`
+- Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
 - Last green commit on main: `2b593bb` (local merge of A2.3 and the review fixes; push pending)
 - Merged this week: A2.1 real-data setup (local only), A2.1 preview audit & contract shape tests, A2.2 location store, B2.1 Home, B2.2 Category page, B2.3 Search page, B2.4 cleanup, A2.4 error toasts, B2.6 location UX, R1 part 2 (contract v1.2, code), B2.5 QA sweep + fixes, R2 Rev2 page fields, A2.3 OG link previews (code, tested locally), review fixes (below)
 - In progress: —
 - **Handoff for the partner: `docs/build/PARTNER_HANDOFF_2026-10-07.md`** (ordered runbook for the database, Auth URLs, Cloudflare, real data, link previews, demo).
-- Needs you (cannot be done from the repo): **R1 part 1** — push migrations 0008/0009 to `tibu-dev` (`npx supabase projects list` → `migration list` → `db push`, then the SQL checks and regenerate `docs/kit/rpc-signatures.txt`). Until then do not run the Supabase data source against `tibu-dev`. Also: recreate the Cloudflare Pages project via Connect to Git (A1.6/A2.1), send the client message in `docs/build/11_SOW_REV2_CHANGES.md` §6.1, collect 3–4 public Instagram reel links.
+- Needs you (cannot be done from the repo): send the client message (decisions D10/D12/D27/D35/D38, the domain, the M1 definition; see `docs/build/11_SOW_REV2_CHANGES.md` §6.1) and collect 3–4 public Instagram reel links. Then: WhatsApp card on real phones (Android + iPhone, add ?v=2), GPS allow/deny test on a real phone over HTTPS, then M1 demo (Mon 12 Oct unless told otherwise).
 - Next task: A2.1 preview/prod env (after the Cloudflare project; A2.3's functions need the same project and three runtime variables) → rehearse the M1 demo on a real phone → M1. Also open: A1.7 auth URLs on dev, F5 hosted DB checks.
 - Deferred follow-ups: none from Week 2 pages. Saved reel taps are a no-op until Saved is rebuilt (B3.5); legacy Saved “View All →” is 24 px high (B3.5).
-- Blocked: Cloudflare preview build requires Pages project recreation via Connect to Git on `daiwangk/TIBU_V1` (waiting on Daiwang Cloudflare GitHub app approval if needed)
+- Blocked: — (resolved: the Pages project was recreated as `tibu-app` via Connect to Git on `daiwangk/TIBU_V1`, deployed 2026-10-08; `/p/anything` returns 200)
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
+- Hosting: Cloudflare Pages project is `tibu-app` (`https://tibu-app.pages.dev`). A2.1 and A2.3 were verified server-side on 2026-10-10. Still to verify: the WhatsApp link-preview card on real phones.
+- Client commercials: 40% (₹4,800) received. The M1 definition and the domain are still unconfirmed in writing.
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-10 · Audit fixes: details mapping, OG robustness, stale URL · dk · Claude Code (Sonnet 5.5)
+- Done: **Details:** copied `details.js` + `details.test.js` from the update pack into `src/services/supabase/`; `mappers.js` now uses `detailsFromDb()` instead of the inline `mapDetails` (seed-form `{"shelf_life":"10 days"}` → `[{label:"Shelf life", value:"10 days"}]`; empty-value rows dropped). **OG functions:** `withOgTags` sets `Content-Type: text/html; charset=utf-8`; `functions/p/[id].ts` and `functions/b/[slug].ts` fetch the shell inside the try/catch, and any failure falls back to the shell, then a second `ASSETS.fetch("/")`, then a minimal 200 page (new `fallbackShell` in `og.ts`) — the functions cannot throw a 5xx. **Docs:** live-site URL `tibu-v1.pages.dev` → `tibu-app.pages.dev` in the "Now" section, the handoff (Site URL and `VITE_SITE_URL` lines), `og-testing.md` and the Week 2–5 prompts; "Now" updated (Blocked resolved, hosting, client payment).
+- Files: new `src/services/supabase/details.js`, `details.test.js`; modified `src/services/supabase/mappers.js`, `mappers.test.js`, `functions/_lib/og.ts`, `og.test.ts`, `functions/p/[id].ts`, `functions/b/[slug].ts`, `docs/PROGRESS.md`, `docs/build/PARTNER_HANDOFF_2026-10-07.md`, `docs/build/og-testing.md`, `docs/build/prompts/WEEK2…WEEK5_DEEP_DIVE.md`.
+- How verified: `npm run check` and `node scripts/check-guards.mjs` (see the session output). The charset header test uses a pass-through fake `HTMLRewriter`, so the real Workers runtime was not exercised.
+- Not done / left out (why): `patches/0003` not applied (it would duplicate the catalog adapter). Old-project history lines (log entries, handoff §"Why" and the `tibu-v1` project-name line) and `og.ts`/`og.test.ts` URL fixtures left as they were on purpose. The "Needs you" line still lists recreating the Pages project. `SearchPage.jsx` is still over the 250-line limit (guard warning). Nothing committed or pushed; the new headers have not been checked against the live site.
+- Next step (exact): redeploy, then `curl -sI -A "WhatsApp/2.23.20" https://tibu-app.pages.dev/p/<seeded-uuid>` and confirm `content-type: text/html; charset=utf-8`; then paste a product link into WhatsApp on a real phone.
+- Gotchas for the next person: `mapDetails` no longer exists; use `detailsFromDb` / `detailsToDb` from `src/services/supabase/details.js`.
 
 ### 2026-10-10 · B2.6 — Location chip, area picker & first-visit prompt verification · dk · Antigravity (Gemini Flash)
 - Done: **Verified** Task B2.6 (Location chip, area picker and first-visit prompt, using location store A2.2). Verified all requirements against codebase and browser runtime (390×844): `LocationChip.jsx` (MapPin, truncated label, fallback to "Set location", opens `AreaPickerSheet`), `AreaPickerSheet.jsx` (calls `requestGps`, inline GPS error handling with sheet staying open, filterable `MUMBAI_AREAS` list, selection updating location and closing sheet, "Clear location"), `LocationPrompt.jsx` (first-visit card on Home when `asked === false` under hero, "See what's near you", "Use my location", "Choose area", dismiss X, calls `markAsked`, never auto-triggers browser geolocation prompt on load), and header integrations on `HomeHeader`, `SearchPage`, and `CategoryPage`. Added `.wrangler` to `eslint.config.js` `globalIgnores`.

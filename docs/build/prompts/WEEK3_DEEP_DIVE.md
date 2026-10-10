@@ -131,7 +131,7 @@ Three screens and a live `SaveButton` everywhere. Deletes `SavedContext.jsx`, `S
 
 ### Both: the exit check (on two real phones)
 
-Incognito, on `https://tibu-v1.pages.dev`:
+Incognito, on `https://tibu-app.pages.dev`:
 1. Open a product → tap WhatsApp → login sheet → "Create an account" → sign up.
 2. Confirm from the email (Android: Gmail app; iPhone: Gmail app, then the iOS Mail app on a second account).
 3. Back in the original tab, log in if needed → **WhatsApp opens** with the right number and the exact message and link.

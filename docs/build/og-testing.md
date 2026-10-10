@@ -14,7 +14,7 @@ Both read the item with the **public anon key** over the REST API (RLS decides w
 |---|---|---|
 | `SUPABASE_URL` | `https://<project-ref>.supabase.co` | runtime variable (not `VITE_`) — set for Production and Preview |
 | `SUPABASE_ANON_KEY` | the anon / publishable key | public by design; still never the service-role key |
-| `SITE_URL` | `https://tibu-v1.pages.dev` (later her domain) | used for `og:url`; if empty the request's own origin is used |
+| `SITE_URL` | `https://tibu-app.pages.dev` (later her domain) | used for `og:url`; if empty the request's own origin is used |
 
 These are separate from the `VITE_*` build variables. Pages Functions read runtime variables, so no rebuild is needed after changing them (a new deployment is).
 

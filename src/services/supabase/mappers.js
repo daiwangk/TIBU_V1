@@ -3,6 +3,8 @@
  * Never map contact columns.
  */
 
+import { detailsFromDb } from './details.js';
+
 /**
  * @param {number|null|undefined} paise
  * @returns {number}
@@ -20,31 +22,6 @@ export function paiseToRupees(paise) {
 function mapDistanceM(row, fallback) {
   if (row?.distance_m != null) return Number(row.distance_m);
   return fallback == null ? null : fallback;
-}
-
-/**
- * @param {unknown} details
- * @returns {Array<{ label: string, value: string }>}
- */
-export function mapDetails(details) {
-  if (details == null) return [];
-  if (Array.isArray(details)) {
-    return details
-      .map((item) => {
-        if (!item || typeof item !== 'object') return null;
-        const label = 'label' in item ? String(item.label) : '';
-        const value = 'value' in item ? String(item.value) : '';
-        return label ? { label, value } : null;
-      })
-      .filter(Boolean);
-  }
-  if (typeof details === 'object') {
-    return Object.entries(details).map(([label, value]) => ({
-      label,
-      value: value == null ? '' : String(value),
-    }));
-  }
-  return [];
 }
 
 /**
@@ -260,7 +237,7 @@ export function mapProductDetail(row, distanceM) {
     createdAt: String(row.created_at ?? ''),
     description: String(row.description ?? ''),
     images,
-    details: mapDetails(row.details),
+    details: detailsFromDb(row.details),
     business,
     // v1.2 effective values: product override ?? business. `??`, never `||` — false is a real value (D37).
     deliveryAvailable: Boolean(row.delivery_available ?? biz.delivery_available),

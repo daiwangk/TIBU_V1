@@ -3,13 +3,13 @@ import {
   mapBusinessDetail,
   mapBusinessSummary,
   mapCategory,
-  mapDetails,
   mapProductDetail,
   mapProductSummaryFromSearch,
   mapProductSummaryNested,
   mapReview,
   paiseToRupees,
 } from './mappers.js';
+import { detailsFromDb } from './details.js';
 
 /** Recursively collect object keys. */
 function allKeys(value, out = new Set()) {
@@ -47,10 +47,16 @@ describe('supabase mappers', () => {
     }).price).toBe(350);
   });
 
-  it('maps details jsonb object to [{ label, value }]', () => {
-    expect(mapDetails({ weight: '500g', serves: '4' })).toEqual([
-      { label: 'weight', value: '500g' },
-      { label: 'serves', value: '4' },
+  it('maps details jsonb object to [{ label, value }] with humanized labels', () => {
+    expect(detailsFromDb({ weight: '500g', serves: '4' })).toEqual([
+      { label: 'Weight', value: '500g' },
+      { label: 'Serves', value: '4' },
+    ]);
+  });
+
+  it('humanizes seed keys and drops rows with an empty value', () => {
+    expect(detailsFromDb({ shelf_life: '10 days', weight: '' })).toEqual([
+      { label: 'Shelf life', value: '10 days' },
     ]);
   });
 
