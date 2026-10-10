@@ -1,6 +1,36 @@
 import { AppError } from '../errors.js';
 
 /**
+ * Supabase Auth errors → contract codes (CONTRACT §11, A3.1 rows). Codes first, then the older message
+ * text, so an auth-js upgrade that drops one of them doesn't turn a wrong password into "Something went wrong".
+ *
+ * @param {unknown} err
+ * @param {string} message
+ * @param {string} code
+ * @returns {AppError|null}
+ */
+function mapAuthError(err, message, code) {
+  const status = err && typeof err === 'object' && 'status' in err ? Number(err.status) : 0;
+
+  if (code === 'invalid_credentials' || /invalid login credentials/i.test(message)) {
+    return new AppError('validation', 'Email or password is incorrect', err);
+  }
+  if (code === 'email_not_confirmed' || /email not confirmed/i.test(message)) {
+    return new AppError('validation', 'Please confirm your email first', err);
+  }
+  if (code === 'user_already_exists' || code === 'email_exists' || /user already registered/i.test(message)) {
+    return new AppError('conflict', 'An account with this email already exists', err);
+  }
+  if (code === 'weak_password' || /password should be at least/i.test(message)) {
+    return new AppError('validation', 'Choose a stronger password', err);
+  }
+  if (code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit' || status === 429) {
+    return new AppError('rate_limited', 'Too many requests — try again in a bit', err);
+  }
+  return null;
+}
+
+/**
  * Map a Supabase / PostgREST / Postgres error to a contract `AppError` (CONTRACT §11).
  * Match the **message prefix** first (several share an errcode), then the code.
  *
@@ -16,6 +46,11 @@ export function mapSupabaseError(err) {
   const code = String(
     (err && typeof err === 'object' && 'code' in err && err.code) || '',
   );
+
+  // Supabase Auth (GoTrue) errors carry a string `code` ("invalid_credentials") and an HTTP `status`.
+  // Documented addition to CONTRACT §11 (A3.1). Matched first: their codes never collide with Postgres ones.
+  const authError = mapAuthError(err, message, code);
+  if (authError) return authError;
 
   // Message-prefix matches first (shared errcodes like P0002).
   // PGRST301 / PGRST303: expired or invalid JWT, treated like a missing login.
