@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   mapBusinessDetail,
+  mapBusinessSummary,
+  mapCategory,
   mapProductDetail,
   mapProductSummaryFromSearch,
+  mapProductSummaryNested,
+  mapReview,
   paiseToRupees,
 } from './mappers.js';
 import { detailsFromDb } from './details.js';
@@ -419,6 +423,263 @@ describe('supabase mappers', () => {
     it('is null when neither the product nor the business states a delivery time', () => {
       const detail = mapProductDetail(product({}, { delivery_time: null }));
       expect(detail.deliveryTime).toBeNull();
+    });
+  });
+
+  describe('CONTRACT.md §2–§3 exact shape coverage', () => {
+    it('Category matches CONTRACT.md §2', () => {
+      const category = mapCategory({
+        slug: 'handmade',
+        name: 'Handmade',
+        parent_slug: null,
+        sort_order: 3,
+      });
+      expect(Object.keys(category).sort()).toEqual([
+        'name',
+        'parentSlug',
+        'slug',
+        'sortOrder',
+      ]);
+    });
+
+    it('BusinessSummary matches CONTRACT.md §3', () => {
+      const summary = mapBusinessSummary({
+        id: 'b1',
+        slug: 'knotty-tales',
+        name: 'Knotty Tales',
+        category_slug: 'crochet',
+        category_name: 'Crochet',
+        logo_url: 'https://x/logo.webp',
+        banner_url: 'https://x/banner.webp',
+        locality: 'Juhu',
+        city: 'Mumbai',
+        rating_avg: 5,
+        rating_count: 1,
+        available_today: true,
+        delivery_available: true,
+        pickup_available: false,
+        approved_at: '2026-09-25T00:00:00Z',
+        distance_m: 1500,
+      });
+      expect(Object.keys(summary).sort()).toEqual([
+        'approvedAt',
+        'availableToday',
+        'bannerUrl',
+        'categoryName',
+        'categorySlug',
+        'city',
+        'deliveryAvailable',
+        'distanceM',
+        'id',
+        'locality',
+        'logoUrl',
+        'name',
+        'pickupAvailable',
+        'rating',
+        'reviewCount',
+        'slug',
+      ]);
+    });
+
+    it('ProductSummary matches CONTRACT.md §3 (search RPC & nested)', () => {
+      const fromSearch = mapProductSummaryFromSearch({
+        id: 'p1',
+        name: 'Crochet Teddy Bear',
+        price_paise: 85000,
+        image_url: 'https://x/teddy.webp',
+        available_today: false,
+        business_id: 'b1',
+        business_slug: 'knotty-tales',
+        business_name: 'Knotty Tales',
+        business_logo_url: 'https://x/logo.webp',
+        locality: 'Juhu',
+        rating_avg: 5,
+        category_slug: 'crochet',
+        created_at: '2026-09-25T00:00:00Z',
+        distance_m: 1500,
+      });
+      const expectedKeys = [
+        'availableToday',
+        'businessId',
+        'businessLogoUrl',
+        'businessName',
+        'businessRating',
+        'businessSlug',
+        'categorySlug',
+        'createdAt',
+        'distanceM',
+        'id',
+        'imageUrl',
+        'locality',
+        'name',
+        'price',
+      ];
+      expect(Object.keys(fromSearch).sort()).toEqual(expectedKeys);
+
+      const nested = mapProductSummaryNested(
+        {
+          id: 'p1',
+          name: 'Crochet Teddy Bear',
+          price_paise: 85000,
+          available_today: false,
+          is_active: true,
+          created_at: '2026-09-25T00:00:00Z',
+          product_images: [{ id: 'pi1', url: 'https://x/teddy.webp', sort_order: 0 }],
+          categories: { slug: 'crochet' },
+        },
+        {
+          id: 'b1',
+          slug: 'knotty-tales',
+          name: 'Knotty Tales',
+          logoUrl: 'https://x/logo.webp',
+          locality: 'Juhu',
+          rating: 5,
+          categorySlug: 'crochet',
+          distanceM: 1500,
+        },
+      );
+      expect(Object.keys(nested).sort()).toEqual(expectedKeys);
+    });
+
+    it('BusinessDetail matches CONTRACT.md §3', () => {
+      const detail = mapBusinessDetail({
+        id: 'b1',
+        slug: 'knotty-tales',
+        name: 'Knotty Tales',
+        description: 'Handmade crochet',
+        address_text: 'Shop 4, Juhu',
+        locality: 'Juhu',
+        city: 'Mumbai',
+        logo_url: 'https://x/logo.webp',
+        banner_url: null,
+        available_today: true,
+        delivery_available: true,
+        pickup_available: false,
+        delivery_time: '2–3 days',
+        established_year: 2021,
+        rating_avg: 5,
+        rating_count: 1,
+        approved_at: '2026-09-25T00:00:00Z',
+        distance_m: 1500,
+        categories: { slug: 'crochet', name: 'Crochet' },
+        business_images: [{ id: 'i1', url: 'https://x/1.webp', sort_order: 0 }],
+        business_videos: [],
+        products: [],
+      });
+      expect(Object.keys(detail).sort()).toEqual([
+        'addressText',
+        'approvedAt',
+        'availableToday',
+        'bannerUrl',
+        'categoryName',
+        'categorySlug',
+        'city',
+        'deliveryAvailable',
+        'deliveryTime',
+        'description',
+        'distanceM',
+        'establishedYear',
+        'id',
+        'images',
+        'locality',
+        'logoUrl',
+        'name',
+        'pickupAvailable',
+        'products',
+        'rating',
+        'reviewCount',
+        'slug',
+        'videos',
+      ]);
+    });
+
+    it('ProductDetail matches CONTRACT.md §3', () => {
+      const detail = mapProductDetail({
+        id: 'p1',
+        name: 'Crochet Teddy Bear',
+        price_paise: 85000,
+        description: 'Cute handcrafted bear',
+        details: [{ label: 'Material', value: 'Cotton' }],
+        available_today: false,
+        is_active: true,
+        created_at: '2026-09-25T00:00:00Z',
+        delivery_available: null,
+        pickup_available: null,
+        delivery_time: null,
+        distance_m: 1500,
+        product_images: [{ id: 'pi1', url: 'https://x/teddy.webp', sort_order: 0 }],
+        categories: { slug: 'crochet' },
+        businesses: {
+          id: 'b1',
+          slug: 'knotty-tales',
+          name: 'Knotty Tales',
+          description: 'Handmade crochet',
+          address_text: 'Shop 4, Juhu',
+          locality: 'Juhu',
+          city: 'Mumbai',
+          logo_url: 'https://x/logo.webp',
+          banner_url: null,
+          available_today: true,
+          delivery_available: true,
+          pickup_available: false,
+          delivery_time: '2–3 days',
+          established_year: 2021,
+          rating_avg: 5,
+          rating_count: 1,
+          approved_at: '2026-09-25T00:00:00Z',
+          categories: { slug: 'crochet', name: 'Crochet' },
+        },
+      });
+      expect(Object.keys(detail).sort()).toEqual([
+        'availableToday',
+        'business',
+        'businessId',
+        'businessLogoUrl',
+        'businessName',
+        'businessRating',
+        'businessSlug',
+        'categorySlug',
+        'createdAt',
+        'deliveryAvailable',
+        'deliveryTime',
+        'description',
+        'details',
+        'distanceM',
+        'id',
+        'imageUrl',
+        'images',
+        'locality',
+        'name',
+        'pickupAvailable',
+        'price',
+      ]);
+    });
+
+    it('Review matches CONTRACT.md §3', () => {
+      const review = mapReview(
+        {
+          id: 'r1',
+          business_id: 'b1',
+          user_id: 'u1',
+          reviewer_name: 'Priya',
+          rating: 5,
+          body: 'Loved the quality!',
+          created_at: '2026-10-01T00:00:00Z',
+          updated_at: '2026-10-01T00:00:00Z',
+        },
+        'u1',
+      );
+      expect(Object.keys(review).sort()).toEqual([
+        'body',
+        'businessId',
+        'createdAt',
+        'id',
+        'isMine',
+        'rating',
+        'reviewerName',
+        'updatedAt',
+      ]);
+      expect(review.isMine).toBe(true);
     });
   });
 });
