@@ -8,6 +8,16 @@ import {
   searchBusinesses,
   searchProducts,
 } from './catalog.js';
+import {
+  getSession,
+  onAuthChange,
+  sendPasswordReset,
+  signIn,
+  signOut,
+  signUp,
+  updatePassword,
+} from './auth.js';
+import { getMe, updateMe, uploadAvatar } from './me.js';
 import { deletePushSubscription, savePushSubscription } from './push.js';
 
 const notImplemented = async () => {
@@ -27,16 +37,6 @@ export {
 export const getMyReview = notImplemented;
 export const saveMyReview = notImplemented;
 export const deleteMyReview = notImplemented;
-export const getSession = notImplemented;
-export const onAuthChange = notImplemented;
-export const signUp = notImplemented;
-export const signIn = notImplemented;
-export const signOut = notImplemented;
-export const sendPasswordReset = notImplemented;
-export const updatePassword = notImplemented;
-export const getMe = notImplemented;
-export const updateMe = notImplemented;
-export const uploadAvatar = notImplemented;
 export const revealContact = notImplemented;
 export const getSavedIds = notImplemented;
 export const listSavedBusinesses = notImplemented;
@@ -74,5 +74,18 @@ export const markThreadRead = notImplemented;
 export const listNotifications = notImplemented;
 export const markNotificationsRead = notImplemented;
 export const getUnreadCounts = notImplemented;
+
+export {
+  getSession,
+  onAuthChange,
+  signUp,
+  signIn,
+  signOut,
+  sendPasswordReset,
+  updatePassword,
+  getMe,
+  updateMe,
+  uploadAvatar,
+};
 
 export { savePushSubscription, deletePushSubscription };

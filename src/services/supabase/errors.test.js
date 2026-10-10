@@ -93,4 +93,23 @@ describe('mapSupabaseError (CONTRACT §11)', () => {
     expect(mapSupabaseError({ name: 'TypeError', message: 'Load failed' }).code).toBe('network');
     expect(mapSupabaseError({ name: 'TypeError', message: "Cannot read properties of undefined (reading 'x')" }).code).toBe('unknown');
   });
+
+  it('maps Supabase Auth errors (CONTRACT section 11, A3.1 rows)', () => {
+    expect(mapSupabaseError({ code: 'invalid_credentials', message: 'Invalid login credentials', status: 400 }))
+      .toMatchObject({ code: 'validation', message: 'Email or password is incorrect' });
+    expect(mapSupabaseError({ code: 'email_not_confirmed', message: 'Email not confirmed', status: 400 }))
+      .toMatchObject({ code: 'validation', message: 'Please confirm your email first' });
+    expect(mapSupabaseError({ code: 'user_already_exists', message: 'User already registered', status: 422 }))
+      .toMatchObject({ code: 'conflict', message: 'An account with this email already exists' });
+    expect(mapSupabaseError({ code: 'weak_password', message: 'Password should be at least 6 characters.', status: 422 }))
+      .toMatchObject({ code: 'validation', message: 'Choose a stronger password' });
+    expect(mapSupabaseError({ code: 'over_email_send_rate_limit', message: 'email rate limit exceeded', status: 429 }))
+      .toMatchObject({ code: 'rate_limited' });
+    expect(mapSupabaseError({ message: 'Too many', status: 429 }).code).toBe('rate_limited');
+  });
+
+  it('falls back to the auth message text when the code is missing', () => {
+    expect(mapSupabaseError({ message: 'Invalid login credentials' }).code).toBe('validation');
+    expect(mapSupabaseError({ message: 'User already registered' }).code).toBe('conflict');
+  });
 });

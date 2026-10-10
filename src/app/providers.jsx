@@ -2,6 +2,7 @@ import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@ta
 import { Toaster, toast } from 'sonner';
 import { shouldToast, userMessage } from '../lib/errors';
 import { isAppError } from '../services/errors';
+import AuthBootstrap from './AuthBootstrap';
 
 /**
  * Global failure handler for queries and mutations.
@@ -37,12 +38,13 @@ const queryClient = new QueryClient({
 });
 
 /**
- * App-wide providers: TanStack Query + sonner toasts.
+ * App-wide providers: TanStack Query, auth session restore + sonner toasts.
  * @param {{ children: React.ReactNode }} props
  */
 export function Providers({ children }) {
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthBootstrap />
       {children}
       <Toaster position="top-center" richColors />
     </QueryClientProvider>

@@ -1,5 +1,7 @@
 # Service contract v1.2
 
+> v1.2.1 (10 Oct 2026): §11 gains five Supabase Auth rows (A3.1). Additive; no shape or function changed.
+
 > v1.2 (2 Oct 2026): SOW Rev2 — delivery time, est. year, per-product delivery override, push subscription functions, details storage rule. Migrations 0008, 0009.
 
 > v1.1 (27 Sep 2026): reconciled against the dev kit's real migrations and tested on Postgres + PostGIS — see `09_SQL_RECONCILIATION.md`. Changes from v1.0: sort values, `approvedAt`, radius/limit/availableToday rules, enquiry functions, unread counts, stats, admin rows, and new §11–§13.
@@ -383,6 +385,11 @@ Match on the **message prefix first** (several share an errcode), then the code.
 | `invalid_status:<s>`, `invalid_transition:<a>-><b>` | submit, admin | `conflict` | "That action isn't possible in the current status" |
 | 23505 unique violation | slug, video shortcode, saved/review duplicates | `conflict` | e.g. "This reel is already added" |
 | 23514 check violation, 22P02 bad input | phone/IG/slug/length checks | `validation` | field-level message from §12 |
+| Auth: `invalid_credentials` ("Invalid login credentials") | signIn | `validation` | "Email or password is incorrect" |
+| Auth: `email_not_confirmed` | signIn | `validation` | "Please confirm your email first" |
+| Auth: `user_already_exists` / `email_exists`, or sign-up returning a user with no identities | signUp | `conflict` | "An account with this email already exists" |
+| Auth: `weak_password` | signUp, updatePassword | `validation` | "Choose a stronger password" |
+| Auth: `over_email_send_rate_limit`, `over_request_rate_limit`, HTTP 429 | signUp, sendPasswordReset | `rate_limited` | "Too many requests — try again in a bit" |
 | fetch/network failure | any | `network` | "You're offline — check your connection" |
 | anything else | — | `unknown` | "Something went wrong" |
 
