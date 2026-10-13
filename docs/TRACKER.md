@@ -43,9 +43,9 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 ## Week 3 — 12–16 Oct (`WEEK3_DEEP_DIVE.md`)
 | ✓ | ID | Task | Who | Day | Est | Needs |
 |---|---|---|---|---|---|---|
-| ☐ | A3.1 | Auth + profile services, store, guards (no PKCE) | A | Mon | 2.5 | A1.5 |
+| ☑ | A3.1 | Auth + profile services, store, guards (no PKCE) | A | Mon | 2.5 | A1.5 |
 | ☐ | B3.1 | Auth pages (+ iPhone email handling) | B | Mon–Tue | 3 | A3.1 |
-| ☐ | A3.2 | Login gate + reveal contact | A | Tue | 2.5 | A3.1 |
+| ☑ | A3.2 | Login gate + reveal contact | A | Tue | 2.5 | A3.1 |
 | ☐ | A3.3 | Saved items | A | Tue | 2 | A3.1 |
 | ☐ | A3.4 | Recently viewed + previously connected | A | Wed | 2 | A3.1 |
 | ☐ | B3.2 | Login sheet | B | Wed | 2 | A3.2 |
