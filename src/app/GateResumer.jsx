@@ -14,13 +14,13 @@
 
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { getWithExpiry } from '../lib/storage.js';
 import { resumePending } from '../stores/loginGate.js';
 import { useAuthStore } from '../stores/auth.js';
 
-// Named import to pull in src/queries/contact.js — this registers the
-// 'whatsapp' and 'call' gate handlers as a module-level side effect (constraint b).
-import { performContactAction as _registerContactHandlers } from '../queries/contact.js';
+// Side-effect import to ensure 'whatsapp' and 'call' gate handlers are registered at boot
+import '../queries/contact.js';
 
 const STORAGE_KEY = 'tibu.pendingAction';
 
@@ -30,15 +30,21 @@ const STORAGE_KEY = 'tibu.pendingAction';
  */
 export function GateResumer() {
   const authStatus = useAuthStore((s) => s.status);
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Guard against running resume multiple times in the same session
+  // Guard against running resume multiple times in the same authenticated session
   const hasResumed = useRef(false);
 
   useEffect(() => {
-    // Only run when authenticated and has not resumed yet
-    if (authStatus !== 'authenticated' || hasResumed.current) return;
+    // Reset guard whenever user logs out or leaves authenticated state
+    if (authStatus !== 'authenticated') {
+      hasResumed.current = false;
+      return;
+    }
+
+    if (hasResumed.current) return;
 
     // Peek at the pending action without consuming it (resumePending will consume)
     const pending = getWithExpiry(STORAGE_KEY);
@@ -47,16 +53,17 @@ export function GateResumer() {
     hasResumed.current = true;
 
     const doResume = async () => {
-      if (pending.returnTo && location.pathname !== pending.returnTo) {
+      const currentPath = location.pathname + location.search;
+      if (pending.returnTo && currentPath !== pending.returnTo) {
         navigate(pending.returnTo, { replace: true });
         // yield one tick so the route update settles before resuming
         await new Promise((r) => setTimeout(r, 0));
       }
-      resumePending();
+      resumePending(queryClient);
     };
 
     doResume();
-  }, [authStatus, location.pathname, navigate]);
+  }, [authStatus, location.pathname, location.search, navigate, queryClient]);
 
   return null;
 }

@@ -20,9 +20,12 @@ import { businessMessage, callLink, productMessage, whatsappLink } from '../lib/
 import { revealContact } from '../services/index.js';
 import { registerGateHandler, useLoginGateStore } from '../stores/loginGate.js';
 import { useAuthStore } from '../stores/auth.js';
+import { userMessage } from '../lib/errors.js';
 import { qk } from './keys.js';
 
-const SITE_URL = import.meta.env.VITE_SITE_URL ?? '';
+const SITE_URL =
+  import.meta.env.VITE_SITE_URL ||
+  (typeof window !== 'undefined' ? window.location.origin : '');
 
 // ---------------------------------------------------------------------------
 // Plain function — shared between useContactAction and registered gate handlers
@@ -31,69 +34,76 @@ const SITE_URL = import.meta.env.VITE_SITE_URL ?? '';
 
 /**
  * Core logic: reveal contact numbers and navigate to the WA/call link.
- * Returns a promise that resolves when done (or rejects on error).
+ * Catches errors: re-opens gate on auth_required, toasts other failures.
  *
- * @param {{ type: 'whatsapp'|'call', payload: object }} action
- * @param {import('@tanstack/react-query').QueryClient} queryClient
+ * @param {{ type: 'whatsapp'|'call', payload: object, returnTo?: string }} action
+ * @param {import('@tanstack/react-query').QueryClient|null} queryClient
  */
 export async function performContactAction(action, queryClient = null) {
   const { type, payload } = action;
   const { businessId, businessSlug, businessName, product } = payload;
 
-  /** @type {import('../services/contract.js').ContactInfo} */
-  const contact = await revealContact({
-    businessId,
-    channel: type,
-    productId: product?.id ?? null,
-  });
+  try {
+    /** @type {import('../services/contract.js').ContactInfo} */
+    const contact = await revealContact({
+      businessId,
+      channel: type,
+      productId: product?.id ?? null,
+    });
 
-  // Invalidate the connected-businesses cache after a successful reveal
-  if (queryClient) {
-    await queryClient.invalidateQueries({ queryKey: qk.connected });
-  }
+    // Invalidate the connected-businesses cache without blocking the redirect
+    if (queryClient) {
+      queryClient.invalidateQueries({ queryKey: qk.connected }).catch(() => {});
+    }
 
-  if (type === 'whatsapp') {
-    const number = contact.whatsapp;
-    if (!number) {
-      toast.error("This seller hasn't added a WhatsApp number");
+    if (type === 'whatsapp') {
+      const number = contact.whatsapp;
+      if (!number) {
+        toast.error("This seller hasn't added a WhatsApp number");
+        return;
+      }
+      const text = product
+        ? productMessage(
+            { name: product.name, price: product.price },
+            `${SITE_URL}/p/${product.id}`,
+          )
+        : businessMessage({ name: businessName }, `${SITE_URL}/b/${businessSlug}`);
+
+      const link = whatsappLink(number, text);
+      if (link) {
+        // Must use window.location.href, NOT window.open — iOS blocks pop-ups after an await
+        window.location.href = link;
+      }
       return;
     }
-    const text = product
-      ? productMessage(
-          { name: product.name, price: product.price },
-          `${SITE_URL}/p/${product.id}`,
-        )
-      : businessMessage({ name: businessName }, `${SITE_URL}/b/${businessSlug}`);
 
-    const link = whatsappLink(number, text);
-    if (link) {
-      // Must use window.location.href, NOT window.open — iOS blocks pop-ups after an await
-      window.location.href = link;
+    if (type === 'call') {
+      const number = contact.phone;
+      if (!number) {
+        toast.error("This seller hasn't added a phone number");
+        return;
+      }
+      const link = callLink(number);
+      if (link) {
+        window.location.href = link;
+      }
     }
-    return;
-  }
-
-  if (type === 'call') {
-    const number = contact.phone;
-    if (!number) {
-      toast.error("This seller hasn't added a phone number");
+  } catch (err) {
+    if (err?.code === 'auth_required') {
+      useLoginGateStore.getState().request(action);
       return;
     }
-    const link = callLink(number);
-    if (link) {
-      window.location.href = link;
-    }
+    toast.error(userMessage(err));
   }
 }
 
 // ---------------------------------------------------------------------------
 // Register gate handlers once at module load time (constraint b)
-// The module is imported by GateResumer unconditionally, so handlers are
-// always present before resumePending() fires.
+// GateResumer passes its queryClient through resumePending(queryClient).
 // ---------------------------------------------------------------------------
 
-registerGateHandler('whatsapp', (action) => performContactAction(action));
-registerGateHandler('call', (action) => performContactAction(action));
+registerGateHandler('whatsapp', (action, qc) => performContactAction(action, qc));
+registerGateHandler('call', (action, qc) => performContactAction(action, qc));
 
 // ---------------------------------------------------------------------------
 // React hook
@@ -116,45 +126,37 @@ export function useContactAction() {
   const location = useLocation();
   const [pendingChannel, setPendingChannel] = useState(null);
 
-  // Re-register handlers with a closure over the current queryClient so
-  // replay after login uses the live client instance (constraint a).
-  registerGateHandler('whatsapp', (action) => performContactAction(action, queryClient));
-  registerGateHandler('call', (action) => performContactAction(action, queryClient));
-
   /**
    * @param {'whatsapp'|'call'} channel
    * @param {{ business: { id: string, slug: string, name: string }, product?: { id: string, name: string, price: number }|null }} ctx
    */
   async function start(channel, { business, product = null }) {
-    if (authStatus === 'guest') {
-      gateRequest({
-        type: channel,
-        payload: {
-          businessId: business.id,
-          businessSlug: business.slug,
-          businessName: business.name,
-          product: product ? { id: product.id, name: product.name, price: product.price } : null,
-        },
-        returnTo: location.pathname,
-      });
+    // Guard against double taps while a reveal is already in flight
+    if (pendingChannel) return;
+
+    // Ignore taps while initial session check is loading
+    if (authStatus === 'loading') return;
+
+    const action = {
+      type: channel,
+      payload: {
+        businessId: business.id,
+        businessSlug: business.slug,
+        businessName: business.name,
+        product: product ? { id: product.id, name: product.name, price: product.price } : null,
+      },
+      returnTo: location.pathname + location.search,
+    };
+
+    if (authStatus !== 'authenticated') {
+      gateRequest(action);
       return;
     }
 
     // Authenticated — call directly
     setPendingChannel(channel);
     try {
-      await performContactAction(
-        {
-          type: channel,
-          payload: {
-            businessId: business.id,
-            businessSlug: business.slug,
-            businessName: business.name,
-            product: product ? { id: product.id, name: product.name, price: product.price } : null,
-          },
-        },
-        queryClient,
-      );
+      await performContactAction(action, queryClient);
     } finally {
       setPendingChannel(null);
     }
