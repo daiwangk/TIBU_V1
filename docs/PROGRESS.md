@@ -3,22 +3,35 @@
 Every AI session starts by reading **Now** and ends by adding a **Log** entry. When a tool runs out of quota mid-task, write the entry anyway (or ask the tool to) so the next tool or person can continue.
 
 ## Now
-- Week: 2 (5–9 Oct 2026) · Milestone 1 target: end of Week 2
+- Week: 3 (12–16 Oct 2026) · Target: Accounts, contact, retention
 - Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
-- Last green commit on main: `7d19324`
-- Merged this week: A2.1 real-data setup (local only), A2.1 preview audit & contract shape tests, A2.2 location store, B2.1 Home, B2.2 Category page, B2.3 Search page, B2.4 cleanup, A2.4 error toasts, B2.6 location UX, R1 part 2 (contract v1.2, code), B2.5 QA sweep + fixes, R2 Rev2 page fields, A2.3 OG link previews (code, tested locally), review fixes (below)
-- In progress: —
-- **Handoff for the partner: `docs/build/PARTNER_HANDOFF_2026-10-07.md`** (ordered runbook for the database, Auth URLs, Cloudflare, real data, link previews, demo).
-- Needs you (cannot be done from the repo): send the client message (decisions D10/D12/D27/D35/D38, the domain, the M1 definition; see `docs/build/11_SOW_REV2_CHANGES.md` §6.1) and collect 3–4 public Instagram reel links. Then: WhatsApp card on real phones (Android + iPhone, add ?v=2), GPS allow/deny test on a real phone over HTTPS, then M1 demo (Mon 12 Oct unless told otherwise).
-- Next task: A3.1 auth services (Week 3), after M1 demo checks. Done: A1.7 (auth URLs on `tibu-dev`, Site URL `tibu-app.pages.dev`, 2026-10-08) · F5 (migrations 0001–0010 on `tibu-dev`, RLS zero-rows clean, 2026-10-08).
+- Last green commit on main: `738344f`
+- Merged this week: A3.1 auth and profile services, auth store, route guards (#21)
+- In progress: A3.2 Login gate + reveal contact (`feat/a3-2-login-gate`)
+- Next task: B3.1 (Auth pages) / B3.2 (Login sheet) / A3.3 (Saved items)
 - Deferred follow-ups: none from Week 2 pages. Saved reel taps are a no-op until Saved is rebuilt (B3.5); legacy Saved “View All →” is 24 px high (B3.5).
-- Blocked: — (resolved: the Pages project was recreated as `tibu-app` via Connect to Git on `daiwangk/TIBU_V1`, deployed 2026-10-08; `/p/anything` returns 200)
+- Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
-- Hosting: Cloudflare Pages project is `tibu-app` (`https://tibu-app.pages.dev`). A2.1 and A2.3 were verified server-side on 2026-10-10. Still to verify: the WhatsApp link-preview card on real phones.
-- Client commercials: 40% (₹4,800) received. The M1 definition and the domain are still unconfirmed in writing.
+- Hosting: Cloudflare Pages project is `tibu-app` (`https://tibu-app.pages.dev`).
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-13 · A3.2 — Login gate + reveal contact · dk · Antigravity (Gemini Flash)
+- Done: **Implemented and Verified** Task A3.2 ("Log in to contact" mechanism and revealContact):
+  1. `src/stores/loginGate.js`: Zustand store with `open`, `pending` (`{ type, payload, returnTo, createdAt }`), `request(action)`, `cancel()`, `close()`. Stores pending action in localStorage via `setWithExpiry('tibu.pendingAction', ..., 10 * 60 * 1000)`. Module-level handler registry with `registerGateHandler(type, handler)` and `resumePending()`. `resumePending` removes the item first, then executes the handler; unknown types clear silently without throwing.
+  2. `src/stores/loginGate.test.js`: Unit tests covering all 4 task scenarios: request persists to localStorage with expiry, cancel clears store and localStorage, expired pending action is ignored on resume, unknown type is handled silently without error.
+  3. `src/services/supabase/contact.js`: `revealContact({ businessId, channel, productId })` calls `reveal_contact` RPC via `getSupabase().rpc`, handles table row result (`phone`, `whatsapp`), maps errors via `mapSupabaseError`. Exported through `src/services/supabase/index.js`.
+  4. `src/queries/contact.js`: `useContactAction()` hook returning `{ start, pendingChannel }`. Guest path opens login gate via `loginGateStore.getState().request`. Authenticated path calls `performContactAction` directly. `performContactAction` calls `revealContact`, invalidates `qk.connected` cache if queryClient is available, and opens WhatsApp or `tel:` link using `window.location.href` (iOS-safe). Module registers 'whatsapp' and 'call' gate handlers immediately so `resumePending()` can run without requiring prior component mount.
+  5. `src/app/GateResumer.jsx`: Null-rendering component inside `BrowserRouter`. Listens for auth status transition from guest/loading to authenticated, checks non-expired pending action, navigates to `returnTo` if needed, and triggers `resumePending()`.
+  6. `src/App.jsx`: Mounted `<GateResumer />` inside `BrowserRouter`.
+- Files: created `src/stores/loginGate.js`, `src/stores/loginGate.test.js`, `src/services/supabase/contact.js`, `src/queries/contact.js`, `src/app/GateResumer.jsx`; modified `src/services/supabase/index.js`, `src/App.jsx`, `docs/PROGRESS.md`, `docs/TRACKER.md`.
+- How verified:
+  1. `npm run check` green: check-guards OK (179 source files, 3 legacy allowlist entries), ESLint 0 errors, Vitest **43 test files / 375 tests passed** (including all 9 `loginGate.test.js` tests), Vite production build OK (300 modules).
+  2. Verified `loginGate` store lifecycle (request -> persist with TTL -> cancel clears -> expiry ignores -> resume executes).
+- Not done / left out (why): Login sheet UI is in Task B3.2.
+- Gotchas: `GateResumer` must sit inside `BrowserRouter` (mounted in `App.jsx`) to access `useNavigate`/`useLocation`; vitest runs in Node so unit tests require `createMemoryStorage` stubbing; `window.location.href` must be used instead of `window.open` for WhatsApp/tel links because iOS WebKit blocks popups triggered after an asynchronous await.
+- Next step: B3.1 (Auth pages) / B3.2 (Login sheet) / A3.3 (Saved items).
 
 ### 2026-10-10 · A3.1 — Auth and profile services, auth store, route guards · dk · Claude Code (Sonnet 5.5)
 - Done: **Services:** `src/services/supabase/auth.js` (getSession, onAuthChange → unsubscribe, signUp, signIn, signOut, sendPasswordReset → `/reset-password`, updatePassword) and `me.js` (getMe, updateMe with a column whitelist that never sends `role`, uploadAvatar → 400 px webp at `avatars/{userId}/<uuid>.webp`), exported from `src/services/supabase/index.js` (mock still throws `unavailable_in_mock`). `signUp` sends `options.data { full_name, signup_as }` (only the exact value `seller` is passed as seller; anything else is `customer`) and `emailRedirectTo` `${VITE_SITE_URL}/auth/callback`; no `flowType`/pkce. **State:** `src/stores/auth.js` (`loading | guest | authenticated`, not persisted); `src/app/authSync.js` + `AuthBootstrap.jsx` mounted in `providers.jsx` (mock mode → `guest`, Supabase never touched; `SIGNED_OUT` → `queryClient.clear()`; `SIGNED_IN` → refetch `qk.me`). **Hooks/guards:** `src/queries/me.js` (useMe, useUpdateMe, useUploadAvatar), `src/app/guards.jsx` (`RequireAuth`, `RequireRole`; spinner while the session or profile loads, 403 screen only once the role is known; admin passes any role check), pure helpers in `src/lib/authGuard.js`. **Errors:** Supabase Auth errors mapped in `src/services/supabase/errors.js` and five rows added to `docs/CONTRACT.md` §11 (note v1.2.1, additive): invalid credentials / email not confirmed / weak password → `validation`, already registered → `conflict`, rate limit / 429 → `rate_limited`.

@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { GateResumer } from './app/GateResumer.jsx';
 import Spinner from './components/ui/Spinner';
 
 // DEV-only lazy route — excluded from production bundle
@@ -213,6 +214,7 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
+      <GateResumer />
       <AppRoutes />
     </BrowserRouter>
   );
