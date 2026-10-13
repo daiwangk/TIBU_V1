@@ -33,19 +33,18 @@ export function GateResumer() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Track the previous status so we react only on the 'loading'/'guest' → 'authenticated' transition
-  const prevStatus = useRef(authStatus);
+  // Guard against running resume multiple times in the same session
+  const hasResumed = useRef(false);
 
   useEffect(() => {
-    const wasAuthenticated = prevStatus.current === 'authenticated';
-    prevStatus.current = authStatus;
-
-    // Only run when we just became authenticated (not on every render while authenticated)
-    if (authStatus !== 'authenticated' || wasAuthenticated) return;
+    // Only run when authenticated and has not resumed yet
+    if (authStatus !== 'authenticated' || hasResumed.current) return;
 
     // Peek at the pending action without consuming it (resumePending will consume)
     const pending = getWithExpiry(STORAGE_KEY);
     if (!pending) return;
+
+    hasResumed.current = true;
 
     const doResume = async () => {
       if (pending.returnTo && location.pathname !== pending.returnTo) {
