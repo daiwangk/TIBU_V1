@@ -46,11 +46,14 @@ export function registerGateHandler(type, fn) {
  * 'review' which don't exist yet) the entry is cleared silently — no
  * throw, no stale entry left behind (constraint c).
  */
-export function resumePending() {
+export function resumePending(context) {
   const action = getWithExpiry(STORAGE_KEY); // also removes if expired
-  if (!action) return;
+  if (!action) {
+    useLoginGateStore.setState({ open: false, pending: null });
+    return;
+  }
 
-  // Always clear before running — prevents double-execution on errors
+  // Always clear storage before running — prevents double-execution on errors
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch {
@@ -58,8 +61,16 @@ export function resumePending() {
   }
 
   const handler = handlers.get(action.type);
-  if (!handler) return; // unknown type — clear and do nothing
-  handler(action);
+  if (!handler) {
+    useLoginGateStore.setState({ open: false, pending: null });
+    return; // unknown type — clear and do nothing
+  }
+
+  try {
+    handler(action, context);
+  } finally {
+    useLoginGateStore.setState({ open: false, pending: null });
+  }
 }
 
 /**

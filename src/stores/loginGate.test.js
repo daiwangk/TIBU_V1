@@ -203,4 +203,25 @@ describe('resumePending()', () => {
     expect(() => resumePending()).toThrow('handler error');
     expect(localStorage.getItem('tibu.pendingAction')).toBeNull();
   });
+
+  it('forwards context to the handler and resets store open/pending state', () => {
+    const handler = vi.fn();
+    registerGateHandler('whatsapp', handler);
+
+    useLoginGateStore.getState().request({
+      type: 'whatsapp',
+      payload: { id: 'biz-1' },
+      returnTo: '/',
+    });
+
+    const fakeClient = { id: 'mock-query-client' };
+    resumePending(fakeClient);
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'whatsapp' }),
+      fakeClient,
+    );
+    expect(useLoginGateStore.getState().open).toBe(false);
+    expect(useLoginGateStore.getState().pending).toBeNull();
+  });
 });
