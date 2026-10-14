@@ -19,6 +19,7 @@ import {
 } from './auth.js';
 import { getMe, updateMe, uploadAvatar } from './me.js';
 import { revealContact } from './contact.js';
+import { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved } from './saved.js';
 import { deletePushSubscription, savePushSubscription } from './push.js';
 
 const notImplemented = async () => {
@@ -38,10 +39,7 @@ export {
 export const getMyReview = notImplemented;
 export const saveMyReview = notImplemented;
 export const deleteMyReview = notImplemented;
-export const getSavedIds = notImplemented;
-export const listSavedBusinesses = notImplemented;
-export const listSavedProducts = notImplemented;
-export const setSaved = notImplemented;
+export { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved };
 export const trackView = notImplemented;
 export const listRecent = notImplemented;
 export const listConnected = notImplemented;

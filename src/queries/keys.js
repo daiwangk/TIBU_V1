@@ -6,7 +6,7 @@ export const qk = {
   business: (slug, near) => ['business', slug, near ?? null],
   product: (id, near) => ['product', id, near ?? null],
   reviews: (businessId, page) => ['reviews', businessId, page],
-  me: ['me'], saved: ['saved'], recent: ['recent'], connected: ['connected'],
+  me: ['me'], saved: ['saved'], savedBusinesses: ['savedBusinesses'], savedProducts: ['savedProducts'], recent: ['recent'], connected: ['connected'],
   myBusiness: ['myBusiness'], myProducts: ['myProducts'],
   applications: (status) => ['applications', status], application: (id) => ['application', id],
   threads: (as) => ['threads', as], thread: (id) => ['thread', id], myThread: (businessId) => ['myThread', businessId],
