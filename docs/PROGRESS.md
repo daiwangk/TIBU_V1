@@ -7,8 +7,8 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
 - Last green commit on main: `738344f`
 - Merged this week: A3.1 auth and profile services, auth store, route guards (#21)
-- In progress: A3.2 Login gate + reveal contact (`feat/a3-2-login-gate`)
-- Next task: B3.1 (Auth pages) / B3.2 (Login sheet) / A3.3 (Saved items)
+- In progress: none (A3.3 complete)
+- Next task: B3.1 (Auth pages) / B3.2 (Login sheet) / A3.4 (Recent + connected)
 - Deferred follow-ups: none from Week 2 pages. Saved reel taps are a no-op until Saved is rebuilt (B3.5); legacy Saved “View All →” is 24 px high (B3.5).
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
@@ -16,6 +16,20 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-14 · A3.3 — Saved businesses and products · dk · Antigravity (Gemini Flash)
+- Done: **Implemented and Verified** Task A3.3 (Saved items service + queries + gate handler):
+  1. `src/services/supabase/saved.js`: Four functions — `getSavedIds()` (parallel select from both saved tables, returns `SavedIds`), `listSavedBusinesses()` (saved_businesses → businesses!inner with categories, ordered by created_at DESC, approved only), `listSavedProducts()` (saved_products → products!inner → businesses!inner, active + approved only, uses `mapProductSummaryNested` / `mapBusinessSummary`), `setSaved({ kind, id, saved })` (upsert with `ignoreDuplicates: true` on composite PK; delete scoped by RLS). User id obtained from `auth.getSession()` (cached, no network call).
+  2. `src/queries/keys.js`: Added `savedBusinesses: ['savedBusinesses']` and `savedProducts: ['savedProducts']` for surgical list-cache invalidation.
+  3. `src/queries/saved.js`: Pure helpers `isInSavedIds` and `applyOptimisticToggle` (exported for tests). Gate handler `performSaveAction` registered at module load via `registerGateHandler('save', ...)` — plain function, no hooks, forwards `queryClient` from GateResumer. Hooks: `useSavedIds()` (enabled when authenticated, 30s staleTime), `useIsSaved(kind, id)` (derived, no extra fetch), `useToggleSave()` (useMutation with optimistic update on `qk.saved`, rollback + toast on error, invalidates id-set + list key on settle).
+  4. `src/queries/saved.test.js`: 17 unit tests for `isInSavedIds` (8 cases: present/absent/wrong-kind/null/empty/cross-contamination) and `applyOptimisticToggle` (9 cases: add/remove/dedupe/no-op/product/null/undefined/mutation-check).
+  5. `src/app/GateResumer.jsx`: Added `import '../queries/saved.js'` side-effect import so the 'save' handler is registered before `resumePending` fires on cold starts.
+  6. `src/services/supabase/index.js`: Replaced four `notImplemented` stubs with real exports from `./saved.js`.
+- Files: created `src/services/supabase/saved.js`, `src/queries/saved.js`, `src/queries/saved.test.js`; modified `src/services/supabase/index.js`, `src/queries/keys.js`, `src/app/GateResumer.jsx`, `docs/PROGRESS.md`, `docs/TRACKER.md`.
+- How verified: `npm run check` green — check-guards OK (187 source files, 3 legacy allowlist entries), ESLint 0 errors, Vitest **46 test files / 415 tests passed** (including all 17 `saved.test.js` tests), Vite production build OK (306 modules). `contract.test.js` passes (both adapters export all `FUNCTION_NAMES`). Hand-verified by user in DevTools console (gate store request & resume execution) and via `npx vitest run src/queries/saved.test.js` (17/17 passed).
+- Not done / left out (why): No UI (save button, Saved page) — that is Task B3.5. `listSavedBusinesses` / `listSavedProducts` hooks not created since no page consumes them yet (B3.5 will add them). `listConnected` query not in scope.
+- Gotchas for next person: `setSaved` fetches the session from cache (`auth.getSession()`) — no extra network call. The Supabase upsert uses `ignoreDuplicates: true` on the composite PK (not `returning: 'minimal'`). The `!inner` join means if a saved business is deleted from the DB, the row simply won't appear (no 404). `useIsSaved` calls `useSavedIds` internally — make sure both are under the same `QueryClientProvider`. `applyOptimisticToggle` returns `old` unchanged when `old` is falsy (undefined/null) — this is intentional so the optimistic patch is a no-op if the cache is cold.
+- Next step: B3.1 (Auth pages — `/login`, `/register`, `/auth/callback`, `/reset-password`) or B3.2 (Login bottom sheet wired to `useLoginGateStore`).
 
 ### 2026-10-13 · A3.2 — Login gate + reveal contact · dk · Antigravity (Gemini Flash)
 - Done: **Implemented and Verified** Task A3.2 ("Log in to contact" mechanism and revealContact):
