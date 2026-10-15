@@ -39,6 +39,16 @@ export function registerGateHandler(type, fn) {
 }
 
 /**
+ * The non-expired pending action, without consuming it (null when none). Auth screens use it to leave
+ * the post-login navigation to GateResumer when an action is waiting.
+ *
+ * @returns {PendingAction|null}
+ */
+export function peekPending() {
+  return getWithExpiry(STORAGE_KEY);
+}
+
+/**
  * Read the non-expired pending action from localStorage, clear it,
  * and execute its registered handler (if any).
  *

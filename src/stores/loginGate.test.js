@@ -9,7 +9,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { registerGateHandler, resumePending, useLoginGateStore } from './loginGate.js';
+import { peekPending, registerGateHandler, resumePending, useLoginGateStore } from './loginGate.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -123,6 +123,15 @@ describe('close()', () => {
     expect(state.open).toBe(false);
     // pending is NOT cleared by close()
     expect(state.pending).not.toBeNull();
+  });
+});
+
+describe('peekPending()', () => {
+  it('returns the pending action without consuming it', () => {
+    expect(peekPending()).toBeNull();
+    useLoginGateStore.getState().request({ type: 'save', payload: { kind: 'product', id: 'p1', saved: true }, returnTo: '/p/p1' });
+    expect(peekPending()).toMatchObject({ type: 'save', returnTo: '/p/p1' });
+    expect(peekPending()).not.toBeNull();
   });
 });
 
