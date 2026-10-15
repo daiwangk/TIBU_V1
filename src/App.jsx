@@ -33,16 +33,16 @@ const NotificationPreferences = lazy(() => import('./NotificationPreferences'));
 const Notification = lazy(() => import('./legacy/pages/Notification'));
 const PrivacyPage = lazy(() => import('./pages/static/PrivacyPage'));
 const ProductPage = lazy(() => import('./pages/product/ProductPage'));
+const ConnectedPage = lazy(() => import('./pages/saved/ConnectedPage'));
 const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
-const Saved = lazy(() => import('./Saved'));
+const RecentPage = lazy(() => import('./pages/saved/RecentPage'));
+const SavedPage = lazy(() => import('./pages/saved/SavedPage'));
 const SearchPage = lazy(() => import('./pages/search/SearchPage'));
 const SellerDashboard = lazy(() => import('./SellerDashboard'));
 const SellerProductDetail = lazy(() => import('./SellerProductDetail'));
 const SellerRegister = lazy(() => import('./SellerRegister'));
 const TermsPage = lazy(() => import('./pages/static/TermsPage'));
 
-// Contexts
-import { useSaved } from './contexts/SavedContext';
 
 /**
  * LegacyPage — wraps legacy pages that still need setPage + selected-entity
@@ -61,7 +61,6 @@ function LegacyPage({ Component, extraProps = {} }) {
   const selectedProductRef = React.useRef(null);
   const selectedBusinessRef = React.useRef(null);
 
-  const { savedProducts, setSavedProducts, savedBusinesses, setSavedBusinesses, savedReels, setSavedReels } = useSaved();
 
   /** Shim: translate old page strings to navigate() calls */
   function setPage(pageKey, entityState) {
@@ -136,18 +135,8 @@ function LegacyPage({ Component, extraProps = {} }) {
       selectedBusinessRef.current = b;
       navigate(location.pathname, { replace: true, state: { ...state, selectedBusiness: b } });
     },
-    // Saved.jsx still calls these until it is rebuilt (B3.5); the Reel page is gone.
-    setSelectedReel: (r) => navigate(location.pathname, { replace: true, state: { ...state, selectedReel: r } }),
-    setCurrentReels: (rs) => navigate(location.pathname, { replace: true, state: { ...state, currentReels: rs } }),
     setPreviousPage: (p) => navigate(location.pathname, { replace: true, state: { ...state, previousPage: p } }),
     setSellerMode: () => {},   // dead prop per audit; keep stub to avoid crashes
-    // contexts
-    savedProducts,
-    setSavedProducts,
-    savedBusinesses,
-    setSavedBusinesses,
-    savedReels,
-    setSavedReels,
     ...extraProps,
   };
 
@@ -166,7 +155,9 @@ function AppRoutes() {
       <Route element={<AppShell />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
-        <Route path="/saved" element={L(Saved)} />
+        <Route path="/saved" element={<RequireAuth><SavedPage /></RequireAuth>} />
+        <Route path="/recent" element={<RecentPage />} />
+        <Route path="/connected" element={<RequireAuth><ConnectedPage /></RequireAuth>} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/edit" element={<RequireAuth><EditProfilePage /></RequireAuth>} />
         <Route path="/notifications" element={L(Notification)} />

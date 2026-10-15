@@ -4,7 +4,6 @@ import './index.css';
 import App from './App.jsx';
 import { ErrorBoundary } from './app/ErrorBoundary.jsx';
 import { Providers } from './app/providers.jsx';
-import { SavedProvider } from './contexts/SavedContext.jsx';
 
 // A tab left open across a deploy can request a chunk filename that no longer exists. Reload once
 // (guarded, so a genuinely missing file can't cause a reload loop) to pick up the new build.
@@ -22,9 +21,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
       <Providers>
-        <SavedProvider>
-          <App />
-        </SavedProvider>
+        <App />
       </Providers>
     </ErrorBoundary>
   </StrictMode>,

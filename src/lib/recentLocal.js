@@ -2,9 +2,10 @@
  * recentLocal — src/lib/recentLocal.js
  *
  * Guest-side recent views stored in localStorage under 'tibu.recent'.
- * Each entry is { kind: 'business'|'product', id: string } where:
+ * Each entry is { kind: 'business'|'product', id: string, viewedAt?: string } where:
  *   - kind === 'business' → id is the business slug  (matches /b/:slug route)
  *   - kind === 'product'  → id is the product UUID   (matches /p/:productId route)
+ *   - viewedAt is the ISO time of the view (B3.5). Entries written before B3.5 have none and stay valid.
  *
  * Rules:
  *   - Max 30 entries. Newest first.
@@ -16,7 +17,7 @@ const STORAGE_KEY = 'tibu.recent';
 const MAX_ITEMS = 30;
 
 /**
- * @typedef {{ kind: 'business'|'product', id: string }} LocalRecentEntry
+ * @typedef {{ kind: 'business'|'product', id: string, viewedAt?: string }} LocalRecentEntry
  */
 
 /**
@@ -30,13 +31,15 @@ function readList() {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (e) =>
-        e &&
-        (e.kind === 'business' || e.kind === 'product') &&
-        typeof e.id === 'string' &&
-        e.id.length > 0,
-    );
+    return parsed
+      .filter(
+        (e) =>
+          e &&
+          (e.kind === 'business' || e.kind === 'product') &&
+          typeof e.id === 'string' &&
+          e.id.length > 0,
+      )
+      .map((e) => (typeof e.viewedAt === 'string' ? { kind: e.kind, id: e.id, viewedAt: e.viewedAt } : { kind: e.kind, id: e.id }));
   } catch {
     return [];
   }
@@ -64,7 +67,7 @@ function writeList(list) {
  */
 export function pushLocal({ kind, id }) {
   const list = readList().filter((e) => !(e.kind === kind && e.id === id));
-  list.unshift({ kind, id });
+  list.unshift({ kind, id, viewedAt: new Date().toISOString() });
   writeList(list.slice(0, MAX_ITEMS));
 }
 

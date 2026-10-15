@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { CalendarCheck } from 'lucide-react';
 import ProductCard from '../../components/ProductCard';
+import SaveButton from '../../components/SaveButton';
 import { useProductSearch } from '../../queries/catalog';
 import { useSearchOrigin } from '../../stores/location';
 import HomeSection from './HomeSection';
@@ -29,7 +30,9 @@ export default function AvailableTodaySection() {
         text: 'Sellers update this daily. Browse all products in the meantime.',
         action: { label: 'Browse products', onClick: () => navigate('/search?tab=products') },
       }}
-      renderItem={(p) => <ProductCard key={p.id} product={p} variant="row" />}
+      renderItem={(p) => (
+        <ProductCard key={p.id} product={p} variant="row" action={<SaveButton kind="product" id={p.id} overlay />} />
+      )}
     />
   );
 }

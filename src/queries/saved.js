@@ -11,7 +11,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { getSavedIds, setSaved } from '../services/index.js';
+import { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved } from '../services/index.js';
 import { registerGateHandler, useLoginGateStore } from '../stores/loginGate.js';
 import { useAuthStore } from '../stores/auth.js';
 import { userMessage } from '../lib/errors.js';
@@ -108,6 +108,34 @@ export function useSavedIds() {
     queryFn: getSavedIds,
     enabled: authStatus === 'authenticated',
     staleTime: 30_000,
+  });
+}
+
+/**
+ * Saved products, newest saved first. Signed-in only; the Saved page renders its own states.
+ * @returns {import('@tanstack/react-query').UseQueryResult<import('../services/contract.js').ProductSummary[]>}
+ */
+export function useSavedProducts() {
+  const authStatus = useAuthStore((s) => s.status);
+  return useQuery({
+    queryKey: qk.savedProducts,
+    queryFn: () => listSavedProducts(),
+    enabled: authStatus === 'authenticated',
+    meta: { silent: true },
+  });
+}
+
+/**
+ * Saved businesses, newest saved first. Signed-in only.
+ * @returns {import('@tanstack/react-query').UseQueryResult<import('../services/contract.js').BusinessSummary[]>}
+ */
+export function useSavedBusinesses() {
+  const authStatus = useAuthStore((s) => s.status);
+  return useQuery({
+    queryKey: qk.savedBusinesses,
+    queryFn: () => listSavedBusinesses(),
+    enabled: authStatus === 'authenticated',
+    meta: { silent: true },
   });
 }
 
