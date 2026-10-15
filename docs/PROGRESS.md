@@ -7,8 +7,8 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
 - Last green commit on main: `738344f`
 - Merged this week: A3.1 auth and profile services, auth store, route guards (#21)
-- In progress: none (A3.3 complete)
-- Next task: B3.1 (Auth pages) / B3.2 (Login sheet) / A3.4 (Recent + connected)
+- In progress: none (A3.4 complete)
+- Next task: B3.1 (Auth pages) / B3.2 (Login sheet) / A3.5 (Profile location default) / B3.5 (Saved, Recently viewed, Previously connected)
 - Deferred follow-ups: none from Week 2 pages. Saved reel taps are a no-op until Saved is rebuilt (B3.5); legacy Saved “View All →” is 24 px high (B3.5).
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
@@ -16,6 +16,21 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-15 · A3.4 — Recently viewed + previously connected · dk · Antigravity (Gemini Flash)
+- Done: **Implemented and Verified** Task A3.4 (Activity tracking services + queries + hooks):
+  1. `src/services/supabase/activity.js`: Three functions — `trackView({ kind, id })` (calls `track_view` RPC with `p_business` or `p_product`), `listRecent({ limit })` (queries `recent_views` with embedded businesses & products ordered by `viewed_at` DESC; maps to `RecentItem[]` with `paiseToRupees`, sorts product images by `sort_order`, skips rows with null embeds), and `listConnected({ limit })` (calls `my_connected_businesses` RPC with `p_limit`, maps to `ConnectedItem[]`).
+  2. `src/services/supabase/index.js`: Replaced `notImplemented` stubs for `trackView`, `listRecent`, and `listConnected` with real exports from `./activity.js`.
+  3. `src/lib/recentLocal.js`: Guest-side recent views stored in localStorage under `tibu.recent` (max 30 items, newest first, deduplication by kind + id, safe checks when `localStorage` is undefined).
+  4. `src/queries/activity.js`: `useTrackView(kind, id, { enabled, serverId })` (fires view tracking once per mount when entity is loaded; guest stores to localStorage, authenticated calls `trackView`), `useRecent()` (authenticated calls `listRecent`, guest resolves local slugs/UUIDs via catalog queries), `useConnected()` (authenticated + Supabase calls `listConnected`), and `flushLocalRecent()` (flushes guest local items oldest-first on login, resolves business slugs to UUIDs, then clears local storage).
+  5. `src/app/GateResumer.jsx`: Added side-effect import for `../queries/activity.js` and hooked `flushLocalRecent()` to fire when `authStatus` transitions to `authenticated`.
+  6. `src/pages/product/ProductPage.jsx` & `src/pages/business/BusinessPage.jsx`: Integrated `useTrackView` unconditionally at the top of components (`enabled: !!product`/`!!business`).
+  7. Tests: `src/lib/recentLocal.test.js` (9 unit tests for storage, deduplication, 30-item cap, clear, invalid JSON, and missing localStorage fallback) and `src/services/supabase/activity.test.js` (5 unit tests covering `trackView` RPC args and error resilience, `listRecent` embed mapping and rupee conversion, and `listConnected` RPC mapping).
+- Files: created `src/services/supabase/activity.js`, `src/services/supabase/activity.test.js`, `src/lib/recentLocal.js`, `src/lib/recentLocal.test.js`, `src/queries/activity.js`; modified `src/services/supabase/index.js`, `src/app/GateResumer.jsx`, `src/pages/product/ProductPage.jsx`, `src/pages/business/BusinessPage.jsx`, `docs/PROGRESS.md`.
+- How verified: `npm run check` green — check-guards OK (192 source files, 3 legacy allowlist entries), ESLint 0 errors, Vitest **48 test files / 429 tests passed** (including all 9 `recentLocal.test.js` tests and 5 `activity.test.js` tests), Vite production build OK (309 modules). Hand-verified by user in DevTools console: confirmed guest view tracking into `localStorage['tibu.recent']`, deduplication on revisits, and dynamic import execution of `flushLocalRecent()` fulfilling and clearing local storage.
+- Not done / left out (why): Activity UI screens (Recent views list, Connected businesses list on Profile/Saved) — that is Task B3.5.
+- Gotchas for next person: `track_view` RPC expects `uuid` for `p_business`. Guest localStorage stores business `slug` (from `/b/:slug` route); `useTrackView` takes `serverId: business?.id` to send the UUID to the RPC when authenticated, while storing the slug for guests. `flushLocalRecent` resolves business slugs to UUIDs via `getBusinessBySlug` before calling `trackView`.
+- Next step: B3.1 (Auth pages) or B3.2 (Login sheet) or B3.5 (Saved, Recently viewed, Previously connected pages).
 
 ### 2026-10-14 · A3.3 — Saved businesses and products · dk · Antigravity (Gemini Flash)
 - Done: **Implemented and Verified** Task A3.3 (Saved items service + queries + gate handler):

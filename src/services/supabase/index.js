@@ -20,6 +20,7 @@ import {
 import { getMe, updateMe, uploadAvatar } from './me.js';
 import { revealContact } from './contact.js';
 import { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved } from './saved.js';
+import { trackView, listRecent, listConnected } from './activity.js';
 import { deletePushSubscription, savePushSubscription } from './push.js';
 
 const notImplemented = async () => {
@@ -40,9 +41,7 @@ export const getMyReview = notImplemented;
 export const saveMyReview = notImplemented;
 export const deleteMyReview = notImplemented;
 export { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved };
-export const trackView = notImplemented;
-export const listRecent = notImplemented;
-export const listConnected = notImplemented;
+export { trackView, listRecent, listConnected };
 export const becomeSeller = notImplemented;
 export const getMyBusiness = notImplemented;
 export const saveMyBusiness = notImplemented;

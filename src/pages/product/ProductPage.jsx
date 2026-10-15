@@ -15,6 +15,7 @@ import ErrorState from '../../components/ui/ErrorState';
 import IconButton from '../../components/ui/IconButton';
 import PageHeader from '../../components/ui/PageHeader';
 import { useProduct } from '../../queries/catalog';
+import { useTrackView } from '../../queries/activity.js';
 import ProductDetailsList from './ProductDetailsList';
 import ProductSkeleton from './ProductSkeleton';
 
@@ -26,6 +27,7 @@ export default function ProductPage() {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { data: product, isLoading, isError, error, refetch } = useProduct(productId);
+  useTrackView('product', productId, { enabled: !!product });
 
   if (isLoading) {
     return <ProductSkeleton />;

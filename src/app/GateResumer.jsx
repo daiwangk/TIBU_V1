@@ -22,6 +22,8 @@ import { useAuthStore } from '../stores/auth.js';
 // Side-effect imports — register gate handlers for 'whatsapp', 'call', and 'save' at boot
 import '../queries/contact.js';
 import '../queries/saved.js';
+import '../queries/activity.js';
+import { flushLocalRecent } from '../queries/activity.js';
 
 const STORAGE_KEY = 'tibu.pendingAction';
 
@@ -37,6 +39,20 @@ export function GateResumer() {
 
   // Guard against running resume multiple times in the same authenticated session
   const hasResumed = useRef(false);
+
+  // Separate guard for the local-history flush (runs once per authenticated session)
+  const hasFlushed = useRef(false);
+
+  // Flush guest recent views to the server on first login
+  useEffect(() => {
+    if (authStatus !== 'authenticated') {
+      hasFlushed.current = false;
+      return;
+    }
+    if (hasFlushed.current) return;
+    hasFlushed.current = true;
+    flushLocalRecent();
+  }, [authStatus]);
 
   useEffect(() => {
     // Reset guard whenever user logs out or leaves authenticated state
