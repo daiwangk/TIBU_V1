@@ -15,6 +15,7 @@ import ErrorState from '../../components/ui/ErrorState';
 import IconButton from '../../components/ui/IconButton';
 import PageHeader from '../../components/ui/PageHeader';
 import { useProduct } from '../../queries/catalog';
+import { useContactAction } from '../../queries/contact.js';
 import { useTrackView } from '../../queries/activity.js';
 import ProductDetailsList from './ProductDetailsList';
 import ProductSkeleton from './ProductSkeleton';
@@ -28,6 +29,7 @@ export default function ProductPage() {
   const navigate = useNavigate();
   const { data: product, isLoading, isError, error, refetch } = useProduct(productId);
   useTrackView('product', productId, { enabled: !!product });
+  const { start: startContact, pendingChannel } = useContactAction();
 
   if (isLoading) {
     return <ProductSkeleton />;
@@ -80,8 +82,8 @@ export default function ProductPage() {
     }
   }
 
-  function handleContact() {
-    toast('Contact opens after login — coming soon');
+  function handleContact(channel) {
+    if (business) startContact(channel, { business, product });
   }
 
   const headerActions = (
@@ -171,11 +173,7 @@ export default function ProductPage() {
 
       {/* Sticky Bottom Bar */}
       <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-surface/95 backdrop-blur-sm border-t border-border px-screen py-3 z-20">
-        <ContactButtons
-          business={business}
-          product={product}
-          onContact={handleContact}
-        />
+        <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} />
       </footer>
     </div>
   );

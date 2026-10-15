@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useBusiness } from '../../queries/catalog';
 import { useTrackView } from '../../queries/activity.js';
+import { useContactAction } from '../../queries/contact.js';
 import PageHeader from '../../components/ui/PageHeader';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
@@ -28,6 +29,7 @@ export default function BusinessPage() {
   const { data: business, isLoading, isError, error, refetch } = useBusiness(slug);
   // slug is the local id (for guest localStorage); business.id is the UUID (for the RPC).
   useTrackView('business', slug, { enabled: !!business, serverId: business?.id });
+  const { start: startContact, pendingChannel } = useContactAction();
 
   if (isLoading) {
     return <BusinessSkeleton />;
@@ -78,8 +80,8 @@ export default function BusinessPage() {
     }
   }
 
-  function handleContact() {
-    toast('Contact opens after login — coming soon');
+  function handleContact(channel) {
+    startContact(channel, { business });
   }
 
   function handleTabChange(value) {
@@ -123,10 +125,7 @@ export default function BusinessPage() {
 
       {/* Sticky Bottom Bar */}
       <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-surface/95 backdrop-blur-sm border-t border-border px-screen py-3 z-20">
-        <ContactButtons
-          business={business}
-          onContact={handleContact}
-        />
+        <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} />
       </footer>
     </div>
   );

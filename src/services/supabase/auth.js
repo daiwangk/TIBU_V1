@@ -1,16 +1,7 @@
+import { siteUrl } from '../../lib/siteUrl.js';
 import { AppError } from '../errors.js';
 import { getSupabase } from './client.js';
 import { mapSupabaseError } from './errors.js';
-
-/**
- * Public site origin for auth e-mail links. `VITE_SITE_URL`, else the page's own origin (local dev).
- * @returns {string}
- */
-export function siteUrl() {
-  const configured = String(import.meta.env.VITE_SITE_URL ?? '').trim().replace(/\/+$/, '');
-  if (configured) return configured;
-  return typeof window === 'undefined' ? '' : window.location.origin;
-}
 
 /**
  * supabase-js session → contract `Session`.

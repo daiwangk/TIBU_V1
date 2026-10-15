@@ -8,7 +8,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Last green commit on main: `738344f`
 - Merged this week: A3.1 auth and profile services, auth store, route guards (#21)
 - In progress: B3.1–B3.5 on stacked branches feat/b3-1-auth-pages … feat/b3-5-saved-recent (not pushed)
-- Next task: B3.3 (Contact buttons live)
+- Next task: B3.4 (Profile and Edit profile)
 - Deferred follow-ups: none from Week 2 pages. Saved reel taps are a no-op until Saved is rebuilt (B3.5); legacy Saved “View All →” is 24 px high (B3.5).
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
@@ -16,6 +16,14 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-15 · B3.3 — Contact buttons live · dk · Claude Code (Opus 5.5)
+- Done: ProductPage and BusinessPage call `useContactAction().start(channel, …)` from ContactButtons — the product page passes `{ business, product }` (the hook keeps id, name, price), the business page only `{ business }`. Placeholder "coming soon" toasts removed. `ContactButtons` takes `loadingChannel` (= `pendingChannel`): that button shows a spinner and both are disabled while the number is revealed; its unused `business`/`product` props were dropped. Navigation stays `window.location.href` (A3.2). The WhatsApp text in `src/lib/whatsapp.js` matches CONTRACT §10 character for character (now also asserted end to end in `src/queries/contact.test.js`). **VITE_SITE_URL:** `contact.js` used the raw value, so a trailing `/` would have produced `https://…//p/<id>` in the WhatsApp message; it and the auth adapter now share `src/lib/siteUrl.js` (trims trailing slashes, falls back to the page origin).
+- Files: new `src/lib/siteUrl.js` (+test), `src/queries/contact.test.js`; modified `src/components/ContactButtons.jsx`, `src/pages/product/ProductPage.jsx`, `src/pages/business/BusinessPage.jsx`, `src/queries/contact.js` (site URL only), `src/services/supabase/auth.js` (imports the shared helper; behaviour unchanged), `docs/PROGRESS.md`.
+- How verified: `npm run check` green (guards OK, 32 files / 271 tests, build OK). Unit: exact product and business messages, `/p/` and `/b/` links with a trailing-slash `VITE_SITE_URL`, `wa.me/91…`, `tel:+91…`, missing-number toast without navigation. Headless Chrome on the production preview (mock), 360/390/430 px: guest WhatsApp on a product → sheet "Log in to contact Aura Candles" with pending `{ type: 'whatsapp', payload.product: { id, name, price }, returnTo: '/p/…' }`; guest Call on a business → sheet with `product: null`; no placeholder toast; no overflow or console errors (22 checks).
+- Not done / left out (why): the authenticated path (reveal → WhatsApp/dialler, loading state, rate-limit toast, Previously connected) needs Supabase and **real phones** (Android Chrome + iOS Safari) — not run.
+- Next step (exact): on two phones against `tibu-dev`: logged-out WhatsApp tap → sheet → log in → WhatsApp opens the right chat with the §10 text and a working `/p/` link; Call → dialler with +91; 10+ quick taps → rate-limit toast; then B3.5's Previously connected shows the business.
+- Gotchas for the next person: `useContactAction` must be called before the pages' early returns (rules of hooks) — it is, next to `useTrackView`.
 
 ### 2026-10-15 · B3.2 — Login sheet · dk · Claude Code (Opus 5.5)
 - Done: `src/components/LoginSheet.jsx` — bottom sheet (`ui/Sheet`, native `<dialog>`) driven by `useLoginGateStore`. Title from `pending.type` via `src/lib/gateTitle.js`: "Log in to contact <businessName>" (WhatsApp/Call), "Log in to save", "Log in to send an enquiry", "Log in to write a review". Body is the same `LoginForm` as /login (no second form), loaded lazily the first time the sheet opens so react-hook-form + zod stay out of the main bundle (main chunk 303 kB / 92 kB gzip). Close button, Escape and backdrop → `loginGate.cancel()` (pending action cleared). "Create an account" → `loginGate.close()` (pending kept in localStorage) + `/signup?next=<encoded returnTo>`. Successful login → `close()`; GateResumer replays the action. The sheet never shows to a signed-in user (e.g. logged in from another tab meanwhile). Mounted once in `App.jsx` next to `<GateResumer />` — not `providers.jsx`, which sits outside the router (approved deviation).
