@@ -2,6 +2,7 @@ import { Store, Share2 } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useBusiness } from '../../queries/catalog';
+import { useTrackView } from '../../queries/activity.js';
 import PageHeader from '../../components/ui/PageHeader';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
@@ -25,6 +26,8 @@ export default function BusinessPage() {
   const activeTab = validTabs.includes(rawTab) ? rawTab : 'products';
 
   const { data: business, isLoading, isError, error, refetch } = useBusiness(slug);
+  // slug is the local id (for guest localStorage); business.id is the UUID (for the RPC).
+  useTrackView('business', slug, { enabled: !!business, serverId: business?.id });
 
   if (isLoading) {
     return <BusinessSkeleton />;
