@@ -245,6 +245,7 @@ export const FUNCTION_NAMES = [
   'signOut',
   'sendPasswordReset',
   'updatePassword',
+  'resendConfirmation',
   'getMe',
   'updateMe',
   'uploadAvatar',

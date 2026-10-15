@@ -302,6 +302,7 @@ export const signIn = unavailable;
 export const signOut = unavailable;
 export const sendPasswordReset = unavailable;
 export const updatePassword = unavailable;
+export const resendConfirmation = unavailable;
 export const getMe = unavailable;
 export const updateMe = unavailable;
 export const uploadAvatar = unavailable;
