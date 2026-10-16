@@ -29,7 +29,7 @@ export default function BusinessPage() {
   const { data: business, isLoading, isError, error, refetch } = useBusiness(slug);
   // slug is the local id (for guest localStorage); business.id is the UUID (for the RPC).
   useTrackView('business', slug, { enabled: !!business, serverId: business?.id });
-  const { start: startContact, pendingChannel } = useContactAction();
+  const { start: startContact, pendingChannel, ready: contactReady } = useContactAction();
 
   if (isLoading) {
     return <BusinessSkeleton />;
@@ -125,7 +125,7 @@ export default function BusinessPage() {
 
       {/* Sticky Bottom Bar */}
       <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-surface/95 backdrop-blur-sm border-t border-border px-screen py-3 z-20">
-        <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} />
+        <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} disabled={!contactReady} />
       </footer>
     </div>
   );

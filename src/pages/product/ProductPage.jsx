@@ -29,7 +29,7 @@ export default function ProductPage() {
   const navigate = useNavigate();
   const { data: product, isLoading, isError, error, refetch } = useProduct(productId);
   useTrackView('product', productId, { enabled: !!product });
-  const { start: startContact, pendingChannel } = useContactAction();
+  const { start: startContact, pendingChannel, ready: contactReady } = useContactAction();
 
   if (isLoading) {
     return <ProductSkeleton />;
@@ -173,7 +173,7 @@ export default function ProductPage() {
 
       {/* Sticky Bottom Bar */}
       <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-surface/95 backdrop-blur-sm border-t border-border px-screen py-3 z-20">
-        <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} />
+        <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} disabled={!contactReady} />
       </footer>
     </div>
   );
