@@ -114,7 +114,10 @@ registerGateHandler('call', (action, qc) => performContactAction(action, qc));
  *   business: { id, slug, name }
  *   product:  { id, name, price } | null | undefined
  *
- * @returns {{ start: Function, pendingChannel: string|null }}
+ * `ready` is false while the session is being restored; start() ignores taps then, so the buttons must be
+ * disabled (ContactButtons `disabled`) rather than left to swallow them.
+ *
+ * @returns {{ start: Function, pendingChannel: string|null, ready: boolean }}
  */
 export function useContactAction() {
   const queryClient = useQueryClient();
@@ -159,5 +162,5 @@ export function useContactAction() {
     }
   }
 
-  return { start, pendingChannel };
+  return { start, pendingChannel, ready: authStatus !== 'loading' };
 }
