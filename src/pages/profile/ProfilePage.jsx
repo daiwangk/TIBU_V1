@@ -10,6 +10,9 @@ import LogoutButton from './LogoutButton';
 import ProfileRows from './ProfileRows';
 import { INFO_ROWS, accountRows } from './profileForm';
 
+// Page heading for the signed-in states that have no visible one (loading, error, no profile).
+const srHeading = <h1 className="sr-only">Profile</h1>;
+
 function GuestCard() {
   return (
     <section className="rounded-card-lg bg-lavender p-5 text-center">
@@ -41,16 +44,19 @@ function HeaderSkeleton() {
 function MemberContent() {
   const { data: profile, isLoading, isError, error, refetch } = useMe();
 
-  if (isLoading) return <div role="status" aria-label="Loading profile"><HeaderSkeleton /></div>;
-  if (isError) return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (isLoading) return <>{srHeading}<div role="status" aria-label="Loading profile"><HeaderSkeleton /></div></>;
+  if (isError) return <>{srHeading}<ErrorState error={error} onRetry={() => refetch()} /></>;
   if (!profile) {
     return (
-      <EmptyState
-        icon={<UserX size={28} aria-hidden="true" />}
-        title="We couldn't find your profile"
-        text="Try again in a moment."
-        action={{ label: 'Try again', onClick: () => refetch() }}
-      />
+      <>
+        {srHeading}
+        <EmptyState
+          icon={<UserX size={28} aria-hidden="true" />}
+          title="We couldn't find your profile"
+          text="Try again in a moment."
+          action={{ label: 'Try again', onClick: () => refetch() }}
+        />
+      </>
     );
   }
 
@@ -79,7 +85,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-svh bg-bg">
       <main className="flex flex-col gap-6 px-screen pt-6 pb-8">
-        {status === 'loading' && <div role="status" aria-label="Loading profile"><HeaderSkeleton /></div>}
+        {status === 'loading' && <>{srHeading}<div role="status" aria-label="Loading profile"><HeaderSkeleton /></div></>}
         {status === 'guest' && (
           <>
             <h1 className="font-heading text-2xl font-bold text-ink">Profile</h1>
