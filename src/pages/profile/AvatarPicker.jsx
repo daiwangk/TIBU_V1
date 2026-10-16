@@ -38,7 +38,7 @@ export default function AvatarPicker({ currentUrl, name, file, onChange }) {
           <Camera size={16} aria-hidden="true" />
           {currentUrl || file ? 'Change photo' : 'Add photo'}
         </label>
-        {file && <span className="font-body text-xs text-muted">New photo is saved when you tap Save.</span>}
+        {file && <span role="status" className="font-body text-xs text-muted">New photo is saved when you tap Save.</span>}
       </div>
     </div>
   );
