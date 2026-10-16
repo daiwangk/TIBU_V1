@@ -12,10 +12,14 @@
  *     (services/mock or services/supabase). Pages go through src/queries -> src/services.
  *  5. A file in the NEW structure (src/pages, src/components, src/app) uses inline
  *     style={{ ... }}. Add `// allow-inline-style` on the same line for genuine dynamic values.
+ *  7. The git index contains a gitlink (mode 160000, a submodule entry). Without a .gitmodules it breaks
+ *     Cloudflare Pages' clone step, and GitHub Actions does not notice. Skipped outside a git checkout.
  * Warns when an allowlisted file no longer exists (remove it from the list).
  */
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { findGitlinks } from './gitlinks.mjs';
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, 'src');
@@ -125,6 +129,16 @@ for (const [name, value] of Object.entries(process.env)) {
   if (name.startsWith('VITE_') && looksPrivileged(value)) {
     errors.push(`[secret] ${name} holds a privileged Supabase key. Vite would ship it to every browser. Use the public anon key and rotate this one.`);
   }
+}
+
+// 7. stray gitlink (submodule) entries
+try {
+  const tracked = execFileSync('git', ['ls-files', '-s', '-z'], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024 });
+  for (const p of findGitlinks(tracked)) {
+    errors.push(`[gitlink] ${p} — gitlink/submodule entry without .gitmodules breaks Cloudflare Pages (run: git rm --cached ${p}).`);
+  }
+} catch {
+  // Not a git checkout (e.g. a source tarball) or git is missing: nothing to check.
 }
 
 for (const w of warnings) console.warn('WARN ' + w);
