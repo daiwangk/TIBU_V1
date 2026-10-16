@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { MailCheck, Store, UserPlus } from 'lucide-react';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth';
-import { peekPending } from '../../stores/loginGate';
+import { useHasPendingAction } from '../../stores/loginGate';
 import AuthLayout from './AuthLayout';
 import CheckInbox from './CheckInbox';
 import SignupForm from './SignupForm';
+import { useAfterAuth } from './useAfterAuth';
 import { safeNextPath, withNext } from './authHelpers';
 
 const linkClass =
@@ -14,19 +15,15 @@ const linkClass =
 /** /signup — `?as=seller` switches the copy and creates a seller profile; `?next=` is kept throughout. */
 export default function SignupPage() {
   const status = useAuthStore((s) => s.status);
-  const navigate = useNavigate();
   const [params] = useSearchParams();
   const next = safeNextPath(params.get('next'));
   const signupAs = params.get('as') === 'seller' ? 'seller' : 'customer';
   const [submitted, setSubmitted] = useState(false);
   const [sentTo, setSentTo] = useState(null);
+  const hasPending = useHasPendingAction();
+  const goNext = useAfterAuth(next);
 
   if (status === 'authenticated' && !submitted) return <Navigate to="/" replace />;
-
-  function goNext({ hadPending }) {
-    if (hadPending) return; // GateResumer navigates and replays the action
-    navigate(next ?? '/', { replace: true });
-  }
 
   function handleDone({ email, needsEmailConfirmation, hadPending }) {
     if (needsEmailConfirmation) setSentTo(email);
@@ -35,8 +32,9 @@ export default function SignupPage() {
 
   if (sentTo) {
     // Confirmed in another tab of this browser (the session syncs across tabs): move on. With a pending
-    // action GateResumer navigates instead.
-    if (status === 'authenticated' && !peekPending()) return <Navigate to={next ?? '/'} replace />;
+    // action GateResumer navigates instead; hasPending is live, so this re-renders when another tab
+    // takes the action.
+    if (status === 'authenticated' && !hasPending) return <Navigate to={next ?? '/'} replace />;
     return (
       <AuthLayout icon={<MailCheck size={26} aria-hidden="true" />} title="Check your inbox">
         <CheckInbox
