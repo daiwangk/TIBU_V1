@@ -47,6 +47,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - How verified: `npm run check` green (guards OK, 30 files / 265 tests, build OK). Headless Chrome on the Vite dev server (mock), opening the sheet through the real store module: opens at 360/390/430 px with the right title, no horizontal scroll, all targets ≥ 44 px; save/enquiry/review titles; Close and Escape close it and clear `tibu.pendingAction`; mock login inside the sheet shows the friendly message and keeps the sheet open; "Create an account" lands on `/signup?next=%2Fb%2Fammas-kitchen%3Ftab%3Dreviews` with the sheet closed and the pending action still stored; no console errors (25 checks).
 - Not done / left out (why): a real login inside the sheet → action replay needs Supabase keys (tested by hand in B3.3's flow).
 - Next step (exact): B3.3 — wire ContactButtons.
+- Review fix (S9, same branch): the sheet's `open` state went stale when another tab consumed or cancelled the pending action. `LoginSheet` now listens for `storage` events (`handlePendingStorageEvent` in `src/stores/loginGate.js`) and closes when the persisted action is gone; it does not gate on `peekPending()` at render, so a tab with blocked localStorage still shows the sheet. Mounting stays in `App.jsx` (approved; `providers.jsx` is outside the router) — S9 flagged this, declined.
 - Gotchas for the next person: `LoginForm` renders only while the sheet is visible, so its fields reset every time it opens.
 
 ### 2026-10-15 · B3.1 — Auth pages · dk · Claude Code (Opus 5.5)
