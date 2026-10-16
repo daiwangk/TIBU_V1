@@ -145,6 +145,22 @@ export const useLoginGateStore = create((set) => ({
 }));
 
 /**
+ * `storage` event handler: another tab consumed or cancelled the pending action, so this tab's open
+ * sheet would be asking about an action that no longer exists. Close it. Only reacts when the persisted
+ * action is really gone, so a tab where localStorage is blocked (in-memory pending) is left alone — and
+ * `storage` events never fire in the tab that made the change.
+ *
+ * @param {{ key: string|null }} event
+ */
+export function handlePendingStorageEvent(event) {
+  if (event.key !== null && event.key !== STORAGE_KEY) return; // null = storage.clear()
+  if (peekPending()) return;
+  if (useLoginGateStore.getState().open || useLoginGateStore.getState().pending) {
+    useLoginGateStore.setState({ open: false, pending: null });
+  }
+}
+
+/**
  * Subscribe to changes of the pending action: this tab's gate store, and `storage` events, which is how
  * another tab consuming or clearing the action reaches this one.
  *
