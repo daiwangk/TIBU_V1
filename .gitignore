@@ -33,3 +33,4 @@ supabase/.temp/
 # Cloudflare wrangler local cache
 .wrangler
 .dev.vars
+/TIBU_V1/
