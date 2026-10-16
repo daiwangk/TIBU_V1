@@ -1,9 +1,9 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { gateTitle, signupHref } from '../lib/gateTitle';
 import { useAuthStore } from '../stores/auth';
-import { useLoginGateStore } from '../stores/loginGate';
+import { handlePendingStorageEvent, useLoginGateStore } from '../stores/loginGate';
 import Button from './ui/Button';
 import IconButton from './ui/IconButton';
 import Sheet from './ui/Sheet';
@@ -23,6 +23,12 @@ export default function LoginSheet() {
   const close = useLoginGateStore((s) => s.close);
   const status = useAuthStore((s) => s.status);
   const navigate = useNavigate();
+
+  // Another tab took or cancelled the action: close this tab's sheet instead of leaving it stale.
+  useEffect(() => {
+    window.addEventListener('storage', handlePendingStorageEvent);
+    return () => window.removeEventListener('storage', handlePendingStorageEvent);
+  }, []);
 
   // Signed in meanwhile (e.g. in another tab): never show the sheet to a signed-in user.
   const visible = open && status !== 'authenticated';

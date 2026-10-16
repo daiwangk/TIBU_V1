@@ -9,7 +9,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { peekPending, registerGateHandler, resumePending, subscribePending, useLoginGateStore } from './loginGate.js';
+import { handlePendingStorageEvent, peekPending, registerGateHandler, resumePending, subscribePending, useLoginGateStore } from './loginGate.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -169,6 +169,33 @@ describe('subscribePending()', () => {
     expect(win.listeners.has('storage')).toBe(false);
     useLoginGateStore.getState().cancel();
     expect(callback).not.toHaveBeenCalled();
+  });
+});
+
+describe('handlePendingStorageEvent()', () => {
+  const open = () => useLoginGateStore.getState().request({ type: 'save', payload: {}, returnTo: '/' });
+
+  it('closes the sheet when another tab removed the pending action', () => {
+    open();
+    localStorage.removeItem('tibu.pendingAction'); // what the other tab did
+    handlePendingStorageEvent({ key: 'tibu.pendingAction' });
+    expect(useLoginGateStore.getState()).toMatchObject({ open: false, pending: null });
+  });
+
+  it('also reacts to storage.clear() (key null)', () => {
+    open();
+    localStorage.removeItem('tibu.pendingAction');
+    handlePendingStorageEvent({ key: null });
+    expect(useLoginGateStore.getState().open).toBe(false);
+  });
+
+  it('keeps the sheet while the persisted action still exists, and ignores other keys', () => {
+    open();
+    handlePendingStorageEvent({ key: 'tibu.pendingAction' });
+    expect(useLoginGateStore.getState().open).toBe(true);
+    localStorage.removeItem('tibu.pendingAction');
+    handlePendingStorageEvent({ key: 'tibu.recent' });
+    expect(useLoginGateStore.getState().open).toBe(true);
   });
 });
 
