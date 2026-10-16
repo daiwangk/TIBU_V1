@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
 import { useAuthStore } from '../../stores/auth';
-import { peekPending } from '../../stores/loginGate';
+import { useHasPendingAction } from '../../stores/loginGate';
 import AuthLayout from './AuthLayout';
 import { linkErrorMessage, safeNextPath } from './authHelpers';
 
@@ -29,8 +29,9 @@ export default function AuthCallbackPage() {
   const [params] = useSearchParams();
   const next = safeNextPath(params.get('next'));
   const [linkError] = useState(() => linkErrorMessage(window.location.hash, window.location.search));
-  // Read once on arrival: GateResumer consumes the action as soon as the session lands.
-  const [hadPending] = useState(() => !!peekPending());
+  // Live: if another tab's GateResumer takes the action, this re-renders into "Email confirmed" instead
+  // of waiting for a navigation that will never come.
+  const hasPending = useHasPendingAction();
 
   if (linkError || status === 'guest') {
     return (
@@ -47,7 +48,7 @@ export default function AuthCallbackPage() {
   }
 
   if (status === 'loading') return <Waiting label="Confirming your email…" />;
-  if (hadPending) return <Waiting label="Taking you back…" />;
+  if (hasPending) return <Waiting label="Taking you back…" />;
 
   return (
     <AuthLayout

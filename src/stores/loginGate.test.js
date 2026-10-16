@@ -9,7 +9,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { peekPending, registerGateHandler, resumePending, useLoginGateStore } from './loginGate.js';
+import { peekPending, registerGateHandler, resumePending, subscribePending, useLoginGateStore } from './loginGate.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -132,6 +132,43 @@ describe('peekPending()', () => {
     useLoginGateStore.getState().request({ type: 'save', payload: { kind: 'product', id: 'p1', saved: true }, returnTo: '/p/p1' });
     expect(peekPending()).toMatchObject({ type: 'save', returnTo: '/p/p1' });
     expect(peekPending()).not.toBeNull();
+  });
+});
+
+describe('subscribePending()', () => {
+  function fakeWindow() {
+    const listeners = new Map();
+    return {
+      listeners,
+      addEventListener: (type, fn) => listeners.set(type, fn),
+      removeEventListener: (type, fn) => { if (listeners.get(type) === fn) listeners.delete(type); },
+    };
+  }
+
+  it('notifies on storage events (another tab) and on this tab’s gate store changes', () => {
+    const win = fakeWindow();
+    vi.stubGlobal('window', win);
+    const callback = vi.fn();
+    const stop = subscribePending(callback);
+
+    win.listeners.get('storage')();
+    expect(callback).toHaveBeenCalledTimes(1);
+
+    useLoginGateStore.getState().request({ type: 'save', payload: {}, returnTo: '/' });
+    useLoginGateStore.getState().cancel();
+    expect(callback).toHaveBeenCalledTimes(3);
+    stop();
+  });
+
+  it('unsubscribes from both sources', () => {
+    const win = fakeWindow();
+    vi.stubGlobal('window', win);
+    const callback = vi.fn();
+    subscribePending(callback)();
+
+    expect(win.listeners.has('storage')).toBe(false);
+    useLoginGateStore.getState().cancel();
+    expect(callback).not.toHaveBeenCalled();
   });
 });
 
