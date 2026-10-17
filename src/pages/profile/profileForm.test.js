@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { describe, expect, it } from 'vitest';
 import { accountRows, editProfileSchema, formToPatch, profileToForm, roundCoord, toTenDigitMobile } from './profileForm.js';
 
@@ -38,8 +39,8 @@ describe('editProfileSchema', () => {
 
   it('validates a phone only when one is entered', () => {
     expect(errorsOf({ ...base, phone: '98765 43210' })).toEqual({});
-    expect(errorsOf({ ...base, phone: '5123456789' })).toEqual({ phone: 'Enter a 10-digit Indian mobile number' });
-    expect(errorsOf({ ...base, phone: '98765' })).toEqual({ phone: 'Enter a 10-digit Indian mobile number' });
+    expect(errorsOf({ ...base, phone: '5123456789' })).toEqual({ phone: 'Enter a valid 10-digit Indian mobile number' });
+    expect(errorsOf({ ...base, phone: '98765' })).toEqual({ phone: 'Enter a valid 10-digit Indian mobile number' });
   });
 
   it('requires a name of at most 80 characters', () => {
@@ -100,5 +101,22 @@ describe('accountRows', () => {
     for (const role of ['customer', 'seller', 'admin']) {
       expect(accountRows(role).some((r) => r.to === '/sell' || r.to.startsWith('/seller'))).toBe(false);
     }
+  });
+});
+
+describe('editProfileSchema through zodResolver (what the form sees)', () => {
+  const base = profileToForm(profile);
+  const resolve = (values) =>
+    zodResolver(editProfileSchema)(values, undefined, { fields: {}, shouldUseNativeValidation: false });
+
+  it('reports an invalid phone on the "phone" path', async () => {
+    const { errors } = await resolve({ ...base, phone: '12345' });
+    expect(Object.keys(errors)).toEqual(['phone']);
+    expect(errors.phone.message).toBe('Enter a valid 10-digit Indian mobile number');
+  });
+
+  it('has no errors for an empty phone', async () => {
+    const { errors } = await resolve({ ...base, phone: '' });
+    expect(errors).toEqual({});
   });
 });
