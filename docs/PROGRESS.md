@@ -7,8 +7,8 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
 - Last green commit on main: `738344f`
 - Merged this week: A3.1 auth and profile services, auth store, route guards (#21)
-- In progress: none (A3.4 complete)
-- Next task: B3.1 (Auth pages) / B3.2 (Login sheet) / A3.5 (Profile location default) / B3.5 (Saved, Recently viewed, Previously connected)
+- In progress: none (A3.5 complete)
+- Next task: B3.1 (Auth pages) / B3.2 (Login sheet) / B3.5 (Saved, Recently viewed, Previously connected)
 - Deferred follow-ups: none from Week 2 pages. Saved reel taps are a no-op until Saved is rebuilt (B3.5); legacy Saved “View All →” is 24 px high (B3.5).
 - Blocked: —
 - Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
@@ -16,6 +16,18 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-16 · A3.5 — Default search location from profile home area · dk · Antigravity (Gemini Flash)
+- Done: **Implemented and Verified** Task A3.5 (Default search location from profile's home area):
+  1. `src/lib/profileLocation.js`: Pure helper `resolveProfileLocationDefault(location, profile)`. Validates that location store is completely empty (`lat == null`, `lng == null`, `source == null`) and profile has valid finite numeric `homeLat` and `homeLng`. Returns `{ lat, lng, label: homeLocality ?? 'Home area' }`. Skips (returns `null`) if any location was already set (`source` 'gps', 'area', 'profile' or coords non-null), if profile is missing, or if coords are null.
+  2. `src/lib/profileLocation.test.js`: 6 unit tests covering all edge cases (empty store + coords sets location, fallback label `'Home area'` when `homeLocality` is null/undefined, skip when location already exists with any source or coords, skip when profile coords are null/missing, skip when coords are non-finite/invalid, skip on null/undefined profile or location).
+  3. `src/app/AuthBootstrap.jsx`: Integrated profile location defaulting: reads `authStatus` via `useAuthStore((s) => s.status)` and `profile` via `useMe()`. When `authStatus === 'authenticated'` and `profile` loads, runs once per login session using a ref guard (`hasAppliedLocation.current`), evaluates `resolveProfileLocationDefault(useLocationStore.getState(), profile)`, and calls `locationStore.setFromProfile(...)`. Resets the ref when `authStatus !== 'authenticated'` so subsequent logins re-evaluate. Never overwrites existing locations, never runs for guests, never calls `markAsked()`, and uses camelCase CONTRACT fields only.
+- Files: created `src/lib/profileLocation.js`, `src/lib/profileLocation.test.js`; modified `src/app/AuthBootstrap.jsx`, `docs/PROGRESS.md`.
+- How verified: `npm run check` green — check-guards OK (194 source files, 3 legacy allowlist entries), ESLint 0 errors, Vitest **49 test files / 435 tests passed** (including all 6 `profileLocation.test.js` tests), Vite production build OK (311 modules).
+- Not done / left out (why): Profile editing UI for home area coordinates is part of Profile screens (B3.4).
+- Gotchas for next person: `resolveProfileLocationDefault` checks `location.source != null` and `location.lat != null || location.lng != null` to ensure user-selected areas, GPS fixes, or prior profile defaults are never clobbered.
+- Next step: B3.1 (Auth pages) / B3.2 (Login sheet) / B3.5 (Saved, Recently viewed, Previously connected).
+
 
 ### 2026-10-15 · A3.4 — Recently viewed + previously connected · dk · Antigravity (Gemini Flash)
 - Done: **Implemented and Verified** Task A3.4 (Activity tracking services + queries + hooks):

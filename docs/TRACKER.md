@@ -50,7 +50,7 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ☑ | A3.4 | Recently viewed + previously connected | A | Wed | 2 | A3.1 |
 | ☐ | B3.2 | Login sheet | B | Wed | 2 | A3.2 |
 | ☐ | B3.3 | WhatsApp + Call live (two real phones) | B | Wed | 1.5 | B3.2 |
-| ☐ | A3.5 | Profile location default + **Resend SMTP on her domain** | A | Thu | 1 | domain |
+| ◐ | A3.5 | Profile location default ✓; Resend SMTP waits on domain | A | Thu | 1 | domain |
 | ☐ | B3.4 | Profile + Edit profile (**+ add-on**) | B | Thu | 2 | A3.1 |
 | ☐ | B3.5 | Saved, Recently viewed, Previously connected | B | Fri | 3 | A3.3, A3.4 |
 | ☐ | Exit | Incognito → WhatsApp → sign up → confirm → WhatsApp opens | both | Fri | — | — |
