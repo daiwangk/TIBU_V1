@@ -15,14 +15,8 @@ import { AppError } from '../errors.js';
 import { getSupabase } from './client.js';
 import { mapSupabaseError } from './errors.js';
 import { mapBusinessSummary, mapProductSummaryNested } from './mappers.js';
+import { BIZ_SUMMARY_COLS, PRODUCT_SUMMARY_COLS } from './selects.js';
 
-// Supabase nested-select string for a business row that mapBusinessSummary can consume.
-const BIZ_COLS = [
-  'id', 'slug', 'name', 'status', 'logo_url', 'banner_url',
-  'locality', 'city', 'rating_avg', 'rating_count',
-  'available_today', 'delivery_available', 'pickup_available',
-  'approved_at', 'categories ( slug, name )',
-].join(', ');
 
 /**
  * Returns the IDs of every saved business and product for the current user.
@@ -55,7 +49,7 @@ export async function getSavedIds() {
 export async function listSavedBusinesses() {
   const { data, error } = await getSupabase()
     .from('saved_businesses')
-    .select(`created_at, businesses!inner ( ${BIZ_COLS} )`)
+    .select(`created_at, businesses!inner ( ${BIZ_SUMMARY_COLS} )`)
     .order('created_at', { ascending: false });
 
   if (error) throw mapSupabaseError(error);
@@ -77,10 +71,8 @@ export async function listSavedProducts() {
     .select(
       `created_at,
        products!inner (
-         id, name, price_paise, category_slug, available_today, is_active, created_at,
-         categories ( slug, name ),
-         product_images ( id, url, sort_order ),
-         businesses!inner ( ${BIZ_COLS} )
+         ${PRODUCT_SUMMARY_COLS},
+         businesses!inner ( ${BIZ_SUMMARY_COLS} )
        )`,
     )
     .order('created_at', { ascending: false });
