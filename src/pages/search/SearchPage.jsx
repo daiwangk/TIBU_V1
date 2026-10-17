@@ -1,16 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, X, SlidersHorizontal, ArrowLeft } from 'lucide-react';
-import Tabs from '../../components/ui/Tabs';
-import Button from '../../components/ui/Button';
-import IconButton from '../../components/ui/IconButton';
-import EmptyState from '../../components/ui/EmptyState';
-import ErrorState from '../../components/ui/ErrorState';
-import ProductCard from '../../components/ProductCard';
-import BusinessCard from '../../components/BusinessCard';
-import SaveButton from '../../components/SaveButton';
-import SearchResultsSkeleton from './SearchResultsSkeleton';
-import LocationChip from '../../components/LocationChip';
+import SearchHeader from './SearchHeader';
+import SearchResults from './SearchResults';
 import SearchFiltersSheet from './SearchFiltersSheet';
 import RecentSearches from './RecentSearches';
 import { useInfiniteProductSearch, useInfiniteBusinessSearch } from '../../queries/catalog';
@@ -177,9 +168,6 @@ export default function SearchPage() {
 
   const items = useMemo(() => query.data?.pages.flat() || [], [query.data]);
 
-  const hasMore = query.hasNextPage;
-  const isFetchingNext = query.isFetchingNextPage;
-
   function getCountLabel(query) {
     if (query.isPending || query.isError) return '';
     const arr = query.data?.pages.flat() || [];
@@ -188,124 +176,37 @@ export default function SearchPage() {
 
   return (
     <main className="flex flex-col min-h-screen pb-4">
-      <header className="sticky top-0 z-30 flex flex-col bg-surface shadow-sm px-screen pt-4 pb-2">
-        <h1 className="sr-only">Search</h1>
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <IconButton
-              label="Go back"
-              onClick={() => navigate(-1)}
-              className="-ml-2"
-            >
-              <ArrowLeft size={20} strokeWidth={1.75} aria-hidden="true" />
-            </IconButton>
-
-            <div className="relative flex-1">
-              <Search
-                size={20}
-                strokeWidth={1.75}
-                aria-hidden="true"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-              />
-              <input
-                type="search"
-                autoFocus
-                enterKeyHint="search"
-                aria-label="Search products and businesses"
-                placeholder="Search cakes, crochet, candles…"
-                value={localQ}
-                onChange={e => setLocalQ(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') saveRecent(localQ); }}
-                className="w-full min-h-12 [&::-webkit-search-cancel-button]:hidden rounded-btn border border-border bg-surface pl-10 pr-10 font-body text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-safe:transition-shadow motion-safe:duration-150"
-              />
-              {localQ && (
-                <button
-                  type="button"
-                  onClick={() => { setLocalQ(''); setSearchParams(prev => { prev.delete('q'); return prev; }, { replace: true }); }}
-                  aria-label="Clear search"
-                  className="absolute right-2 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
-                >
-                  <X size={18} aria-hidden="true" />
-                </button>
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setFiltersOpen(true)}
-              aria-label="Open filters"
-              className="relative -mr-2 flex min-h-11 min-w-11 items-center justify-center text-ink hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
-            >
-              <SlidersHorizontal size={24} strokeWidth={1.75} aria-hidden="true" />
-              {filterCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-fg">
-                  {filterCount}
-                </span>
-              )}
-            </button>
-          </div>
-
-          <div className="-mt-1 flex">
-            <LocationChip />
-          </div>
-
-          {isSearching && (
-            <Tabs
-              value={tab}
-              onChange={handleTabChange}
-              items={[
-                { value: 'products', label: `Products${getCountLabel(productSearch)}` },
-                { value: 'businesses', label: `Businesses${getCountLabel(businessSearch)}` }
-              ]}
-            />
-          )}
-        </div>
-      </header>
+      <SearchHeader
+        value={localQ}
+        onValueChange={setLocalQ}
+        onEnter={() => saveRecent(localQ)}
+        onClear={() => { setLocalQ(''); setSearchParams(prev => { prev.delete('q'); return prev; }, { replace: true }); }}
+        onBack={() => navigate(-1)}
+        onOpenFilters={() => setFiltersOpen(true)}
+        filterCount={filterCount}
+        tabs={isSearching ? {
+          value: tab,
+          onChange: handleTabChange,
+          items: [
+            { value: 'products', label: `Products${getCountLabel(productSearch)}` },
+            { value: 'businesses', label: `Businesses${getCountLabel(businessSearch)}` }
+          ],
+        } : undefined}
+      />
 
       <div className="flex-1 flex flex-col">
         {!isSearching ? (
           <RecentSearches onSelect={handleSearchInputSelect} />
-        ) : query.isPending ? (
-          <SearchResultsSkeleton tab={tab} />
-        ) : query.isError ? (
-          <div className="flex-1 flex items-center justify-center py-12">
-            <ErrorState message="We couldn't load the search results." onRetry={() => query.refetch()} />
-          </div>
-        ) : items.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center py-12">
-            <EmptyState
-              icon={<Search size={28} strokeWidth={1.75} aria-hidden="true" />}
-              title={q ? `No results for "${q}".` : 'No results for these filters.'}
-              text="Try adjusting your filters or searching for something else."
-              action={filterCount > 0 ? { label: 'Reset filters', onClick: handleResetFilters } : undefined}
-            />
-          </div>
         ) : (
-          <div
-            className="flex flex-col gap-6 px-screen py-6"
-            onClickCapture={(e) => { if (e.target instanceof Element && e.target.closest('a')) saveRecent(q); }}
-          >
-            <div className="flex flex-col gap-4">
-              {items.map(item => (
-                tab === 'products' ? (
-                  <ProductCard key={item.id} product={item} action={<SaveButton kind="product" id={item.id} overlay />} />
-                ) : (
-                  <BusinessCard key={item.id} business={item} action={<SaveButton kind="business" id={item.id} />} />
-                )
-              ))}
-            </div>
-
-            {hasMore && (
-              <Button
-                variant="secondary"
-                onClick={() => query.fetchNextPage()}
-                disabled={isFetchingNext}
-                className="w-full"
-              >
-                {isFetchingNext ? 'Loading...' : 'Load more'}
-              </Button>
-            )}
-          </div>
+          <SearchResults
+            tab={tab}
+            query={query}
+            items={items}
+            q={q}
+            filterCount={filterCount}
+            onResetFilters={handleResetFilters}
+            onOpenResult={() => saveRecent(q)}
+          />
         )}
       </div>
 

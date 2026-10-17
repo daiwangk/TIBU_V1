@@ -18,6 +18,8 @@ export default function NewBusinessesSection() {
   return (
     <HomeSection
       title="New businesses"
+      icon={<Store size={20} strokeWidth={1.75} />}
+      subtitle="Fresh on Tibu"
       viewAllTo="/search?tab=businesses&sort=newest"
       query={query}
       skeleton={<BusinessRowSkeleton />}

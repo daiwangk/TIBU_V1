@@ -5,6 +5,7 @@ import { Search, X } from 'lucide-react';
  * and a `trailing` slot (e.g. the filters button). Pages own all state and behaviour; every other prop
  * (`value`, `onChange`, `onClick`, `onKeyDown`, `autoFocus`, `enterKeyHint`, `id`…) goes to the <input>.
  * Pass `label` for the accessible name, or an `id` with your own <label>.
+ * A long placeholder ends in "…" instead of clipping under the trailing buttons; keep it short anyway.
  *
  * @param {{
  *   label?: string,
@@ -31,7 +32,7 @@ export default function SearchField({ label, onClear, trailing, className = '', 
         type="search"
         aria-label={label}
         {...inputProps}
-        className={`w-full min-h-12 rounded-full border border-sage bg-surface pl-12 ${padRight} font-body text-base text-ink placeholder:text-muted [&::-webkit-search-cancel-button]:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-safe:transition-shadow motion-safe:duration-150`}
+        className={`w-full min-h-12 rounded-full border border-sage bg-surface pl-12 ${padRight} font-body text-base text-ink text-ellipsis placeholder:text-muted [&::-webkit-search-cancel-button]:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-safe:transition-shadow motion-safe:duration-150`}
       />
       {endSlots > 0 && (
         <div className="absolute right-1 top-1/2 flex -translate-y-1/2 items-center">

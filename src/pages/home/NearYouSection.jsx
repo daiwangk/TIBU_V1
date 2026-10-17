@@ -7,7 +7,8 @@ import { useSearchOrigin } from '../../stores/location';
 import HomeSection from './HomeSection';
 import BusinessRowSkeleton from './BusinessRowSkeleton';
 
-// Default radius (15 km) applies — this row is about what is genuinely close.
+// Default radius (15 km) applies — this row is about what is genuinely close. The "Within 15 km" subtitle
+// matches CONTRACT §radiusKm (SQL default 15) and the mock's DEFAULT_RADIUS_KM; change both together.
 const PARAMS = { sort: 'distance', limit: 8 };
 
 /** "Near you" row — only rendered once a location is set, and hidden if nothing is nearby. */
@@ -22,6 +23,8 @@ export default function NearYouSection() {
   return (
     <HomeSection
       title="Near you"
+      icon={<MapPin size={20} strokeWidth={1.75} />}
+      subtitle="Within 15 km"
       viewAllTo="/search?tab=businesses&sort=distance"
       query={query}
       skeleton={<BusinessRowSkeleton />}
