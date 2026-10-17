@@ -26,6 +26,9 @@ import ImagePlaceholder from '../../components/ui/ImagePlaceholder';
 
 // Shared components
 import Logo from '../../components/brand/Logo';
+import { formatPrice } from '../../lib/format';
+import TokenSwatches from './TokenSwatches';
+import DecorSet from './DecorSet';
 import Price from '../../components/Price';
 import Rating from '../../components/Rating';
 import Distance from '../../components/Distance';
@@ -336,11 +339,24 @@ export default function UiGalleryPage() {
         </div>
       </Section>
 
-      {/* ── Logo ── */}
-      <Section id="logo" title="Logo">
-        <div className="px-screen">
-          <Logo />
+      {/* ── Tokens, logo, decor (D40) ── */}
+      <Section id="tokens" title="Colour tokens" description="theme.css values (D40) and the approved text pairs">
+        <TokenSwatches />
+      </Section>
+
+      <Section id="logo" title="Logo" description="Placeholder wordmark, TODO(logo) · sm / md / lg · with tagline">
+        <div className="flex flex-col items-start gap-4 px-screen">
+          <Logo size="sm" />
+          <Logo size="md" />
+          <Logo size="lg" tagline />
+          <p id="rupee-check" className="font-body text-base text-body">
+            Price glyph check: {formatPrice(1250)} · <strong className="font-bold text-ink">{formatPrice(12499)}</strong>
+          </p>
         </div>
+      </Section>
+
+      <Section id="decor" title="Decor" description="Inline SVG, aria-hidden, currentColor, no animation">
+        <DecorSet />
       </Section>
 
       {/* ── Price / Rating / Distance ── */}

@@ -1,31 +1,39 @@
 @import "tailwindcss";
 
+/* Values and meanings: docs/DECISIONS.md D40 (17 Oct 2026 references). */
 @theme {
   /* ── Backgrounds ─────────────────────────────────── */
-  --color-bg: #faf7f2;        /* warm cream page background */
-  --color-surface: #ffffff;   /* card / panel white */
+  --color-bg: #f6f1eb;        /* warm cream page and app column */
+  --color-surface: #fffdf9;   /* cards and sheets (warm white) */
 
   /* ── Brand / Primary ─────────────────────────────── */
-  --color-primary: #5a1848;   /* deep plum — buttons, logo, active states */
+  --color-primary: #71244f;   /* plum — logo, headings, active nav, icons, primary button */
   --color-primary-fg: #ffffff;
 
   /* ── Pastel surfaces ─────────────────────────────── */
-  --color-lime: #eef3d6;
-  --color-blush: #fbe6ea;
-  --color-lavender: #efe4f7;
-  --color-mint: #ddf1ee;
+  --color-lime: #f6e4d8;      /* soft peach accent (name kept, D40) */
+  --color-blush: #f2e6ea;     /* pale pink hero tint */
+  --color-lavender: #f1e7ee;  /* mauve tint — hovers, info banners */
+  --color-mint: #dcded3;      /* soft sage — chips, strips, "Available today" */
+
+  /* ── Sage, error, decor ──────────────────────────── */
+  --color-sage: #748e83;        /* decor fills and field borders; never behind text */
+  --color-sage-strong: #566e63; /* accent button fill and sage text */
+  --color-error: #b3261e;
+  --color-coral: #e5735f;       /* decor strokes and the rating star only; never text */
 
   /* ── Borders ─────────────────────────────────────── */
-  --color-border: #ede7ee;
+  --color-border: #e8e0d6;
 
   /* ── Text ────────────────────────────────────────── */
-  --color-ink: #2a0f2a;       /* heading dark ink-plum */
+  --color-ink: #3a1631;       /* names and strong text (deep plum-ink) */
   --color-body: #4a4556;      /* body text */
-  --color-muted: #8a8494;     /* captions / placeholder */
+  --color-muted: #6b6574;     /* captions / placeholder */
 
   /* ── Typography ──────────────────────────────────── */
   --font-heading: "Nunito", sans-serif;
   --font-body: "Nunito Sans", sans-serif;
+  --font-script: "Caveat", cursive; /* taglines only */
 
   /* ── Radius ──────────────────────────────────────── */
   --radius-card: 16px;
