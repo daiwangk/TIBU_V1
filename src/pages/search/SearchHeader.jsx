@@ -34,7 +34,7 @@ export default function SearchHeader({ value, onValueChange, onEnter, onClear, o
             label="Search products and businesses"
             autoFocus
             enterKeyHint="search"
-            placeholder="Search cakes, crochet, candles…"
+            placeholder="Search products or shops"
             value={value}
             onChange={(e) => onValueChange(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') onEnter(); }}
