@@ -49,6 +49,25 @@ video {
   display: block;
 }
 
+/* ── Toasts (sonner) on theme tokens, D40 ──
+   sonner appends its own <style> after ours, so these selectors carry one extra `html` to win.
+   Every toast is warm white with ink text; the icon carries the type (error 6.4:1, sage-strong 5.4:1). */
+html [data-sonner-toaster] {
+  font-family: var(--font-body);
+}
+html [data-sonner-toaster][data-sonner-theme] {
+  --normal-bg: var(--color-surface);
+  --normal-border: var(--color-border);
+  --normal-text: var(--color-ink);
+  --border-radius: var(--radius-card);
+}
+html [data-sonner-toast][data-type="error"] [data-icon] {
+  color: var(--color-error);
+}
+html [data-sonner-toast][data-type="success"] [data-icon] {
+  color: var(--color-sage-strong);
+}
+
 /* ── Utility: hide scrollbar visually but keep it functional ── */
 @utility no-scrollbar {
   scrollbar-width: none;

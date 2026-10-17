@@ -47,7 +47,7 @@ export default function BusinessCard({ business, action, className = '' }) {
 
       {/* Info */}
       <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-        <p className="font-heading font-bold text-ink text-sm leading-tight truncate">{name}</p>
+        <p className="font-heading font-bold text-ink text-base leading-tight truncate">{name}</p>
         <p className="font-body text-xs text-muted truncate">{categoryName}</p>
         <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
           <span className="font-body text-xs text-muted">{locality}</span>

@@ -4,8 +4,12 @@ import ErrorState from './ui/ErrorState';
 import { useCategories } from '../queries/catalog';
 import { getCategoryIcon } from '../lib/categoryIcons';
 
-/** Pastel tile colours, cycled by position. */
-const TILE_BG = ['bg-lavender', 'bg-blush', 'bg-lime', 'bg-mint'];
+/**
+ * Pastel circle colours, cycled by position: blush, peach, soft sage. Lavender is left out because it
+ * reads the same as blush side by side (D40).
+ * TODO(category-photos): show the client's photo per slug (static assets) when they arrive; no contract change.
+ */
+const TILE_BG = ['bg-blush', 'bg-lime', 'bg-mint'];
 const SKELETON_COUNT = 6;
 
 /**
@@ -23,9 +27,9 @@ export default function CategoryShortcuts() {
             <div
               key={i}
               aria-hidden="true"
-              className="flex w-16 flex-shrink-0 flex-col items-center gap-2 py-1"
+              className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2 py-1"
             >
-              <span className="block h-16 w-16 rounded-full bg-border motion-safe:animate-pulse" />
+              <span className="block h-[72px] w-[72px] rounded-full bg-border motion-safe:animate-pulse" />
               <span className="block h-3 w-12 rounded bg-border motion-safe:animate-pulse" />
             </div>
           ))}
@@ -58,12 +62,12 @@ export default function CategoryShortcuts() {
             <Link
               key={cat.slug}
               to={`/category/${cat.slug}`}
-              className="group flex w-16 flex-shrink-0 snap-start flex-col items-center gap-2 rounded-card py-1 no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="group flex w-[72px] flex-shrink-0 snap-start flex-col items-center gap-2 rounded-card py-1 no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <span
-                className={`flex h-16 w-16 items-center justify-center rounded-full text-primary ${TILE_BG[i % TILE_BG.length]} group-active:opacity-80 motion-safe:transition-opacity motion-safe:duration-150`}
+                className={`flex h-[72px] w-[72px] items-center justify-center rounded-full text-primary ${TILE_BG[i % TILE_BG.length]} group-active:opacity-80 motion-safe:transition-opacity motion-safe:duration-150`}
               >
-                <Icon size={26} strokeWidth={1.75} aria-hidden="true" />
+                <Icon size={28} strokeWidth={1.75} aria-hidden="true" />
               </span>
               <span className="line-clamp-2 text-center font-body text-xs font-semibold leading-tight text-ink">
                 {cat.name}

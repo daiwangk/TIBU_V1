@@ -46,7 +46,8 @@ export function Providers({ children }) {
     <QueryClientProvider client={queryClient}>
       <AuthBootstrap />
       {children}
-      <Toaster position="top-center" richColors />
+      {/* Styled from theme tokens in src/index.css (D40), so no richColors. */}
+      <Toaster position="top-center" />
     </QueryClientProvider>
   );
 }

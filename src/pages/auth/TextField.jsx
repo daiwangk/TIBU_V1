@@ -15,12 +15,12 @@ export default function TextField({ id, label, error, ...rest }) {
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
         className={`w-full min-h-11 rounded-btn border bg-surface px-3 py-2.5 font-body text-base text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${
-          error ? 'border-blush' : 'border-border'
+          error ? 'border-error' : 'border-sage'
         }`}
         {...rest}
       />
       {error && (
-        <span id={`${id}-error`} role="alert" className="font-body text-sm font-semibold text-primary">
+        <span id={`${id}-error`} role="alert" className="font-body text-sm font-semibold text-error">
           {error}
         </span>
       )}

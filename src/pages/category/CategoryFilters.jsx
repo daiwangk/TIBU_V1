@@ -118,6 +118,7 @@ export default function CategoryFilters({
         {/* Sort */}
         <div className="flex-shrink-0 min-w-[140px]">
           <Select
+            compact
             id="category-sort"
             value={sort}
             onChange={(e) => onSortChange(e.target.value)}
@@ -142,6 +143,7 @@ export default function CategoryFilters({
         {tab === 'products' && (
           <div className="flex-shrink-0 min-w-[130px]">
             <Select
+              compact
               id="category-price"
               value={price}
               onChange={(e) => onPriceChange(e.target.value)}

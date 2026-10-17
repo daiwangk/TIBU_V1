@@ -1,5 +1,5 @@
 /**
- * Toggleable chip — for filter or selection UIs.
+ * Toggleable chip — for filter or selection UIs. Inactive: soft sage with ink text; active: plum.
  *
  * @param {{
  *   active?: boolean,
@@ -24,7 +24,7 @@ export default function Chip({ active = false, onToggle, children, className = '
         ${
           active
             ? 'bg-primary text-primary-fg'
-            : 'bg-surface text-body border border-border hover:bg-lavender'
+            : 'bg-mint text-ink hover:brightness-95 active:brightness-95'
         }
         ${className}
       `}

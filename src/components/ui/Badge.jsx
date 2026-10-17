@@ -3,8 +3,8 @@
  *
  * Tones map to existing theme.css tokens only — no hex values.
  *   neutral → bg-lavender / text-ink
- *   success → bg-mint / text-ink
- *   warning → bg-blush / text-ink
+ *   success → bg-mint (soft sage) / text-ink
+ *   warning → bg-lime (soft peach) / text-ink
  *   plum    → bg-primary / text-primary-fg  (no plum token → use primary)
  *
  * @param {{
@@ -17,7 +17,7 @@ export default function Badge({ tone = 'neutral', children, className = '' }) {
   const toneClasses = {
     neutral: 'bg-lavender text-ink',
     success: 'bg-mint text-ink',
-    warning: 'bg-blush text-ink',
+    warning: 'bg-lime text-ink',
     plum: 'bg-primary text-primary-fg',
   };
 

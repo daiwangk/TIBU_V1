@@ -28,7 +28,7 @@ export default function PasswordField({ id, label, error, autoComplete, ...rest 
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
           className={`w-full min-h-11 rounded-btn border bg-surface py-2.5 pr-12 pl-3 font-body text-base text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${
-            error ? 'border-blush' : 'border-border'
+            error ? 'border-error' : 'border-sage'
           }`}
           {...rest}
         />
@@ -43,7 +43,7 @@ export default function PasswordField({ id, label, error, autoComplete, ...rest 
         </button>
       </div>
       {error && (
-        <span id={`${id}-error`} role="alert" className="font-body text-sm font-semibold text-primary">
+        <span id={`${id}-error`} role="alert" className="font-body text-sm font-semibold text-error">
           {error}
         </span>
       )}

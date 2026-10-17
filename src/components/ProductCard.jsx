@@ -52,20 +52,20 @@ export default function ProductCard({ product, variant = 'grid', action, classNa
           <ImagePlaceholder aspect="1/1" bg="lavender" className="w-full h-full" />
         )}
 
-        {/* Today badge */}
+        {/* Available-today pill on the image (bottom-left; the save action owns the top-right corner) */}
         {availableToday && (
-          <span className="absolute top-2 left-2">
-            <Badge tone="success">Today</Badge>
+          <span className="absolute bottom-2 left-2">
+            <Badge tone="success">Available today</Badge>
           </span>
         )}
       </div>
 
-      {/* Body */}
-      <div className="flex flex-col gap-1 p-2">
+      {/* Body: name in ink, price as the stronger plum element */}
+      <div className="flex flex-col gap-1 p-2.5">
         <p className="font-body text-sm font-semibold text-ink line-clamp-2 leading-snug">
           {name}
         </p>
-        <Price value={price} size="sm" />
+        <Price value={price} size="md" />
         <div className="flex items-center gap-1 flex-wrap">
           <span className="font-body text-xs text-muted truncate">{businessName}</span>
           {distanceM != null && (
