@@ -5,13 +5,15 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 3 (12–16 Oct 2026) · Target: Accounts, contact, retention
 - Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
-- Last green commit on main: `738344f`
-- Merged this week: A3.1 auth and profile services, auth store, route guards (#21)
-- In progress: none (A3.5 code done; Resend SMTP waits on domain)
-- Next task: the Week 3 exit check on real phones; then Week 4
-- Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5). Profile rows "Sell on Tibu" / "Seller dashboard" hidden until B4.1 (`TODO(B4.1)`).
-- Blocked: —
-- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
+- Last green commit on main: `0514fdc` (Merge PR #34; Actions `check` and Cloudflare Pages both green; `npm run check` on main: 37 files / 314 tests, build OK)
+- Merged this week: A3.1 auth and profile services, auth store, route guards (#21) · B3.1 auth pages (#26, includes the contract commit `023e5d6` — `resendConfirmation`, CONTRACT v1.2.2, D39) · B3.2 login sheet (#27) · B3.3 contact buttons live (#28) · B3.4 profile and edit profile (#29) · B3.5 saved / recently viewed / previously connected (#30) · gitlink removal (#31) · gitlink guard in `npm run check` (#32) · saved-products fix (#33: `products` has `category_id`, not `category_slug`) · edit-profile phone-error fix (#34)
+- In progress: none — all Week 3 PRs are merged to main (stack merged as merge commits, branches kept); A3.5 profile home area → default search location half done (#36), Resend SMTP half waits on the client's domain
+- Next task: Week 4. Week 3 exit check passed on real phones on 17 Oct 2026 (gate replay, WhatsApp and Call, saved items, recent, keyboard, email flow with team addresses only). Found and fixed during testing: saved products 42703 (#33) and phone-error visibility (#34).
+- Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
+- Carry-overs: (1) un-hide the "Sell on Tibu" / "Seller dashboard" profile rows in B4.1 (`TODO(B4.1)` in `src/pages/profile/profileForm.js`); (2) the Admin row on /profile points to a 404 until Week 4; (3) `src/pages/search/SearchPage.jsx` is 321 lines vs the 250-line limit; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
+- Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
+- Blocked: SMTP / real-customer sign-up (needs the domain)
+- Waiting on client: domain · D12 answer (email confirmation stays ON — decisions list, docs/build/08_CLIENT_COMMS.md §2, not yet sent) · logo · reel links · real sellers · accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested
 - Hosting: Cloudflare Pages project is `tibu-app` (`https://tibu-app.pages.dev`).
 - Unavailable evenings this week: —
 
@@ -73,7 +75,6 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Next step (exact): with `tibu-dev` keys: sign up with a team address → confirm in Gmail (Android) and the iOS Gmail + Mail apps → land on /auth/callback; wrong password; reset round trip; `/login?next=/saved`.
 - Review fix (S9, same branch): a one-time `peekPending()` could go stale. `AuthCallbackPage` and the Check-inbox redirect now read `useHasPendingAction()` (re-renders on `storage` events from other tabs and on gate-store changes), and the login/signup pages navigate through `useAfterAuth(next)`: with a pending action it waits for GateResumer but a 1.5 s fallback sends the user on if the page is still mounted (action expired mid-request or taken by another tab; GateResumer navigating away unmounts the page and cancels the timer). Verified in Chrome on the dev server (callback page, simulated `storage` events); the fallback timer itself has no automated test (no jsdom).
 - Gotchas for the next person: `LoginForm.onSuccess({ hadPending })` — `hadPending` is read *before* sign-in because GateResumer consumes the action as soon as the store flips. Pages that start a login set a `submitted` flag first, otherwise the "signed-in visitor → /" redirect fires on their own success. `contact.js` builds links from raw `VITE_SITE_URL` (a trailing `/` would give `//p/`); fixed with a shared helper in B3.3.
->>>>>>> origin/main
 
 ### 2026-10-15 · A3.4 — Recently viewed + previously connected · dk · Antigravity (Gemini Flash)
 - Done: **Implemented and Verified** Task A3.4 (Activity tracking services + queries + hooks):
