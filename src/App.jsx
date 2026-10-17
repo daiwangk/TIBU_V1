@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { GateResumer } from './app/GateResumer.jsx';
+import { RequireAuth } from './app/guards.jsx';
 import LoginSheet from './components/LoginSheet';
 import Spinner from './components/ui/Spinner';
 
@@ -25,14 +26,14 @@ const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 const SignupPage = lazy(() => import('./pages/auth/SignupPage'));
 const BusinessPage = lazy(() => import('./pages/business/BusinessPage'));
 const CategoryPage = lazy(() => import('./pages/category/CategoryPage'));
-const EditProfile = lazy(() => import('./EditProfile'));
+const EditProfilePage = lazy(() => import('./pages/profile/EditProfilePage'));
 const HelpPage = lazy(() => import('./pages/static/HelpPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const NotificationPreferences = lazy(() => import('./NotificationPreferences'));
 const Notification = lazy(() => import('./legacy/pages/Notification'));
 const PrivacyPage = lazy(() => import('./pages/static/PrivacyPage'));
 const ProductPage = lazy(() => import('./pages/product/ProductPage'));
-const Profile = lazy(() => import('./Profile'));
+const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 const Saved = lazy(() => import('./Saved'));
 const SearchPage = lazy(() => import('./pages/search/SearchPage'));
 const SellerDashboard = lazy(() => import('./SellerDashboard'));
@@ -42,7 +43,6 @@ const TermsPage = lazy(() => import('./pages/static/TermsPage'));
 
 // Contexts
 import { useSaved } from './contexts/SavedContext';
-import { useProfile } from './contexts/ProfileContext';
 
 /**
  * LegacyPage — wraps legacy pages that still need setPage + selected-entity
@@ -62,7 +62,6 @@ function LegacyPage({ Component, extraProps = {} }) {
   const selectedBusinessRef = React.useRef(null);
 
   const { savedProducts, setSavedProducts, savedBusinesses, setSavedBusinesses, savedReels, setSavedReels } = useSaved();
-  const { profile, setProfile, profileStats } = useProfile();
 
   /** Shim: translate old page strings to navigate() calls */
   function setPage(pageKey, entityState) {
@@ -149,9 +148,6 @@ function LegacyPage({ Component, extraProps = {} }) {
     setSavedBusinesses,
     savedReels,
     setSavedReels,
-    profile,
-    setProfile,
-    profileStats,
     ...extraProps,
   };
 
@@ -171,9 +167,11 @@ function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/saved" element={L(Saved)} />
-        <Route path="/profile" element={L(Profile)} />
-        <Route path="/profile/edit" element={L(EditProfile)} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/edit" element={<RequireAuth><EditProfilePage /></RequireAuth>} />
         <Route path="/notifications" element={L(Notification)} />
+        {/* Temporary: both paths show the legacy screen until B5.3 builds /notifications/settings */}
+        <Route path="/notifications/settings" element={L(NotificationPreferences)} />
         <Route path="/notifications/preferences" element={L(NotificationPreferences)} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/help" element={<HelpPage />} />

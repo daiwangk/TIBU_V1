@@ -4,7 +4,6 @@ import './index.css';
 import App from './App.jsx';
 import { ErrorBoundary } from './app/ErrorBoundary.jsx';
 import { Providers } from './app/providers.jsx';
-import { ProfileProvider } from './contexts/ProfileContext.jsx';
 import { SavedProvider } from './contexts/SavedContext.jsx';
 
 // A tab left open across a deploy can request a chunk filename that no longer exists. Reload once
@@ -23,11 +22,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
       <Providers>
-        <ProfileProvider>
-          <SavedProvider>
-            <App />
-          </SavedProvider>
-        </ProfileProvider>
+        <SavedProvider>
+          <App />
+        </SavedProvider>
       </Providers>
     </ErrorBoundary>
   </StrictMode>,
