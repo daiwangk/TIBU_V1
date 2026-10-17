@@ -5,13 +5,15 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 3 (12–16 Oct 2026) · Target: Accounts, contact, retention
 - Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
-- Last green commit on main: `738344f`
-- Merged this week: A3.1 auth and profile services, auth store, route guards (#21)
-- In progress: none — B3.1–B3.5 done on stacked branches feat/b3-1-auth-pages … feat/b3-5-saved-recent (not pushed)
-- Next task: A3.5 (profile location default + SMTP); then the Week 3 exit check on real phones
-- Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5). Profile rows "Sell on Tibu" / "Seller dashboard" hidden until B4.1 (`TODO(B4.1)`).
-- Blocked: —
-- Waiting on client: accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested · decisions list (docs/build/08_CLIENT_COMMS.md §2) not yet sent
+- Last green commit on main: `0514fdc` (Merge PR #34; Actions `check` and Cloudflare Pages both green; `npm run check` on main: 37 files / 314 tests, build OK)
+- Merged this week: A3.1 auth and profile services, auth store, route guards (#21) · B3.1 auth pages (#26, includes the contract commit `023e5d6` — `resendConfirmation`, CONTRACT v1.2.2, D39) · B3.2 login sheet (#27) · B3.3 contact buttons live (#28) · B3.4 profile and edit profile (#29) · B3.5 saved / recently viewed / previously connected (#30) · gitlink removal (#31) · gitlink guard in `npm run check` (#32) · saved-products fix (#33: `products` has `category_id`, not `category_slug`) · edit-profile phone-error fix (#34)
+- In progress: none — all Week 3 PRs are merged to main (stack merged as merge commits, branches kept)
+- Next task: A3.5 (profile home area → location store default); SMTP is blocked on the domain. Week 3 exit check on real phones: status not recorded here — owner to confirm.
+- Open: A3.5 (profile home area → location default; SMTP blocked on domain) · Week 3 exit check status — owner to confirm
+- Carry-overs: (1) un-hide the "Sell on Tibu" / "Seller dashboard" profile rows in B4.1 (`TODO(B4.1)` in `src/pages/profile/profileForm.js`); (2) the Admin row on /profile points to a 404 until Week 4; (3) `src/pages/search/SearchPage.jsx` is 321 lines vs the 250-line limit; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
+- Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
+- Blocked: SMTP / real-customer sign-up (needs the domain)
+- Waiting on client: domain · D12 answer (email confirmation stays ON — decisions list, docs/build/08_CLIENT_COMMS.md §2, not yet sent) · logo · reel links · real sellers · accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested
 - Hosting: Cloudflare Pages project is `tibu-app` (`https://tibu-app.pages.dev`).
 - Unavailable evenings this week: —
 
