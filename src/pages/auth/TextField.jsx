@@ -20,7 +20,7 @@ export default function TextField({ id, label, error, ...rest }) {
         {...rest}
       />
       {error && (
-        <span id={`${id}-error`} role="alert" className="font-body text-xs font-semibold text-ink">
+        <span id={`${id}-error`} role="alert" className="font-body text-sm font-semibold text-primary">
           {error}
         </span>
       )}

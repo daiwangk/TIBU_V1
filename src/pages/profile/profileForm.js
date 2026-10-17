@@ -16,7 +16,7 @@ export const editProfileSchema = z.object({
   phone: z
     .string()
     .trim()
-    .refine((v) => v === '' || toTenDigitMobile(v) !== null, 'Enter a 10-digit Indian mobile number'),
+    .refine((v) => v === '' || toTenDigitMobile(v) !== null, 'Enter a valid 10-digit Indian mobile number'),
   homeLocality: z.string(),
   homeLat: z.number().nullable(),
   homeLng: z.number().nullable(),

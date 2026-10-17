@@ -43,7 +43,7 @@ export default function PasswordField({ id, label, error, autoComplete, ...rest 
         </button>
       </div>
       {error && (
-        <span id={`${id}-error`} role="alert" className="font-body text-xs font-semibold text-ink">
+        <span id={`${id}-error`} role="alert" className="font-body text-sm font-semibold text-primary">
           {error}
         </span>
       )}
