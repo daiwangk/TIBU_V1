@@ -97,6 +97,20 @@ export async function sendPasswordReset(email) {
 }
 
 /**
+ * Re-send the sign-up confirmation e-mail. Same redirect as `signUp`, so the link lands on /auth/callback.
+ * @param {string} email
+ * @returns {Promise<void>}
+ */
+export async function resendConfirmation(email) {
+  const { error } = await getSupabase().auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${siteUrl()}/auth/callback` },
+  });
+  if (error) throw mapSupabaseError(error);
+}
+
+/**
  * @param {string} newPassword
  * @returns {Promise<void>}
  */

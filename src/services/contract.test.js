@@ -10,6 +10,11 @@ describe('service contract adapters', () => {
     }
   });
 
+  it('includes resendConfirmation (v1.2.2), which mock rejects with unavailable_in_mock', async () => {
+    expect(FUNCTION_NAMES).toContain('resendConfirmation');
+    await expect(mock.resendConfirmation('a@b.co')).rejects.toMatchObject({ code: 'unavailable_in_mock' });
+  });
+
   it('supabase exports every FUNCTION_NAMES entry as a function', () => {
     for (const name of FUNCTION_NAMES) {
       expect(typeof supabase[name], name).toBe('function');

@@ -17,6 +17,11 @@ import AppShell from './layouts/AppShell';
 import HomePage from './pages/home/HomePage';
 
 const AboutPage = lazy(() => import('./pages/static/AboutPage'));
+const AuthCallbackPage = lazy(() => import('./pages/auth/AuthCallbackPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
+const SignupPage = lazy(() => import('./pages/auth/SignupPage'));
 const BusinessPage = lazy(() => import('./pages/business/BusinessPage'));
 const CategoryPage = lazy(() => import('./pages/category/CategoryPage'));
 const EditProfile = lazy(() => import('./EditProfile'));
@@ -173,6 +178,13 @@ function AppRoutes() {
         <Route path="/help" element={<HelpPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/about" element={<AboutPage />} />
+
+        {/* Auth — BottomNav hidden via navVisibility.js */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
         {/* Entity detail — BottomNav hidden via prefix matching in BottomNav.jsx */}
         <Route path="/p/:productId" element={<ProductPage />} />

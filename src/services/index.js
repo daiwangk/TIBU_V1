@@ -23,6 +23,7 @@ export const {
   signOut,
   sendPasswordReset,
   updatePassword,
+  resendConfirmation,
   getMe,
   updateMe,
   uploadAvatar,

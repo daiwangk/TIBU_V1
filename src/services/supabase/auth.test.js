@@ -7,13 +7,14 @@ const auth = {
   getSession: vi.fn(),
   resetPasswordForEmail: vi.fn(),
   updateUser: vi.fn(),
+  resend: vi.fn(),
   onAuthStateChange: vi.fn(),
 };
 
 vi.mock('./client.js', () => ({ getSupabase: () => ({ auth }) }));
 
 const {
-  getSession, onAuthChange, sendPasswordReset, signIn, signOut, signUp, toSession, updatePassword,
+  getSession, onAuthChange, resendConfirmation, sendPasswordReset, signIn, signOut, signUp, toSession, updatePassword,
 } = await import('./auth.js');
 
 const ORIGIN = 'https://tibu-app.pages.dev';
@@ -85,6 +86,18 @@ describe('sign in, out, reset', () => {
     auth.resetPasswordForEmail.mockResolvedValue({ error: null });
     await sendPasswordReset('a@b.co');
     expect(auth.resetPasswordForEmail).toHaveBeenCalledWith('a@b.co', { redirectTo: `${ORIGIN}/reset-password` });
+  });
+
+  it('resendConfirmation re-sends the sign-up e-mail with the callback redirect', async () => {
+    auth.resend.mockResolvedValueOnce({ error: null });
+    await resendConfirmation('a@b.co');
+    expect(auth.resend).toHaveBeenCalledWith({
+      type: 'signup',
+      email: 'a@b.co',
+      options: { emailRedirectTo: `${ORIGIN}/auth/callback` },
+    });
+    auth.resend.mockResolvedValueOnce({ error: { code: 'over_email_send_rate_limit', message: 'slow down', status: 429 } });
+    await expect(resendConfirmation('a@b.co')).rejects.toMatchObject({ code: 'rate_limited' });
   });
 
   it('updatePassword sends the new password', async () => {
