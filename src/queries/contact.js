@@ -16,16 +16,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { siteUrl } from '../lib/siteUrl.js';
 import { businessMessage, callLink, productMessage, whatsappLink } from '../lib/whatsapp.js';
 import { revealContact } from '../services/index.js';
 import { registerGateHandler, useLoginGateStore } from '../stores/loginGate.js';
 import { useAuthStore } from '../stores/auth.js';
 import { userMessage } from '../lib/errors.js';
 import { qk } from './keys.js';
-
-const SITE_URL =
-  import.meta.env.VITE_SITE_URL ||
-  (typeof window !== 'undefined' ? window.location.origin : '');
 
 // ---------------------------------------------------------------------------
 // Plain function — shared between useContactAction and registered gate handlers
@@ -65,9 +62,9 @@ export async function performContactAction(action, queryClient = null) {
       const text = product
         ? productMessage(
             { name: product.name, price: product.price },
-            `${SITE_URL}/p/${product.id}`,
+            `${siteUrl()}/p/${product.id}`,
           )
-        : businessMessage({ name: businessName }, `${SITE_URL}/b/${businessSlug}`);
+        : businessMessage({ name: businessName }, `${siteUrl()}/b/${businessSlug}`);
 
       const link = whatsappLink(number, text);
       if (link) {
@@ -117,7 +114,10 @@ registerGateHandler('call', (action, qc) => performContactAction(action, qc));
  *   business: { id, slug, name }
  *   product:  { id, name, price } | null | undefined
  *
- * @returns {{ start: Function, pendingChannel: string|null }}
+ * `ready` is false while the session is being restored; start() ignores taps then, so the buttons must be
+ * disabled (ContactButtons `disabled`) rather than left to swallow them.
+ *
+ * @returns {{ start: Function, pendingChannel: string|null, ready: boolean }}
  */
 export function useContactAction() {
   const queryClient = useQueryClient();
@@ -162,5 +162,5 @@ export function useContactAction() {
     }
   }
 
-  return { start, pendingChannel };
+  return { start, pendingChannel, ready: authStatus !== 'loading' };
 }
