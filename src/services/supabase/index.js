@@ -16,6 +16,7 @@ import {
   signOut,
   signUp,
   updatePassword,
+  resendConfirmation,
 } from './auth.js';
 import { getMe, updateMe, uploadAvatar } from './me.js';
 import { revealContact } from './contact.js';
@@ -80,6 +81,7 @@ export {
   signOut,
   sendPasswordReset,
   updatePassword,
+  resendConfirmation,
   getMe,
   updateMe,
   uploadAvatar,

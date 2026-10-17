@@ -1,6 +1,8 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { GateResumer } from './app/GateResumer.jsx';
+import { RequireAuth } from './app/guards.jsx';
+import LoginSheet from './components/LoginSheet';
 import Spinner from './components/ui/Spinner';
 
 // DEV-only lazy route — excluded from production bundle
@@ -17,26 +19,30 @@ import AppShell from './layouts/AppShell';
 import HomePage from './pages/home/HomePage';
 
 const AboutPage = lazy(() => import('./pages/static/AboutPage'));
+const AuthCallbackPage = lazy(() => import('./pages/auth/AuthCallbackPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
+const SignupPage = lazy(() => import('./pages/auth/SignupPage'));
 const BusinessPage = lazy(() => import('./pages/business/BusinessPage'));
 const CategoryPage = lazy(() => import('./pages/category/CategoryPage'));
-const EditProfile = lazy(() => import('./EditProfile'));
+const EditProfilePage = lazy(() => import('./pages/profile/EditProfilePage'));
 const HelpPage = lazy(() => import('./pages/static/HelpPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const NotificationPreferences = lazy(() => import('./NotificationPreferences'));
 const Notification = lazy(() => import('./legacy/pages/Notification'));
 const PrivacyPage = lazy(() => import('./pages/static/PrivacyPage'));
 const ProductPage = lazy(() => import('./pages/product/ProductPage'));
-const Profile = lazy(() => import('./Profile'));
-const Saved = lazy(() => import('./Saved'));
+const ConnectedPage = lazy(() => import('./pages/saved/ConnectedPage'));
+const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
+const RecentPage = lazy(() => import('./pages/saved/RecentPage'));
+const SavedPage = lazy(() => import('./pages/saved/SavedPage'));
 const SearchPage = lazy(() => import('./pages/search/SearchPage'));
 const SellerDashboard = lazy(() => import('./SellerDashboard'));
 const SellerProductDetail = lazy(() => import('./SellerProductDetail'));
 const SellerRegister = lazy(() => import('./SellerRegister'));
 const TermsPage = lazy(() => import('./pages/static/TermsPage'));
 
-// Contexts
-import { useSaved } from './contexts/SavedContext';
-import { useProfile } from './contexts/ProfileContext';
 
 /**
  * LegacyPage — wraps legacy pages that still need setPage + selected-entity
@@ -55,8 +61,6 @@ function LegacyPage({ Component, extraProps = {} }) {
   const selectedProductRef = React.useRef(null);
   const selectedBusinessRef = React.useRef(null);
 
-  const { savedProducts, setSavedProducts, savedBusinesses, setSavedBusinesses, savedReels, setSavedReels } = useSaved();
-  const { profile, setProfile, profileStats } = useProfile();
 
   /** Shim: translate old page strings to navigate() calls */
   function setPage(pageKey, entityState) {
@@ -131,21 +135,8 @@ function LegacyPage({ Component, extraProps = {} }) {
       selectedBusinessRef.current = b;
       navigate(location.pathname, { replace: true, state: { ...state, selectedBusiness: b } });
     },
-    // Saved.jsx still calls these until it is rebuilt (B3.5); the Reel page is gone.
-    setSelectedReel: (r) => navigate(location.pathname, { replace: true, state: { ...state, selectedReel: r } }),
-    setCurrentReels: (rs) => navigate(location.pathname, { replace: true, state: { ...state, currentReels: rs } }),
     setPreviousPage: (p) => navigate(location.pathname, { replace: true, state: { ...state, previousPage: p } }),
     setSellerMode: () => {},   // dead prop per audit; keep stub to avoid crashes
-    // contexts
-    savedProducts,
-    setSavedProducts,
-    savedBusinesses,
-    setSavedBusinesses,
-    savedReels,
-    setSavedReels,
-    profile,
-    setProfile,
-    profileStats,
     ...extraProps,
   };
 
@@ -164,15 +155,26 @@ function AppRoutes() {
       <Route element={<AppShell />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
-        <Route path="/saved" element={L(Saved)} />
-        <Route path="/profile" element={L(Profile)} />
-        <Route path="/profile/edit" element={L(EditProfile)} />
+        <Route path="/saved" element={<RequireAuth><SavedPage /></RequireAuth>} />
+        <Route path="/recent" element={<RecentPage />} />
+        <Route path="/connected" element={<RequireAuth><ConnectedPage /></RequireAuth>} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/edit" element={<RequireAuth><EditProfilePage /></RequireAuth>} />
         <Route path="/notifications" element={L(Notification)} />
+        {/* Temporary: both paths show the legacy screen until B5.3 builds /notifications/settings */}
+        <Route path="/notifications/settings" element={L(NotificationPreferences)} />
         <Route path="/notifications/preferences" element={L(NotificationPreferences)} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/help" element={<HelpPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/about" element={<AboutPage />} />
+
+        {/* Auth — BottomNav hidden via navVisibility.js */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
         {/* Entity detail — BottomNav hidden via prefix matching in BottomNav.jsx */}
         <Route path="/p/:productId" element={<ProductPage />} />
@@ -215,6 +217,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <GateResumer />
+      {/* Inside the router (needs navigate), so here rather than in providers.jsx */}
+      <LoginSheet />
       <AppRoutes />
     </BrowserRouter>
   );

@@ -9,7 +9,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { registerGateHandler, resumePending, useLoginGateStore } from './loginGate.js';
+import { handlePendingStorageEvent, peekPending, registerGateHandler, resumePending, subscribePending, useLoginGateStore } from './loginGate.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -123,6 +123,79 @@ describe('close()', () => {
     expect(state.open).toBe(false);
     // pending is NOT cleared by close()
     expect(state.pending).not.toBeNull();
+  });
+});
+
+describe('peekPending()', () => {
+  it('returns the pending action without consuming it', () => {
+    expect(peekPending()).toBeNull();
+    useLoginGateStore.getState().request({ type: 'save', payload: { kind: 'product', id: 'p1', saved: true }, returnTo: '/p/p1' });
+    expect(peekPending()).toMatchObject({ type: 'save', returnTo: '/p/p1' });
+    expect(peekPending()).not.toBeNull();
+  });
+});
+
+describe('subscribePending()', () => {
+  function fakeWindow() {
+    const listeners = new Map();
+    return {
+      listeners,
+      addEventListener: (type, fn) => listeners.set(type, fn),
+      removeEventListener: (type, fn) => { if (listeners.get(type) === fn) listeners.delete(type); },
+    };
+  }
+
+  it('notifies on storage events (another tab) and on this tab’s gate store changes', () => {
+    const win = fakeWindow();
+    vi.stubGlobal('window', win);
+    const callback = vi.fn();
+    const stop = subscribePending(callback);
+
+    win.listeners.get('storage')();
+    expect(callback).toHaveBeenCalledTimes(1);
+
+    useLoginGateStore.getState().request({ type: 'save', payload: {}, returnTo: '/' });
+    useLoginGateStore.getState().cancel();
+    expect(callback).toHaveBeenCalledTimes(3);
+    stop();
+  });
+
+  it('unsubscribes from both sources', () => {
+    const win = fakeWindow();
+    vi.stubGlobal('window', win);
+    const callback = vi.fn();
+    subscribePending(callback)();
+
+    expect(win.listeners.has('storage')).toBe(false);
+    useLoginGateStore.getState().cancel();
+    expect(callback).not.toHaveBeenCalled();
+  });
+});
+
+describe('handlePendingStorageEvent()', () => {
+  const open = () => useLoginGateStore.getState().request({ type: 'save', payload: {}, returnTo: '/' });
+
+  it('closes the sheet when another tab removed the pending action', () => {
+    open();
+    localStorage.removeItem('tibu.pendingAction'); // what the other tab did
+    handlePendingStorageEvent({ key: 'tibu.pendingAction' });
+    expect(useLoginGateStore.getState()).toMatchObject({ open: false, pending: null });
+  });
+
+  it('also reacts to storage.clear() (key null)', () => {
+    open();
+    localStorage.removeItem('tibu.pendingAction');
+    handlePendingStorageEvent({ key: null });
+    expect(useLoginGateStore.getState().open).toBe(false);
+  });
+
+  it('keeps the sheet while the persisted action still exists, and ignores other keys', () => {
+    open();
+    handlePendingStorageEvent({ key: 'tibu.pendingAction' });
+    expect(useLoginGateStore.getState().open).toBe(true);
+    localStorage.removeItem('tibu.pendingAction');
+    handlePendingStorageEvent({ key: 'tibu.recent' });
+    expect(useLoginGateStore.getState().open).toBe(true);
   });
 });
 

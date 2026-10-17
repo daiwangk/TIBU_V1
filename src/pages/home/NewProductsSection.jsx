@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { PackageOpen } from 'lucide-react';
 import ProductCard from '../../components/ProductCard';
+import SaveButton from '../../components/SaveButton';
 import { useProductSearch } from '../../queries/catalog';
 import HomeSection from './HomeSection';
 import ProductRowSkeleton from './ProductRowSkeleton';
@@ -27,7 +28,9 @@ export default function NewProductsSection() {
         text: 'Sellers are adding new items. Check back soon.',
         action: { label: 'Search products', onClick: () => navigate('/search?tab=products') },
       }}
-      renderItem={(p) => <ProductCard key={p.id} product={p} variant="row" />}
+      renderItem={(p) => (
+        <ProductCard key={p.id} product={p} variant="row" action={<SaveButton kind="product" id={p.id} overlay />} />
+      )}
     />
   );
 }

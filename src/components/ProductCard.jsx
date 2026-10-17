@@ -13,6 +13,7 @@ import Badge from './ui/Badge';
  *   action?: React.ReactNode,
  *   className?: string,
  * }} props
+ * `action` (e.g. SaveButton) sits over the image corner, next to the link rather than inside it.
  */
 export default function ProductCard({ product, variant = 'grid', action, className = '' }) {
   const {
@@ -27,7 +28,8 @@ export default function ProductCard({ product, variant = 'grid', action, classNa
 
   const isRow = variant === 'row';
 
-  return (
+  const size = `snap-start flex-shrink-0 ${isRow ? 'w-40' : 'w-full'}`;
+  const card = (
     <Link
       to={`/p/${id}`}
       className={`
@@ -35,9 +37,7 @@ export default function ProductCard({ product, variant = 'grid', action, classNa
         overflow-hidden no-underline text-inherit
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
         transition-shadow hover:shadow-sm
-        snap-start flex-shrink-0
-        ${isRow ? 'w-40' : 'w-full'}
-        ${className}
+        ${action ? 'h-full w-full' : `${size} ${className}`}
       `}
     >
       {/* Image */}
@@ -56,16 +56,6 @@ export default function ProductCard({ product, variant = 'grid', action, classNa
         {availableToday && (
           <span className="absolute top-2 left-2">
             <Badge tone="success">Today</Badge>
-          </span>
-        )}
-
-        {/* Action slot (e.g. SaveButton) */}
-        {action && (
-          <span
-            className="absolute top-1 right-1"
-            onClick={(e) => e.preventDefault()}
-          >
-            {action}
           </span>
         )}
       </div>
@@ -87,5 +77,13 @@ export default function ProductCard({ product, variant = 'grid', action, classNa
         </div>
       </div>
     </Link>
+  );
+
+  if (!action) return card;
+  return (
+    <div className={`relative ${size} ${className}`}>
+      {card}
+      <span className="absolute top-1 right-1">{action}</span>
+    </div>
   );
 }

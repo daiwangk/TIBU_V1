@@ -1,16 +1,7 @@
+import { siteUrl } from '../../lib/siteUrl.js';
 import { AppError } from '../errors.js';
 import { getSupabase } from './client.js';
 import { mapSupabaseError } from './errors.js';
-
-/**
- * Public site origin for auth e-mail links. `VITE_SITE_URL`, else the page's own origin (local dev).
- * @returns {string}
- */
-export function siteUrl() {
-  const configured = String(import.meta.env.VITE_SITE_URL ?? '').trim().replace(/\/+$/, '');
-  if (configured) return configured;
-  return typeof window === 'undefined' ? '' : window.location.origin;
-}
 
 /**
  * supabase-js session → contract `Session`.
@@ -92,6 +83,20 @@ export async function signOut() {
 export async function sendPasswordReset(email) {
   const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
     redirectTo: `${siteUrl()}/reset-password`,
+  });
+  if (error) throw mapSupabaseError(error);
+}
+
+/**
+ * Re-send the sign-up confirmation e-mail. Same redirect as `signUp`, so the link lands on /auth/callback.
+ * @param {string} email
+ * @returns {Promise<void>}
+ */
+export async function resendConfirmation(email) {
+  const { error } = await getSupabase().auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${siteUrl()}/auth/callback` },
   });
   if (error) throw mapSupabaseError(error);
 }

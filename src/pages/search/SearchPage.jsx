@@ -8,6 +8,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import ProductCard from '../../components/ProductCard';
 import BusinessCard from '../../components/BusinessCard';
+import SaveButton from '../../components/SaveButton';
 import SearchResultsSkeleton from './SearchResultsSkeleton';
 import LocationChip from '../../components/LocationChip';
 import SearchFiltersSheet from './SearchFiltersSheet';
@@ -287,9 +288,9 @@ export default function SearchPage() {
             <div className="flex flex-col gap-4">
               {items.map(item => (
                 tab === 'products' ? (
-                  <ProductCard key={item.id} product={item} />
+                  <ProductCard key={item.id} product={item} action={<SaveButton kind="product" id={item.id} overlay />} />
                 ) : (
-                  <BusinessCard key={item.id} business={item} />
+                  <BusinessCard key={item.id} business={item} action={<SaveButton kind="business" id={item.id} />} />
                 )
               ))}
             </div>

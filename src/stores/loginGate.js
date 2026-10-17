@@ -18,6 +18,7 @@
  *   resumePending()               – read, clear, and execute the pending action
  */
 
+import { useSyncExternalStore } from 'react';
 import { create } from 'zustand';
 import { getWithExpiry, setWithExpiry } from '../lib/storage.js';
 
@@ -36,6 +37,16 @@ const handlers = new Map();
  */
 export function registerGateHandler(type, fn) {
   handlers.set(type, fn);
+}
+
+/**
+ * The non-expired pending action, without consuming it (null when none). Auth screens use it to leave
+ * the post-login navigation to GateResumer when an action is waiting.
+ *
+ * @returns {PendingAction|null}
+ */
+export function peekPending() {
+  return getWithExpiry(STORAGE_KEY);
 }
 
 /**
@@ -132,3 +143,45 @@ export const useLoginGateStore = create((set) => ({
     set({ open: false });
   },
 }));
+
+/**
+ * `storage` event handler: another tab consumed or cancelled the pending action, so this tab's open
+ * sheet would be asking about an action that no longer exists. Close it. Only reacts when the persisted
+ * action is really gone, so a tab where localStorage is blocked (in-memory pending) is left alone — and
+ * `storage` events never fire in the tab that made the change.
+ *
+ * @param {{ key: string|null }} event
+ */
+export function handlePendingStorageEvent(event) {
+  if (event.key !== null && event.key !== STORAGE_KEY) return; // null = storage.clear()
+  if (peekPending()) return;
+  if (useLoginGateStore.getState().open || useLoginGateStore.getState().pending) {
+    useLoginGateStore.setState({ open: false, pending: null });
+  }
+}
+
+/**
+ * Subscribe to changes of the pending action: this tab's gate store, and `storage` events, which is how
+ * another tab consuming or clearing the action reaches this one.
+ *
+ * @param {() => void} callback
+ * @returns {() => void} unsubscribe
+ */
+export function subscribePending(callback) {
+  window.addEventListener('storage', callback);
+  const unsubscribe = useLoginGateStore.subscribe(callback);
+  return () => {
+    window.removeEventListener('storage', callback);
+    unsubscribe();
+  };
+}
+
+/**
+ * Live "is a gated action waiting?" for screens that must react when it is taken (here or in another
+ * tab). Reading `peekPending()` once at render time goes stale.
+ *
+ * @returns {boolean}
+ */
+export function useHasPendingAction() {
+  return useSyncExternalStore(subscribePending, () => !!peekPending(), () => false);
+}
