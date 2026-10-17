@@ -8,10 +8,12 @@ import ImagePlaceholder from './ui/ImagePlaceholder';
  *
  * @param {{
  *   business: import('../services/contract').BusinessSummary,
+ *   action?: React.ReactNode,
  *   className?: string,
  * }} props
+ * `action` (e.g. SaveButton) sits next to the link, not inside it, so it is never a button nested in a link.
  */
-export default function BusinessCard({ business, className = '' }) {
+export default function BusinessCard({ business, action, className = '' }) {
   const {
     slug,
     name,
@@ -23,7 +25,7 @@ export default function BusinessCard({ business, className = '' }) {
     reviewCount,
   } = business;
 
-  return (
+  const card = (
     <Link
       to={`/b/${slug}`}
       className={`
@@ -31,7 +33,7 @@ export default function BusinessCard({ business, className = '' }) {
         no-underline text-inherit
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
         transition-shadow hover:shadow-sm
-        ${className}
+        ${action ? 'pr-12' : className}
       `}
     >
       {/* Logo */}
@@ -59,5 +61,13 @@ export default function BusinessCard({ business, className = '' }) {
         <Rating rating={rating} reviewCount={reviewCount} className="mt-0.5" />
       </div>
     </Link>
+  );
+
+  if (!action) return card;
+  return (
+    <div className={`relative ${className}`}>
+      {card}
+      <span className="absolute top-1 right-1">{action}</span>
+    </div>
   );
 }

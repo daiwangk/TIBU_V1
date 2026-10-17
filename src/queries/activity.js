@@ -106,7 +106,7 @@ export function useRecent() {
               if (!biz) return null;
               return /** @type {import('../services/contract.js').RecentItem} */ ({
                 kind: 'business',
-                viewedAt: new Date().toISOString(), // no server timestamp; use now
+                viewedAt: entry.viewedAt ?? null, // entries from before B3.5 have no time
                 business: {
                   id: biz.id,
                   slug: biz.slug,
@@ -120,7 +120,7 @@ export function useRecent() {
               if (!prod) return null;
               return /** @type {import('../services/contract.js').RecentItem} */ ({
                 kind: 'product',
-                viewedAt: new Date().toISOString(),
+                viewedAt: entry.viewedAt ?? null,
                 product: {
                   id: prod.id,
                   name: prod.name,

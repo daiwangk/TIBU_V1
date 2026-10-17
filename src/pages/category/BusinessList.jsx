@@ -1,5 +1,6 @@
 import { Store } from 'lucide-react';
 import BusinessCard from '../../components/BusinessCard';
+import SaveButton from '../../components/SaveButton';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import Skeleton from '../../components/ui/Skeleton';
@@ -62,7 +63,7 @@ export default function BusinessList({ params }) {
     <section aria-label="Businesses" className="flex flex-col gap-4 pb-8">
       <div className="flex flex-col gap-3 px-screen">
         {allBusinesses.map((business) => (
-          <BusinessCard key={business.id} business={business} />
+          <BusinessCard key={business.id} business={business} action={<SaveButton kind="business" id={business.id} />} />
         ))}
       </div>
 

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import BusinessCard from '../../components/BusinessCard';
+import SaveButton from '../../components/SaveButton';
 import { useBusinessSearch } from '../../queries/catalog';
 import { useSearchOrigin } from '../../stores/location';
 import HomeSection from './HomeSection';
@@ -31,7 +32,12 @@ export default function NearYouSection() {
         action: { label: 'Explore Tibu', onClick: () => navigate('/search') },
       }}
       renderItem={(b) => (
-        <BusinessCard key={b.id} business={b} className="w-72 flex-shrink-0 snap-start" />
+        <BusinessCard
+          key={b.id}
+          business={b}
+          className="w-72 flex-shrink-0 snap-start"
+          action={<SaveButton kind="business" id={b.id} />}
+        />
       )}
     />
   );

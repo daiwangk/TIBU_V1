@@ -1,5 +1,6 @@
 import { PackageOpen } from 'lucide-react';
 import ProductCard from '../../components/ProductCard';
+import SaveButton from '../../components/SaveButton';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import Skeleton from '../../components/ui/Skeleton';
@@ -60,7 +61,12 @@ export default function ProductGrid({ params }) {
     <section aria-label="Products" className="flex flex-col gap-4 pb-8">
       <div className="grid grid-cols-2 gap-3 px-screen">
         {allProducts.map((product) => (
-          <ProductCard key={product.id} product={product} variant="grid" />
+          <ProductCard
+            key={product.id}
+            product={product}
+            variant="grid"
+            action={<SaveButton kind="product" id={product.id} overlay />}
+          />
         ))}
       </div>
 
