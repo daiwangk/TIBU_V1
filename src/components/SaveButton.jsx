@@ -37,7 +37,7 @@ export default function SaveButton({ kind, id, overlay = false, className = '' }
       label={saved ? 'Remove from saved' : 'Save'}
       aria-pressed={saved}
       onClick={handleClick}
-      className={`${saved ? 'text-primary' : 'text-ink'} hover:text-primary ${overlay ? 'rounded-full bg-surface/90 shadow-sm' : ''} ${className}`}
+      className={`${saved ? 'text-primary' : 'text-ink'} hover:text-primary ${overlay ? 'rounded-full bg-surface shadow-sm ring-1 ring-border' : ''} ${className}`}
     >
       <Heart size={20} aria-hidden="true" className={saved ? 'fill-current' : ''} />
     </IconButton>

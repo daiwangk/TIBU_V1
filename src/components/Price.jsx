@@ -1,7 +1,7 @@
 import { formatPrice } from '../lib/format';
 
 /**
- * Formatted price display.
+ * Formatted price display — plum Nunito 800, the strongest element on a card (names stay ink, D40).
  *
  * @param {{
  *   value: number,
@@ -17,7 +17,7 @@ export default function Price({ value, size = 'md', className = '' }) {
   }[size] ?? 'text-base';
 
   return (
-    <span className={`font-heading font-bold text-ink ${sizeClass} ${className}`}>
+    <span className={`font-heading font-extrabold text-primary ${sizeClass} ${className}`}>
       {formatPrice(value)}
     </span>
   );

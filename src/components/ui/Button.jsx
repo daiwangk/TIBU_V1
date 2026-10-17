@@ -10,7 +10,7 @@ import Spinner from './Spinner';
  *   - `<button>` otherwise
  *
  * @param {{
- *   variant?: 'primary' | 'secondary' | 'ghost' | 'danger',
+ *   variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'danger',
  *   size?: 'sm' | 'md' | 'lg',
  *   loading?: boolean,
  *   disabled?: boolean,
@@ -32,15 +32,18 @@ export default function Button({
   className = '',
   ...rest
 }) {
+  // accent: white on sage-strong 5.5:1 (never white on plain `sage`, D40). danger: outlined, error on surface 6.4:1.
   const variantClasses = {
     primary:
       'bg-primary text-primary-fg hover:opacity-90 active:opacity-80',
     secondary:
       'bg-surface text-primary border border-primary hover:bg-lavender active:bg-lavender',
+    accent:
+      'bg-sage-strong text-primary-fg hover:opacity-90 active:opacity-80',
     ghost:
       'bg-transparent text-body hover:bg-lavender active:bg-lavender',
     danger:
-      'bg-blush text-ink border border-blush hover:opacity-90 active:opacity-80',
+      'bg-surface text-error border border-error hover:bg-blush active:bg-blush',
   };
 
   const sizeClasses = {
@@ -51,7 +54,7 @@ export default function Button({
 
   const base = `
     inline-flex items-center justify-center gap-2
-    rounded-btn font-body font-semibold
+    rounded-full font-body font-semibold
     transition-opacity duration-150
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
     disabled:opacity-50 disabled:pointer-events-none

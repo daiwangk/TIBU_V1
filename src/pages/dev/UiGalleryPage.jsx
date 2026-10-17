@@ -29,6 +29,10 @@ import Logo from '../../components/brand/Logo';
 import { formatPrice } from '../../lib/format';
 import TokenSwatches from './TokenSwatches';
 import DecorSet from './DecorSet';
+import GalleryControls from './GalleryControls';
+import GalleryFields from './GalleryFields';
+import GalleryCards from './GalleryCards';
+import GalleryStates from './GalleryStates';
 import Price from '../../components/Price';
 import Rating from '../../components/Rating';
 import Distance from '../../components/Distance';
@@ -138,6 +142,12 @@ export default function UiGalleryPage() {
           <strong>UI Kit Component Catalog:</strong> Interactive preview of all reusable components, states, and loading placeholders.
         </span>
       </div>
+
+      {/* ── D2 component states (own files) ── */}
+      <GalleryControls />
+      <GalleryFields />
+      <GalleryCards />
+      <GalleryStates />
 
       {/* ── Buttons ── */}
       <Section id="buttons" title="Button">

@@ -15,7 +15,7 @@ export default function FormAlert({ tone = 'error', children, className = '' }) 
         isError ? 'bg-blush' : 'bg-mint'
       } ${className}`}
     >
-      <Icon size={18} className="mt-0.5 flex-shrink-0" aria-hidden="true" />
+      <Icon size={18} className={`mt-0.5 flex-shrink-0 ${isError ? 'text-error' : ''}`} aria-hidden="true" />
       <div className="flex-1">{children}</div>
     </div>
   );

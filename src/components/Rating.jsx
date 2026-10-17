@@ -2,7 +2,7 @@ import { Star } from 'lucide-react';
 import { formatRating } from '../lib/format';
 
 /**
- * Star rating display.
+ * Star rating display. The coral star is decorative (the number carries the meaning), so coral is allowed here.
  *
  * @param {{
  *   rating: number,
@@ -20,7 +20,7 @@ export default function Rating({ rating, reviewCount, className = '' }) {
         strokeWidth={0}
         fill="currentColor"
         aria-hidden="true"
-        className="text-primary"
+        className="text-coral"
       />
       <span className="font-body text-sm font-semibold text-ink">{label}</span>
       {reviewCount != null && reviewCount > 0 && (

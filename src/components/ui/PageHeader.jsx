@@ -33,7 +33,7 @@ export default function PageHeader({ title, titleAs: TitleTag = 'h1', fallbackTo
     <header
       className={`
         flex h-14 items-center gap-2 px-screen
-        bg-surface border-b border-border
+        bg-bg/95 backdrop-blur-[14px] border-b border-border
         sticky top-0 z-10
         ${className}
       `}
@@ -42,7 +42,7 @@ export default function PageHeader({ title, titleAs: TitleTag = 'h1', fallbackTo
         <ChevronLeft size={22} strokeWidth={2} aria-hidden="true" />
       </IconButton>
 
-      <TitleTag className="flex-1 font-heading font-bold text-ink text-lg leading-tight truncate">
+      <TitleTag className="flex-1 font-heading font-extrabold text-primary text-lg leading-tight truncate">
         {title}
       </TitleTag>
 

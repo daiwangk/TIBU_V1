@@ -5,7 +5,7 @@ import ErrorState from '../../components/ui/ErrorState';
 
 /**
  * A Home row: SectionHeader + horizontal scroller with the 4 data states.
- * "View all" is only shown once there is data to view.
+ * "See all" is only shown once there is data to view.
  *
  * @template T
  * @param {{
