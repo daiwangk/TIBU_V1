@@ -10,6 +10,7 @@ import {
   mapProductSummaryFromSearch,
   mapReview,
 } from './mappers.js';
+import { PRODUCT_SUMMARY_COLS } from './selects.js';
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
@@ -161,10 +162,8 @@ export async function getBusinessBySlug(slug, opts = {}) {
       business_images ( id, url, sort_order ),
       business_videos ( id, instagram_url, shortcode, caption, sort_order ),
       products (
-        id, name, price_paise, description, details, available_today, is_active,
-        sort_order, created_at,
-        product_images ( id, url, sort_order ),
-        categories ( slug )
+        ${PRODUCT_SUMMARY_COLS},
+        description, details, sort_order
       )
     `)
     .eq('slug', slug)

@@ -143,9 +143,9 @@ export function mapProductSummaryNested(row, business, distanceM) {
   if (!row || row.is_active === false) return null;
 
   const images = bySortOrder(row.product_images).map(mapImage).filter(Boolean);
+  // products has no category_slug column: product override (embed) ?? business category.
   const categorySlug =
     row.categories?.slug
-    ?? row.category_slug
     ?? business.categorySlug
     ?? '';
 
@@ -216,7 +216,6 @@ export function mapProductDetail(row, distanceM) {
   const images = bySortOrder(row.product_images).map(mapImage).filter(Boolean);
   const categorySlug =
     row.categories?.slug
-    ?? row.category_slug
     ?? business.categorySlug
     ?? '';
 
