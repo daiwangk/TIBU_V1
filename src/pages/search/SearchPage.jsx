@@ -246,7 +246,7 @@ export default function SearchPage() {
           </div>
 
           <div className="-mt-1 flex">
-            <LocationChip className="-ml-2" />
+            <LocationChip />
           </div>
 
           {isSearching && (

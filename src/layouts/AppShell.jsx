@@ -7,8 +7,8 @@ import { isBottomNavHidden } from './navVisibility';
 /**
  * AppShell — centered mobile column layout.
  *
- * On desktop (≥640px): renders a centered 480px column on the cream
- * background. On mobile: full-width, matching the phone UI as designed.
+ * On desktop (≥640px): renders a centered 480px cream column on a soft-sage
+ * gutter. On mobile: full-width, matching the phone UI as designed.
  *
  * Provides:
  * - Safe-area padding via env(safe-area-inset-*)
@@ -21,11 +21,11 @@ export default function AppShell() {
 
   return (
     <>
-      {/* Outer full-viewport layer — cream bg on desktop */}
-      <div className="flex min-h-svh justify-center bg-bg">
-        {/* Inner 480px column — white card on desktop */}
+      {/* Outer full-viewport layer — soft-sage gutter on desktop */}
+      <div className="flex min-h-svh justify-center bg-mint">
+        {/* Inner 480px column — cream; cards sit on it in warm white */}
         <div
-          className={`relative min-h-svh w-full max-w-[480px] bg-surface pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] ${
+          className={`relative min-h-svh w-full max-w-[480px] bg-bg pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] ${
             navVisible ? 'pb-[76px]' : ''
           }`}
         >
