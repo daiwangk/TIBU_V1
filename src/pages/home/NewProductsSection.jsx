@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { PackageOpen } from 'lucide-react';
+import { PackageOpen, ShoppingBag } from 'lucide-react';
 import ProductCard from '../../components/ProductCard';
 import SaveButton from '../../components/SaveButton';
 import { useProductSearch } from '../../queries/catalog';
@@ -18,6 +18,8 @@ export default function NewProductsSection() {
   return (
     <HomeSection
       title="New products"
+      icon={<ShoppingBag size={20} strokeWidth={1.75} />}
+      subtitle="Just listed"
       viewAllTo="/search?tab=products&sort=newest"
       query={query}
       skeleton={<ProductRowSkeleton />}

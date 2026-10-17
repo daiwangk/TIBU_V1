@@ -17,6 +17,8 @@ Values and reasons: `docs/DECISIONS.md` D40 (17 Oct 2026). Tokens live in `src/s
 - Section headers (`SectionHeader`): plum title, optional icon and subtitle, "See all ›". Page headers (`ui/PageHeader`): cream with blur, plum title.
 - Empty / error states: icon on a soft-sage `Blob` with a coral `Spark` (EmptyState, optional `illustration`, `action.to`, `actionVariant`); error icon in `text-error` on a blush blob. Toasts are warm white with ink text; the icon carries the type (styled in `src/index.css`, no `richColors`).
 - Category circles: 72px, blush / peach / mint (not lavender next to blush — they read the same).
+- Colour bands: a full-width pastel block (e.g. the Home hero in `bg-blush`) ends in `ScallopEdge` in the same colour. Text sits in its own column; decor (Blob, Flower, Leaf, Spark) sits beside it, `aria-hidden`, never under text. Soft-sage cards (`bg-mint`, e.g. LocationPrompt) use ink/body text and warm-white icon circles.
+- Lists: product results and saved products are a 2-column `ProductCard` grid; businesses are a `BusinessCard` list. Large page titles (Saved) are plum Nunito 800.
 - Pastel surfaces (names kept, meanings changed in D40): blush #F2E6EA (`bg-blush`, pale pink hero tint), mint #DCDED3 (`bg-mint`, **soft sage**: chips, strips, "Available today"), lime #F6E4D8 (`bg-lime`, **soft peach** accent), lavender #F1E7EE (`bg-lavender`, **mauve tint**: hovers, info banners).
 - Sage: `sage` #748E83 for decor fills and field borders (3.15:1), **never behind text**. `sage-strong` #566E63 for the accent button fill (white text, 5.5:1) and sage-coloured text on `bg`/`surface`.
 - Coral `coral` #E5735F: decor strokes and the rating star only, **never text**.

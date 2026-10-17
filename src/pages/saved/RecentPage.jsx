@@ -1,5 +1,4 @@
 import { History } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import Price from '../../components/Price';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
@@ -12,7 +11,6 @@ import ActivityRow from './ActivityRow';
 
 /** /recent — signed in: from the server; guests: views kept in this browser (moved to the account on login). */
 export default function RecentPage() {
-  const navigate = useNavigate();
   const status = useAuthStore((s) => s.status);
   const { data, isPending, isError, error, refetch } = useRecent();
 
@@ -25,7 +23,7 @@ export default function RecentPage() {
         icon={<History size={28} aria-hidden="true" />}
         title="Nothing viewed yet"
         text="Products and businesses you open will show up here."
-        action={{ label: 'Explore Tibu', onClick: () => navigate('/') }}
+        action={{ label: 'Explore Tibu', to: '/' }}
       />
     );
   } else {

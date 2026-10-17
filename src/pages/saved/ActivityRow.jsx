@@ -30,11 +30,11 @@ export default function ActivityRow({ to, imageUrl, title, detail, meta, round =
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-heading text-sm font-bold text-ink">{title}</p>
+          <p className="truncate font-heading text-base font-bold text-ink">{title}</p>
           {detail && <div className="truncate font-body text-xs text-body">{detail}</div>}
           {meta && <p className="font-body text-xs text-muted">{meta}</p>}
         </div>
-        <ChevronRight size={18} className="flex-shrink-0 text-muted" aria-hidden="true" />
+        <ChevronRight size={18} className="flex-shrink-0 text-body" aria-hidden="true" />
       </Link>
     </li>
   );

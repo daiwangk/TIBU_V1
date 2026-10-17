@@ -10,6 +10,8 @@ import ErrorState from '../../components/ui/ErrorState';
  * @template T
  * @param {{
  *   title: string,
+ *   icon?: React.ReactNode,
+ *   subtitle?: string,
  *   viewAllTo?: string,
  *   query: { data?: T[], isPending: boolean, isError: boolean, refetch: () => unknown },
  *   skeleton: React.ReactNode,
@@ -20,6 +22,8 @@ import ErrorState from '../../components/ui/ErrorState';
  */
 export default function HomeSection({
   title,
+  icon,
+  subtitle,
   viewAllTo,
   query,
   skeleton,
@@ -48,7 +52,7 @@ export default function HomeSection({
 
   return (
     <section aria-label={title} className="flex flex-col gap-1 w-full min-w-0">
-      <SectionHeader title={title} viewAllTo={hasData ? viewAllTo : undefined} />
+      <SectionHeader title={title} icon={icon} subtitle={subtitle} viewAllTo={hasData ? viewAllTo : undefined} />
       {body}
     </section>
   );

@@ -22,8 +22,9 @@ export default function RecentSearches({ onSelect }) {
     <div className="flex flex-col gap-6 pt-4">
       {searches.length > 0 && (
         <section aria-labelledby="recent-searches-title" className="px-screen">
-          <div className="flex items-center justify-between mb-3">
-            <h2 id="recent-searches-title" className="font-heading font-bold text-ink">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 id="recent-searches-title" className="flex items-center gap-2 font-heading text-lg font-extrabold text-primary">
+              <Clock size={20} strokeWidth={1.75} aria-hidden="true" />
               Recent searches
             </h2>
             <button
@@ -34,16 +35,16 @@ export default function RecentSearches({ onSelect }) {
               Clear
             </button>
           </div>
-          <ul className="flex flex-col">
+          {/* Pills run the search again on tap (no per-item remove). Text on mint stays ink (D40). */}
+          <ul className="flex flex-wrap gap-2">
             {searches.map((s, i) => (
-              <li key={`${s}-${i}`} className="border-b border-border last:border-b-0">
+              <li key={`${s}-${i}`} className="max-w-full">
                 <button
                   type="button"
                   onClick={() => onSelect(s)}
-                  className="w-full flex items-center gap-3 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-btn"
+                  className="inline-flex min-h-11 max-w-full items-center rounded-full bg-mint px-4 font-body text-sm font-semibold text-ink hover:brightness-95 active:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <Clock size={18} className="text-muted flex-shrink-0" aria-hidden="true" />
-                  <span className="font-body text-body flex-1 truncate">{s}</span>
+                  <span className="truncate">{s}</span>
                 </button>
               </li>
             ))}
@@ -52,8 +53,8 @@ export default function RecentSearches({ onSelect }) {
       )}
 
       <section aria-labelledby="browse-categories-title" className="flex flex-col gap-3">
-        <h2 id="browse-categories-title" className="px-screen font-heading font-bold text-ink">
-          Browse categories
+        <h2 id="browse-categories-title" className="px-screen font-heading text-lg font-extrabold text-primary">
+          Browse by category
         </h2>
         <CategoryShortcuts />
       </section>

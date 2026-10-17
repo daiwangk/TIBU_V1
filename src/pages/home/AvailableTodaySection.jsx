@@ -20,6 +20,8 @@ export default function AvailableTodaySection() {
   return (
     <HomeSection
       title="Available today"
+      icon={<CalendarCheck size={20} strokeWidth={1.75} />}
+      subtitle="Ready today"
       viewAllTo="/search?tab=products&today=1"
       query={query}
       skeleton={<ProductRowSkeleton />}

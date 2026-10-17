@@ -3,6 +3,7 @@ import { MapPin, X } from 'lucide-react';
 import AreaPickerSheet from '../../components/AreaPickerSheet';
 import Button from '../../components/ui/Button';
 import IconButton from '../../components/ui/IconButton';
+import Leaf from '../../components/decor/Leaf';
 import { useLocationStore } from '../../stores/location';
 import { userMessage } from '../../lib/errors';
 
@@ -47,13 +48,15 @@ export default function LocationPrompt() {
       {showCard && (
         <section
           aria-label="Find businesses near you"
-          className="relative mx-screen flex flex-col gap-3 rounded-card border border-border bg-surface p-4"
+          className="relative mx-screen flex flex-col gap-3 overflow-hidden rounded-card bg-mint p-4"
         >
-          <IconButton label="Dismiss" onClick={markAsked} className="absolute right-1 top-1">
+          {/* Soft-sage card (text ink/body on mint, D40); the leaf sits in the corner, away from the text. */}
+          <Leaf className="pointer-events-none absolute -right-2 -bottom-2 h-14 w-14 rotate-12 text-sage" />
+          <IconButton label="Dismiss" onClick={markAsked} className="absolute right-1 top-1 z-10">
             <X size={18} strokeWidth={1.75} aria-hidden="true" />
           </IconButton>
-          <div className="flex items-start gap-3 pr-10">
-            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-lavender text-primary">
+          <div className="relative flex items-start gap-3 pr-10">
+            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-surface text-primary">
               <MapPin size={20} strokeWidth={1.75} aria-hidden="true" />
             </span>
             <div className="flex flex-col gap-0.5">
@@ -61,7 +64,7 @@ export default function LocationPrompt() {
               <p className="font-body text-sm text-body">Find homegrown sellers close to you.</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="relative flex flex-wrap gap-2 pr-10">
             <Button loading={locating} onClick={handleGps}>
               Use my location
             </Button>

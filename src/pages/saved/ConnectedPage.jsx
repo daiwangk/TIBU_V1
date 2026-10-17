@@ -1,5 +1,4 @@
 import { MessageCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import PageHeader from '../../components/ui/PageHeader';
@@ -10,11 +9,10 @@ import ActivityRow from './ActivityRow';
 
 /** /connected (RequireAuth) — businesses contacted by WhatsApp or Call, newest first. */
 export default function ConnectedPage() {
-  const navigate = useNavigate();
   const { data, isPending, isError, error, refetch } = useConnected();
 
   let body;
-  if (isPending) body = <ActivityListSkeleton label="Loading previously connected" />;
+  if (isPending) body = <ActivityListSkeleton label="Loading previously connected" round />;
   else if (isError) body = <ErrorState error={error} onRetry={() => refetch()} />;
   else if (!data?.length) {
     body = (
@@ -22,7 +20,7 @@ export default function ConnectedPage() {
         icon={<MessageCircle size={28} aria-hidden="true" />}
         title="No sellers contacted yet"
         text="Businesses you WhatsApp or call from Tibu will show up here."
-        action={{ label: 'Explore Tibu', onClick: () => navigate('/') }}
+        action={{ label: 'Explore Tibu', to: '/' }}
       />
     );
   } else {
