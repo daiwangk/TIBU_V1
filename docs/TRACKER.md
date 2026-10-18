@@ -16,7 +16,7 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ✓ | ID | Task | Who | Est | Needs |
 |---|---|---|---|---|---|
 | ☐ | F5 | Hosted DB checks: 0007 applied, zero-RLS query, psql smoke test → PROGRESS | A | 0.25 | — |
-| ☐ | R1-1 | R1 Part 1: push migrations 0008/0009 to dev — files are in supabase/migrations; `npx supabase db push` still to run by you | A | 0.3 | F5 |
+| ◐ | R1-1 | R1 Part 1: push migrations 0008/0009 to dev — pushed: `npx supabase migration list` on 18 Oct 2026 shows 0001–0010 on both Local and Remote (linked project tibu-dev). Still to confirm by hand: the three SQL checks in `REV2_TASKS.md` R1 (5 rows · 18 tables · 0 rows without RLS) and the refreshed `docs/kit/rpc-signatures.txt` | A | 0.3 | F5 |
 | ☑ | A1.5 | Supabase catalog adapter — merged as PR #10, hand-tested on tibu-dev (PROGRESS 2 Oct); R1-2 still adds the v1.2 fields | A | 0.5 | R1-1 |
 | ☑ | R1-2 | R1 Part 2: contract v1.2, D32–D38, AGENTS.md, v1.2 fields in the adapter (code merged; live only after R1-1) | A | 1.5 | A1.5 |
 | ☐ | A1.7 | Auth URLs on dev | A | 0.5 | — |
