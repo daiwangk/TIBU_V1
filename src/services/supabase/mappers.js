@@ -14,6 +14,14 @@ export function paiseToRupees(paise) {
 }
 
 /**
+ * @param {number|null|undefined} rupees
+ * @returns {number}
+ */
+export function rupeesToPaise(rupees) {
+  return Math.round(Number(rupees || 0) * 100);
+}
+
+/**
  * Prefer a database/RPC distance over the adapter's haversine fallback.
  * @param {{ distance_m?: number|null }|null|undefined} row
  * @param {number|null|undefined} fallback
@@ -203,10 +211,11 @@ export function mapBusinessDetail(row, distanceM) {
 /**
  * @param {object} row products nested select with businesses(...)
  * @param {number|null} [distanceM]
+ * @param {{ includeInactive?: boolean }} [options]
  * @returns {import('../contract.js').ProductDetail|null}
  */
-export function mapProductDetail(row, distanceM) {
-  if (!row || row.is_active === false) return null;
+export function mapProductDetail(row, distanceM, options = {}) {
+  if (!row || (row.is_active === false && !options.includeInactive)) return null;
   const biz = row.businesses;
   if (!biz) return null;
 

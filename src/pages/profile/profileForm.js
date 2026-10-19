@@ -1,5 +1,8 @@
 import { z } from 'zod';
+import { roundCoord } from '../../lib/geo.js';
 import { normalizeIndianMobile } from '../../lib/whatsapp';
+
+export { roundCoord };
 
 /** Select value that asks the browser for the current position instead of naming an area. */
 export const CURRENT_LOCATION = '__current';
@@ -55,11 +58,6 @@ export function formToPatch(values) {
     homeLng: hasHome ? values.homeLng : null,
     notifyDigest: values.notifyDigest,
   };
-}
-
-/** GPS coordinates rounded to 3 decimals (~100 m), the precision the location store also uses. */
-export function roundCoord(value) {
-  return Math.round(value * 1000) / 1000;
 }
 
 /**

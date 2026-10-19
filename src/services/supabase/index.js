@@ -23,6 +23,21 @@ import { revealContact } from './contact.js';
 import { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved } from './saved.js';
 import { trackView, listRecent, listConnected } from './activity.js';
 import { deletePushSubscription, savePushSubscription } from './push.js';
+import {
+  addVideo,
+  becomeSeller,
+  deleteProduct,
+  getMyBusiness,
+  getMyStats,
+  getSubmitChecklist,
+  listMyProducts,
+  removeVideo,
+  saveMyBusiness,
+  saveMyContacts,
+  saveProduct,
+  setAvailableToday,
+  submitForReview,
+} from './seller.js';
 
 const notImplemented = async () => {
   throw new AppError('config', 'Supabase adapter not implemented yet');
@@ -43,23 +58,25 @@ export const saveMyReview = notImplemented;
 export const deleteMyReview = notImplemented;
 export { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved };
 export { trackView, listRecent, listConnected };
-export const becomeSeller = notImplemented;
-export const getMyBusiness = notImplemented;
-export const saveMyBusiness = notImplemented;
-export const saveMyContacts = notImplemented;
+export {
+  becomeSeller,
+  getMyBusiness,
+  saveMyBusiness,
+  saveMyContacts,
+  listMyProducts,
+  saveProduct,
+  deleteProduct,
+  addVideo,
+  removeVideo,
+  getSubmitChecklist,
+  submitForReview,
+  setAvailableToday,
+  getMyStats,
+};
 export const uploadBusinessImage = notImplemented;
 export const removeBusinessImage = notImplemented;
-export const listMyProducts = notImplemented;
-export const saveProduct = notImplemented;
-export const deleteProduct = notImplemented;
 export const uploadProductImage = notImplemented;
 export const removeProductImage = notImplemented;
-export const addVideo = notImplemented;
-export const removeVideo = notImplemented;
-export const getSubmitChecklist = notImplemented;
-export const submitForReview = notImplemented;
-export const setAvailableToday = notImplemented;
-export const getMyStats = notImplemented;
 export const listApplications = notImplemented;
 export const getApplication = notImplemented;
 export const decideApplication = notImplemented;

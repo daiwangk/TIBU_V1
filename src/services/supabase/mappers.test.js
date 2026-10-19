@@ -8,6 +8,7 @@ import {
   mapProductSummaryNested,
   mapReview,
   paiseToRupees,
+  rupeesToPaise,
 } from './mappers.js';
 import { detailsFromDb } from './details.js';
 
@@ -30,6 +31,8 @@ describe('supabase mappers', () => {
   it('rounds price_paise to integer rupees', () => {
     expect(paiseToRupees(35000)).toBe(350);
     expect(paiseToRupees(129950)).toBe(1300);
+    expect(rupeesToPaise(350)).toBe(35000);
+    expect(rupeesToPaise(1300)).toBe(130000);
     expect(mapProductSummaryFromSearch({
       id: 'p1',
       name: 'Cookies',
