@@ -5,8 +5,8 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 3 (12–16 Oct 2026) · Target: Accounts, contact, retention
 - Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
-- Last green commit on main: `f5b6a2f` (Merge PR #41, docs only; Actions `check` and Cloudflare Pages both green; `npm run check` on main: 38 files / 320 tests, build OK)
-- Database: linked CLI project is `tibu-dev` (ref `lxsnktdqjwgiymlakwem`); `npx supabase migration list` on 18 Oct 2026 shows migrations 0001–0010 applied on the remote, including 0008, 0009 and 0010. Not re-run: the R1 SQL checks (5 rows · 18 tables · 0 rows without RLS) and the `docs/kit/rpc-signatures.txt` refresh.
+- Last green commit on main: `87167f0` (Merge PR #42, docs only; Actions `check` green on 18 Oct 2026; `npm run check` on main: 38 files / 320 tests, build OK as of `f5b6a2f`, no code changed since)
+- Database: linked CLI project is `tibu-dev` (ref `lxsnktdqjwgiymlakwem`); `npx supabase migration list` on 18 Oct 2026 shows migrations 0001–0010 applied on the remote, including 0008, 0009 and 0010. R1 SQL checks (5 rows · 18 tables · 0 rows without RLS) passed on 19 Oct 2026 and `docs/kit/rpc-signatures.txt` is current (see Log).
 - Merged this week: A3.1 auth and profile services, auth store, route guards (#21) · B3.1 auth pages (#26, includes the contract commit `023e5d6` — `resendConfirmation`, CONTRACT v1.2.2, D39) · B3.2 login sheet (#27) · B3.3 contact buttons live (#28) · B3.4 profile and edit profile (#29) · B3.5 saved / recently viewed / previously connected (#30) · gitlink removal (#31) · gitlink guard in `npm run check` (#32) · saved-products fix (#33: `products` has `category_id`, not `category_slug`) · edit-profile phone-error fix (#34) · Week 3 close in PROGRESS (#35) · A3.5 profile home area → default search location (#36) · client design references (#37)
 - Design refresh (D40), merged to main on 18 Oct 2026 as merge commits after a real-phone check: D1 theme, fonts, wordmark and shell (#38 → `6735333`) · D2 components (#39 → `7021930`) · D3 group 1 Home, Search, Saved/Recent/Connected (#40 → `406ba7a`). D3 group 2 (Profile, auth, Product, Business) deferred. Screenshots in `docs/design-review/d1/`, `d2/`, `d3/`. Known gaps: card image placeholders are still lavender · no category photos yet (pastel icon circles, `TODO(category-photos)`) · the logo is the placeholder wordmark (`TODO(logo)`).
 - In progress: none — all Week 3 PRs are merged to main (stack merged as merge commits, branches kept); A3.5 profile home area → default search location half done (#36), Resend SMTP half waits on the client's domain · design refresh D3 group 2 not started
@@ -20,6 +20,12 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-19 · R1-1 close-out: SQL checks on tibu-dev · dk · Claude Code (Sonnet 5.5)
+- Done: 19 Oct 2026: R1 SQL checks passed on tibu-dev (ref `lxsnktdqjwgiymlakwem`) — 0008 columns 5 rows, public tables 18, tables without RLS 0; `migration list` 0001–0010 on Local and Remote. Live function list (36) compared with `docs/kit/rpc-signatures.txt`: identical, including `save_push_subscription` and `delete_push_subscription`, so the file needed no change. TRACKER R1-1 ◐ → ☑.
+- Files: `docs/TRACKER.md`, `docs/PROGRESS.md`.
+- How verified: read-only `npx supabase db query --linked` SELECTs and `migration list`; no db push, no writes, nothing against prod.
+- Next step: Week 4.
 
 ### 2026-10-18 · Pre-Week-4 repo cleanup and health check · dk · Claude Code (Opus 5.5)
 - Done: inventory of PRs, branches and stashes; merged PR #41 as a merge commit (`f5b6a2f`); no other PR was open. Confirmed on main `f5b6a2f`: no 160000 entries, Actions `check` and Cloudflare Pages green, `npm run check` green (38 files / 320 tests, guards OK, build OK), local main equals origin/main. Supabase CLI logged in and linked to `tibu-dev`; `migration list` shows 0001–0010 on the remote. No branch was deleted or closed.
