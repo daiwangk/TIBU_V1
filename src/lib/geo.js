@@ -3,6 +3,15 @@ import { AppError } from '../services/errors.js';
 const EARTH_RADIUS_METERS = 6_371_000;
 
 /**
+ * Round a coordinate to 3 decimals (~100 m). D38 / CONTRACT §12.
+ * @param {number} n
+ * @returns {number}
+ */
+export function roundCoord(n) {
+  return Math.round(n * 1000) / 1000;
+}
+
+/**
  * Fallback areas when browser location permission is unavailable.
  * Duplicated in `scripts/seed-dev.mjs` (`AREAS`) — keep both lists in sync.
  * @type {ReadonlyArray<{ name: string, lat: number, lng: number }>}

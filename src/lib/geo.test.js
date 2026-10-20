@@ -1,8 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AppError } from '../services/errors.js';
-import { filterAreas, getBrowserLocation, haversineMeters, MUMBAI_AREAS } from './geo.js';
+import { filterAreas, getBrowserLocation, haversineMeters, MUMBAI_AREAS, roundCoord } from './geo.js';
 
 describe('geo helpers', () => {
+  it('rounds coordinates to 3 decimals (D38)', () => {
+    expect(roundCoord(19.123456)).toBe(19.123);
+    expect(roundCoord(72.8299)).toBe(72.83);
+    expect(roundCoord(-72.8294)).toBe(-72.829);
+  });
+
   it('calculates the Bandra West to Andheri West distance', () => {
     const bandra = MUMBAI_AREAS.find((area) => area.name === 'Bandra West');
     const andheri = MUMBAI_AREAS.find((area) => area.name === 'Andheri West');

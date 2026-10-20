@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { describe, expect, it } from 'vitest';
-import { accountRows, editProfileSchema, formToPatch, profileToForm, roundCoord, toTenDigitMobile } from './profileForm.js';
+import { accountRows, editProfileSchema, formToPatch, profileToForm, toTenDigitMobile } from './profileForm.js';
 
 const profile = {
   id: 'u1',
@@ -73,13 +73,6 @@ describe('profileToForm / formToPatch', () => {
     expect(patch.homeLat).toBeNull();
     expect(Object.keys(patch)).not.toContain('role');
     expect(Object.keys(patch)).not.toContain('avatarUrl');
-  });
-});
-
-describe('roundCoord', () => {
-  it('rounds to 3 decimals', () => {
-    expect(roundCoord(19.123456)).toBe(19.123);
-    expect(roundCoord(72.8299)).toBe(72.83);
   });
 });
 
