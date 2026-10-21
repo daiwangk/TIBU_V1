@@ -31,12 +31,16 @@ import {
   getMyStats,
   getSubmitChecklist,
   listMyProducts,
+  removeBusinessImage,
+  removeProductImage,
   removeVideo,
   saveMyBusiness,
   saveMyContacts,
   saveProduct,
   setAvailableToday,
   submitForReview,
+  uploadBusinessImage,
+  uploadProductImage,
 } from './seller.js';
 
 const notImplemented = async () => {
@@ -72,11 +76,11 @@ export {
   submitForReview,
   setAvailableToday,
   getMyStats,
+  uploadBusinessImage,
+  removeBusinessImage,
+  uploadProductImage,
+  removeProductImage,
 };
-export const uploadBusinessImage = notImplemented;
-export const removeBusinessImage = notImplemented;
-export const uploadProductImage = notImplemented;
-export const removeProductImage = notImplemented;
 export const listApplications = notImplemented;
 export const getApplication = notImplemented;
 export const decideApplication = notImplemented;

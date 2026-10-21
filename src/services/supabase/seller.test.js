@@ -9,6 +9,11 @@ import {
   SUBMIT_CHECKLIST_ITEMS,
   toEstablishedYear,
   toDeliveryTime,
+  buildBusinessImagePath,
+  buildProductImagePath,
+  getStoragePathFromUrl,
+  validateCompressedSize,
+  validateImageFile,
 } from './seller.js';
 import { AppError } from '../errors.js';
 
@@ -220,3 +225,116 @@ describe('established year and delivery time', () => {
     );
   });
 });
+
+describe('seller image pure helpers', () => {
+  describe('validateImageFile', () => {
+    it('throws validation error if file is missing or null', () => {
+      expect(() => validateImageFile(null)).toThrow(AppError);
+      expect(() => validateImageFile(undefined)).toThrow('Please select an image file');
+      expect(() => validateImageFile('not-a-file')).toThrow('Please select an image file');
+    });
+
+    it('throws validation error if mime type does not start with image/', () => {
+      expect(() => validateImageFile({ type: 'application/pdf', size: 1000 })).toThrow(AppError);
+      expect(() => validateImageFile({ type: 'application/pdf', size: 1000 })).toThrow('Please upload a valid image file');
+      expect(() => validateImageFile({ type: 'text/plain', size: 1000 })).toThrow('Please upload a valid image file');
+      expect(() => validateImageFile({ type: '', size: 1000 })).toThrow('Please upload a valid image file');
+    });
+
+    it('throws validation error if raw file is greater than 10 MB', () => {
+      const tenMbPlusOne = 10 * 1024 * 1024 + 1;
+      expect(() => validateImageFile({ type: 'image/jpeg', size: tenMbPlusOne })).toThrow(AppError);
+      expect(() => validateImageFile({ type: 'image/jpeg', size: tenMbPlusOne })).toThrow('Image must be under 10 MB');
+    });
+
+    it('accepts valid image files <= 10 MB', () => {
+      expect(() => validateImageFile({ type: 'image/webp', size: 5 * 1024 * 1024 })).not.toThrow();
+      expect(() => validateImageFile({ type: 'image/jpeg', size: 10 * 1024 * 1024 })).not.toThrow();
+      expect(() => validateImageFile({ type: 'image/png', size: 1024 })).not.toThrow();
+    });
+  });
+
+  describe('validateCompressedSize', () => {
+    it('throws validation error if compressed file exceeds 3 MB bucket limit', () => {
+      const threeMbPlusOne = 3 * 1024 * 1024 + 1;
+      expect(() => validateCompressedSize({ size: threeMbPlusOne })).toThrow(AppError);
+      expect(() => validateCompressedSize({ size: threeMbPlusOne })).toThrow('Compressed image exceeds the 3 MB limit');
+    });
+
+    it('accepts compressed files <= 3 MB', () => {
+      expect(() => validateCompressedSize({ size: 3 * 1024 * 1024 })).not.toThrow();
+      expect(() => validateCompressedSize({ size: 200 * 1024 })).not.toThrow();
+    });
+  });
+
+  describe('buildBusinessImagePath', () => {
+    const businessId = 'biz-uuid-123';
+    const timestamp = 1729500000000;
+    const uuid = 'img-uuid-456';
+
+    it('builds logo path as {businessId}/logo-<ts>.webp', () => {
+      const path = buildBusinessImagePath(businessId, 'logo', { timestamp, uuid });
+      expect(path).toBe('biz-uuid-123/logo-1729500000000.webp');
+    });
+
+    it('builds banner path as {businessId}/banner-<ts>.webp', () => {
+      const path = buildBusinessImagePath(businessId, 'banner', { timestamp, uuid });
+      expect(path).toBe('biz-uuid-123/banner-1729500000000.webp');
+    });
+
+    it('builds gallery path as {businessId}/gallery/<uuid>.webp', () => {
+      const path = buildBusinessImagePath(businessId, 'gallery', { timestamp, uuid });
+      expect(path).toBe('biz-uuid-123/gallery/img-uuid-456.webp');
+    });
+
+    it('throws validation error for invalid businessId or unknown kind', () => {
+      expect(() => buildBusinessImagePath('', 'logo')).toThrow('Business ID is required');
+      expect(() => buildBusinessImagePath(businessId, 'unknown')).toThrow('Invalid image kind: unknown');
+    });
+  });
+
+  describe('buildProductImagePath', () => {
+    const businessId = 'biz-uuid-123';
+    const productId = 'prod-uuid-789';
+    const uuid = 'img-uuid-999';
+
+    it('builds product path as {businessId}/products/{productId}/<uuid>.webp', () => {
+      const path = buildProductImagePath(businessId, productId, { uuid });
+      expect(path).toBe('biz-uuid-123/products/prod-uuid-789/img-uuid-999.webp');
+    });
+
+    it('throws validation error when businessId or productId is missing', () => {
+      expect(() => buildProductImagePath('', productId)).toThrow('Business ID is required');
+      expect(() => buildProductImagePath(businessId, '')).toThrow('Product ID is required');
+    });
+  });
+
+  describe('getStoragePathFromUrl', () => {
+    it('extracts relative path from standard Supabase storage public URL', () => {
+      const url = 'https://abcxyz.supabase.co/storage/v1/object/public/business-media/biz-1/gallery/uuid-1.webp';
+      expect(getStoragePathFromUrl(url)).toBe('biz-1/gallery/uuid-1.webp');
+    });
+
+    it('strips query parameters and hashes from URL', () => {
+      const url = 'https://abcxyz.supabase.co/storage/v1/object/public/business-media/biz-1/logo-123.webp?v=456#main';
+      expect(getStoragePathFromUrl(url)).toBe('biz-1/logo-123.webp');
+    });
+
+    it('handles relative bucket paths with or without leading slash', () => {
+      expect(getStoragePathFromUrl('/business-media/biz-1/banner-123.webp')).toBe('biz-1/banner-123.webp');
+      expect(getStoragePathFromUrl('business-media/biz-1/banner-123.webp')).toBe('biz-1/banner-123.webp');
+    });
+
+    it('handles already-clean paths', () => {
+      expect(getStoragePathFromUrl('biz-1/products/prod-1/img.webp')).toBe('biz-1/products/prod-1/img.webp');
+      expect(getStoragePathFromUrl('/biz-1/products/prod-1/img.webp')).toBe('biz-1/products/prod-1/img.webp');
+    });
+
+    it('returns empty string for null, undefined, or empty url', () => {
+      expect(getStoragePathFromUrl(null)).toBe('');
+      expect(getStoragePathFromUrl(undefined)).toBe('');
+      expect(getStoragePathFromUrl('')).toBe('');
+    });
+  });
+});
+
