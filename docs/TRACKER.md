@@ -62,7 +62,7 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ☐ | B4.1 | Sell landing, seller gate, hooks | B | Mon | 1.5 | A4.1 |
 | ☐ | B4.2a | Onboarding shell + steps 1–3 (**+ R4 add-on**) | B | Mon–Wed | 2.5 | B4.1 |
 | ☐ | A4.3 | Admin services | A | Tue/Thu | 1.5 | A3.1 |
-| ☐ | A4.2 | Image pipeline (**+ A4.2 path correction**), WhatsApp WebP check | A | Wed | 2 | A4.1 |
+| ☑ | A4.2 | Image pipeline (**+ A4.2 path correction**), WhatsApp WebP check | A | Wed | 2 | A4.1 |
 | ☐ | B4.4 | Admin panel | A | Thu | 3 | A4.3 |
 | ☐ | B4.2b | Onboarding steps 4–7 (**+ R4 add-on**) | B | Thu | 2.5 | A4.2 |
 | ☐ | A4.4 | Chat (enquiry) backend | A | Fri | 2 | A3.1 |

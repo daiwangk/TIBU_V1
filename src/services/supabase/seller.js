@@ -498,3 +498,291 @@ export async function getMyStats() {
     reviewCount: Number(row?.rating_count ?? 0),
   };
 }
+
+// ─── A4.2 Image pipeline ────────────────────────────────────────────────────
+
+const STORAGE_BUCKET = 'business-media';
+const MAX_RAW_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_COMPRESSED_SIZE_BYTES = 3 * 1024 * 1024; // 3 MB (bucket limit)
+
+/** @param {Blob|File} file */
+export function validateImageFile(file) {
+  if (!file || typeof file !== 'object') {
+    throw new AppError('validation', 'Please select an image file');
+  }
+  if (!file.type || !file.type.startsWith('image/')) {
+    throw new AppError('validation', 'Please upload a valid image file');
+  }
+  if (file.size > MAX_RAW_SIZE_BYTES) {
+    throw new AppError('validation', 'Image must be under 10 MB');
+  }
+}
+
+/** @param {Blob|File} file */
+export function validateCompressedSize(file) {
+  if (file && file.size > MAX_COMPRESSED_SIZE_BYTES) {
+    throw new AppError('validation', 'Compressed image exceeds the 3 MB limit');
+  }
+}
+
+/**
+ * Build storage path for logo, banner, or gallery.
+ * CONTRACT §13: first folder must be businessId (owns_business policy).
+ * @param {string} businessId
+ * @param {'logo'|'banner'|'gallery'} kind
+ * @param {{ timestamp?: number, uuid?: string }} [options]
+ * @returns {string}
+ */
+export function buildBusinessImagePath(businessId, kind, { timestamp = Date.now(), uuid = crypto.randomUUID() } = {}) {
+  if (!businessId) throw new AppError('validation', 'Business ID is required');
+  if (kind === 'logo') return `${businessId}/logo-${timestamp}.webp`;
+  if (kind === 'banner') return `${businessId}/banner-${timestamp}.webp`;
+  if (kind === 'gallery') return `${businessId}/gallery/${uuid}.webp`;
+  throw new AppError('validation', `Invalid image kind: ${kind}`);
+}
+
+/**
+ * Build storage path for a product image.
+ * @param {string} businessId
+ * @param {string} productId
+ * @param {{ uuid?: string }} [options]
+ * @returns {string}
+ */
+export function buildProductImagePath(businessId, productId, { uuid = crypto.randomUUID() } = {}) {
+  if (!businessId) throw new AppError('validation', 'Business ID is required');
+  if (!productId) throw new AppError('validation', 'Product ID is required');
+  return `${businessId}/products/${productId}/${uuid}.webp`;
+}
+
+/**
+ * Extract relative storage path from a full public Supabase storage URL.
+ * @param {string} url
+ * @param {string} [bucket]
+ * @returns {string}
+ */
+export function getStoragePathFromUrl(url, bucket = STORAGE_BUCKET) {
+  if (!url || typeof url !== 'string') return '';
+  const cleanUrl = url.split('?')[0].split('#')[0];
+  const marker = `/${bucket}/`;
+  const idx = cleanUrl.indexOf(marker);
+  if (idx !== -1) return cleanUrl.slice(idx + marker.length);
+  if (cleanUrl.startsWith(`${bucket}/`)) return cleanUrl.slice(bucket.length + 1);
+  return cleanUrl.replace(/^\/+/, '');
+}
+
+async function fetchOwnerBusinessId(userId) {
+  const { data, error } = await getSupabase()
+    .from('businesses')
+    .select('id')
+    .eq('owner_id', userId)
+    .maybeSingle();
+  if (error) throw mapSupabaseError(error);
+  if (!data) throw new AppError('validation', 'Save your business details first');
+  return data.id;
+}
+
+/**
+ * Upload a logo, banner, or gallery image for the seller's business.
+ * @param {{ kind: 'logo'|'banner'|'gallery', file: File|Blob }} input
+ * @returns {Promise<import('../contract.js').Image>}
+ */
+export async function uploadBusinessImage({ kind, file }) {
+  if (!kind || !['logo', 'banner', 'gallery'].includes(kind)) {
+    throw new AppError('validation', 'Invalid image kind');
+  }
+  validateImageFile(file);
+
+  const userId = await requireUserId();
+  const businessId = await fetchOwnerBusinessId(userId);
+
+  let sortOrder = 0;
+  if (kind === 'gallery') {
+    const { count, error: countErr } = await getSupabase()
+      .from('business_images')
+      .select('id', { count: 'exact', head: true })
+      .eq('business_id', businessId);
+    if (countErr) throw mapSupabaseError(countErr);
+    if ((count ?? 0) >= 6) throw new AppError('validation', 'Maximum 6 gallery images allowed');
+
+    const { data: maxRow, error: maxErr } = await getSupabase()
+      .from('business_images')
+      .select('sort_order')
+      .eq('business_id', businessId)
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (maxErr) throw mapSupabaseError(maxErr);
+    sortOrder = maxRow ? (maxRow.sort_order ?? 0) + 1 : 0;
+  }
+
+  const { compressImage } = await import('../../lib/image.js');
+  const compressed = await compressImage(file, { maxEdge: 1200, quality: 0.8, type: 'image/webp' });
+  validateCompressedSize(compressed);
+
+  const path = buildBusinessImagePath(businessId, kind);
+  const storage = getSupabase().storage.from(STORAGE_BUCKET);
+  const { error: uploadErr } = await storage.upload(path, compressed, {
+    contentType: 'image/webp',
+    upsert: false,
+  });
+  if (uploadErr) throw mapSupabaseError(uploadErr);
+
+  const { data: urlData } = storage.getPublicUrl(path);
+  const publicUrl = urlData.publicUrl;
+
+  if (kind === 'logo') {
+    const { error: updateErr } = await getSupabase()
+      .from('businesses')
+      .update({ logo_url: publicUrl })
+      .eq('id', businessId);
+    if (updateErr) throw mapSupabaseError(updateErr);
+    return { id: path, url: publicUrl };
+  }
+
+  if (kind === 'banner') {
+    const { error: updateErr } = await getSupabase()
+      .from('businesses')
+      .update({ banner_url: publicUrl })
+      .eq('id', businessId);
+    if (updateErr) throw mapSupabaseError(updateErr);
+    return { id: path, url: publicUrl };
+  }
+
+  // gallery → insert into business_images
+  const { data: row, error: insertErr } = await getSupabase()
+    .from('business_images')
+    .insert({ business_id: businessId, storage_path: path, url: publicUrl, sort_order: sortOrder })
+    .select('id, url')
+    .single();
+  if (insertErr) throw mapSupabaseError(insertErr);
+  return { id: row.id, url: row.url };
+}
+
+/**
+ * Upload an image for a product owned by the seller.
+ * @param {string} productId
+ * @param {File|Blob} file
+ * @returns {Promise<import('../contract.js').Image>}
+ */
+export async function uploadProductImage(productId, file) {
+  if (!productId || typeof productId !== 'string') {
+    throw new AppError('validation', 'Product ID is required');
+  }
+  validateImageFile(file);
+
+  const userId = await requireUserId();
+  const businessId = await fetchOwnerBusinessId(userId);
+
+  const { data: product, error: prodErr } = await getSupabase()
+    .from('products')
+    .select('id, business_id')
+    .eq('id', productId)
+    .eq('business_id', businessId)
+    .maybeSingle();
+  if (prodErr) throw mapSupabaseError(prodErr);
+  if (!product) throw new AppError('not_found', 'Product not found');
+
+  const { count, error: countErr } = await getSupabase()
+    .from('product_images')
+    .select('id', { count: 'exact', head: true })
+    .eq('product_id', productId);
+  if (countErr) throw mapSupabaseError(countErr);
+  if ((count ?? 0) >= 5) throw new AppError('validation', 'Maximum 5 images per product allowed');
+
+  const { data: maxRow, error: maxErr } = await getSupabase()
+    .from('product_images')
+    .select('sort_order')
+    .eq('product_id', productId)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (maxErr) throw mapSupabaseError(maxErr);
+  const sortOrder = maxRow ? (maxRow.sort_order ?? 0) + 1 : 0;
+
+  const { compressImage } = await import('../../lib/image.js');
+  const compressed = await compressImage(file, { maxEdge: 1200, quality: 0.8, type: 'image/webp' });
+  validateCompressedSize(compressed);
+
+  const path = buildProductImagePath(businessId, productId);
+  const storage = getSupabase().storage.from(STORAGE_BUCKET);
+  const { error: uploadErr } = await storage.upload(path, compressed, {
+    contentType: 'image/webp',
+    upsert: false,
+  });
+  if (uploadErr) throw mapSupabaseError(uploadErr);
+
+  const { data: urlData } = storage.getPublicUrl(path);
+  const publicUrl = urlData.publicUrl;
+
+  const { data: row, error: insertErr } = await getSupabase()
+    .from('product_images')
+    .insert({ product_id: productId, storage_path: path, url: publicUrl, sort_order: sortOrder })
+    .select('id, url')
+    .single();
+  if (insertErr) throw mapSupabaseError(insertErr);
+  return { id: row.id, url: row.url };
+}
+
+/**
+ * Remove a business gallery image row and its storage object.
+ * @param {string} imageId
+ * @returns {Promise<void>}
+ */
+export async function removeBusinessImage(imageId) {
+  if (!imageId || typeof imageId !== 'string') {
+    throw new AppError('validation', 'Image ID is required');
+  }
+  await requireUserId();
+
+  const { data: deleted, error: delErr } = await getSupabase()
+    .from('business_images')
+    .delete()
+    .eq('id', imageId)
+    .select('id, storage_path, url')
+    .maybeSingle();
+  if (delErr) throw mapSupabaseError(delErr);
+
+  if (deleted) {
+    const path = deleted.storage_path || getStoragePathFromUrl(deleted.url);
+    if (path) {
+      const { error: storageErr } = await getSupabase().storage.from(STORAGE_BUCKET).remove([path]);
+      if (storageErr) {
+        const msg = storageErr.message?.toLowerCase() || '';
+        const notFound = msg.includes('not found') || storageErr.statusCode === '404' || storageErr.status === 404;
+        if (!notFound) throw mapSupabaseError(storageErr);
+      }
+    }
+  }
+}
+
+/**
+ * Remove a product image row and its storage object.
+ * @param {string} imageId
+ * @returns {Promise<void>}
+ */
+export async function removeProductImage(imageId) {
+  if (!imageId || typeof imageId !== 'string') {
+    throw new AppError('validation', 'Image ID is required');
+  }
+  await requireUserId();
+
+  const { data: deleted, error: delErr } = await getSupabase()
+    .from('product_images')
+    .delete()
+    .eq('id', imageId)
+    .select('id, storage_path, url')
+    .maybeSingle();
+  if (delErr) throw mapSupabaseError(delErr);
+
+  if (deleted) {
+    const path = deleted.storage_path || getStoragePathFromUrl(deleted.url);
+    if (path) {
+      const { error: storageErr } = await getSupabase().storage.from(STORAGE_BUCKET).remove([path]);
+      if (storageErr) {
+        const msg = storageErr.message?.toLowerCase() || '';
+        const notFound = msg.includes('not found') || storageErr.statusCode === '404' || storageErr.status === 404;
+        if (!notFound) throw mapSupabaseError(storageErr);
+      }
+    }
+  }
+}
