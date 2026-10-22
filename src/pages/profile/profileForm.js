@@ -61,9 +61,8 @@ export function formToPatch(values) {
 }
 
 /**
- * Account rows shown under the header, by role.
- * TODO(B4.1): add "Sell on Tibu" (/sell, customers) and "Seller dashboard" (/seller, sellers) once those
- * pages exist — the legacy /seller/register screen (fake OTP) must not be reachable from here.
+ * Account rows shown under the header, by role. Customers get "Sell on Tibu" (/sell) and sellers
+ * "Seller dashboard" (/seller); the legacy /seller/register screen (fake OTP) is not linked from here.
  *
  * @param {'customer'|'seller'|'admin'|null|undefined} role null for a guest
  * @returns {Array<{ key: string, label: string, to: string }>}
@@ -76,6 +75,8 @@ export function accountRows(role) {
     { key: 'connected', label: 'Previously connected', to: '/connected' },
     { key: 'notifications', label: 'Notification settings', to: '/notifications/settings' },
   ];
+  if (role === 'customer') rows.push({ key: 'sell', label: 'Sell on Tibu', to: '/sell' });
+  if (role === 'seller') rows.push({ key: 'seller', label: 'Seller dashboard', to: '/seller' });
   if (role === 'admin') rows.push({ key: 'admin', label: 'Admin panel', to: '/admin' });
   return rows;
 }
