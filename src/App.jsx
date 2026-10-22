@@ -38,6 +38,9 @@ const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 const RecentPage = lazy(() => import('./pages/saved/RecentPage'));
 const SavedPage = lazy(() => import('./pages/saved/SavedPage'));
 const SearchPage = lazy(() => import('./pages/search/SearchPage'));
+const SellLandingPage = lazy(() => import('./pages/seller/SellLandingPage'));
+const SellerGate = lazy(() => import('./pages/seller/SellerGate'));
+const SellerPlaceholder = lazy(() => import('./pages/seller/SellerPlaceholder'));
 const SellerDashboard = lazy(() => import('./SellerDashboard'));
 const SellerProductDetail = lazy(() => import('./SellerProductDetail'));
 const SellerRegister = lazy(() => import('./SellerRegister'));
@@ -183,7 +186,19 @@ function AppRoutes() {
         {/* Category hub — single route replaces 11 legacy pages */}
         <Route path="/category/:slug" element={<CategoryPage />} />
 
-        {/* Seller routes — BottomNav hidden via /seller/ prefix */}
+        {/* Sell landing (public) */}
+        <Route path="/sell" element={<SellLandingPage />} />
+
+        {/* Seller area — gated (seller role; no submitted shop → onboarding). Pages are placeholders until B4.2 / B4.3. */}
+        <Route path="/seller" element={<SellerGate />}>
+          <Route index element={<SellerPlaceholder title="Seller dashboard" backTo="/profile" />} />
+          <Route path="onboarding" element={<SellerPlaceholder title="Set up your shop" backTo="/profile" />} />
+          <Route path="products" element={<SellerPlaceholder title="Products" />} />
+          <Route path="videos" element={<SellerPlaceholder title="Videos" />} />
+          <Route path="business" element={<SellerPlaceholder title="Edit business" />} />
+        </Route>
+
+        {/* Legacy seller routes — BottomNav hidden via /seller/ prefix. Removed when B4.2 / B4.3 replace them. */}
         <Route path="/seller/register" element={L(SellerRegister)} />
         <Route path="/seller/dashboard" element={L(SellerDashboard)} />
         <Route path="/seller/products/view" element={L(SellerProductDetail)} />

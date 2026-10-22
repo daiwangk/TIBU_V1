@@ -6,5 +6,5 @@ const HIDDEN_PREFIXES = ['/p/', '/b/', '/seller/', '/dev/', '/login', '/signup',
 
 /** @param {string} pathname */
 export function isBottomNavHidden(pathname) {
-  return HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  return pathname === '/seller' || HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }

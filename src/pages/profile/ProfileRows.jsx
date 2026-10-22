@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, CircleHelp, FileText, Heart, History, Info, Lock, MessageCircle, ShieldCheck } from 'lucide-react';
+import { Bell, ChevronRight, CircleHelp, FileText, Heart, History, Info, Lock, MessageCircle, ShieldCheck, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ICONS = {
@@ -6,6 +6,8 @@ const ICONS = {
   recent: History,
   connected: MessageCircle,
   notifications: Bell,
+  sell: Store,
+  seller: Store,
   admin: ShieldCheck,
   help: CircleHelp,
   about: Info,

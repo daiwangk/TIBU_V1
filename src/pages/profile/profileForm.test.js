@@ -84,15 +84,25 @@ describe('accountRows', () => {
   });
 
   it('members get the retention rows and notification settings', () => {
-    expect(keys('customer')).toEqual(['saved', 'recent', 'connected', 'notifications']);
+    expect(keys('customer')).toEqual(['saved', 'recent', 'connected', 'notifications', 'sell']);
     expect(accountRows('customer').find((r) => r.key === 'notifications').to).toBe('/notifications/settings');
   });
 
-  it('only admins see the admin panel; no seller rows until B4.1', () => {
+  it('customers get Sell on Tibu, sellers get the Seller dashboard, admins get neither', () => {
+    expect(accountRows('customer').find((r) => r.key === 'sell').to).toBe('/sell');
+    expect(accountRows('seller').find((r) => r.key === 'seller').to).toBe('/seller');
+    expect(keys('seller')).not.toContain('sell');
+    expect(keys('customer')).not.toContain('seller');
+    expect(keys('admin')).not.toContain('sell');
+    expect(keys('admin')).not.toContain('seller');
+    expect(accountRows(null).some((r) => r.to === '/sell' || r.to.startsWith('/seller'))).toBe(false);
+  });
+
+  it('only admins see the admin panel; nothing links to the legacy seller register', () => {
     expect(keys('admin')).toContain('admin');
     expect(keys('seller')).not.toContain('admin');
     for (const role of ['customer', 'seller', 'admin']) {
-      expect(accountRows(role).some((r) => r.to === '/sell' || r.to.startsWith('/seller'))).toBe(false);
+      expect(accountRows(role).some((r) => r.to === '/seller/register')).toBe(false);
     }
   });
 });
