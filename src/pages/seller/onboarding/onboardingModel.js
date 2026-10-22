@@ -111,7 +111,10 @@ export function groupLeafCategories(categories) {
   return { groups, singles };
 }
 
-/** Label and onboarding step for each submit-checklist key (CONTRACT §5; the same list the adapter uses). */
+/**
+ * Label and onboarding step for each submit-checklist key (CONTRACT §5). Keep in step with
+ * SUBMIT_CHECKLIST_ITEMS in src/services/supabase/seller.js — pages can't import the adapter.
+ */
 const CHECKLIST_ITEMS = {
   category: { label: 'Category', step: 1 },
   description: { label: 'Description', step: 1 },

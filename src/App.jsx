@@ -188,7 +188,7 @@ function AppRoutes() {
         {/* Sell landing (public) */}
         <Route path="/sell" element={<SellLandingPage />} />
 
-        {/* Seller area — gated (seller role; no submitted shop → onboarding). Pages are placeholders until B4.2 / B4.3. */}
+        {/* Seller area — gated (seller role; no submitted shop → onboarding). The other seller pages are placeholders until B4.3. */}
         <Route path="/seller" element={<SellerGate />}>
           <Route index element={<SellerPlaceholder title="Seller dashboard" backTo="/profile" />} />
           <Route path="onboarding" element={<OnboardingPage />} />

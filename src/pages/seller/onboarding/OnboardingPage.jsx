@@ -83,7 +83,7 @@ export default function OnboardingPage() {
               onBack={step > 1 ? () => goTo(step - 1) : undefined}
               onSaved={() => goTo(step + 1)}
               onGoTo={goTo}
-              onSubmitted={() => setParams({})}
+              onSubmitted={() => setParams({}, { replace: true })}
             />
           </>
         )}

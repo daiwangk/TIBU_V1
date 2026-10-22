@@ -97,7 +97,8 @@ export default function ProductForm({ business, productId, onClose }) {
       onClose();
     } catch (err) {
       setConfirmDelete(false);
-      toast.error(userMessage(err));
+      // Network / forbidden / unknown errors already raise the global toast.
+      if (!shouldToast(err)) toast.error(userMessage(err));
     }
   }
 

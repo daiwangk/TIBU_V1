@@ -31,6 +31,7 @@ export default function VideosStep({ business, onBack, onSaved }) {
     handleSubmit,
     reset,
     setError,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(videoSchema), defaultValues: { instagramUrl: '', caption: '' } });
 
@@ -54,7 +55,8 @@ export default function VideosStep({ business, onBack, onSaved }) {
     try {
       await removeVideo.mutateAsync(removing.id);
     } catch (err) {
-      toast.error(userMessage(err));
+      // Network / forbidden / unknown errors already raise the global toast.
+      if (!shouldToast(err)) toast.error(userMessage(err));
     } finally {
       setRemoving(null);
     }
@@ -103,6 +105,12 @@ export default function VideosStep({ business, onBack, onSaved }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          // A new reel link typed but not added would be lost silently (a duplicate or a non-reel can't be added anyway).
+          const pending = parseInstagramShortcode(getValues('instagramUrl'));
+          if (pending && !business.videos.some((v) => v.shortcode === pending)) {
+            setError('instagramUrl', { message: 'Tap "Add video" to keep this link, or clear it' });
+            return;
+          }
           onSaved();
         }}
         noValidate

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 import { fileToObjectUrl } from '../lib/image';
-import { userMessage } from '../lib/errors';
+import { shouldToast, userMessage } from '../lib/errors';
 import PendingUpload from './PendingUpload';
 import PhotoPicker from './PhotoPicker';
 import IconButton from './ui/IconButton';
@@ -55,7 +55,8 @@ export default function PhotoGrid({ images, max, upload, remove, noun = 'photo',
     try {
       await remove(id);
     } catch (err) {
-      toast.error(userMessage(err));
+      // Network / forbidden / unknown errors already raise the global toast.
+      if (!shouldToast(err)) toast.error(userMessage(err));
     } finally {
       setRemovingId(null);
     }
