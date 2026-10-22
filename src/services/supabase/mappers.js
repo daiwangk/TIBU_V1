@@ -309,3 +309,44 @@ export function mapApplicationRow(row) {
     productCount: Number(row.product_count ?? 0),
   };
 }
+
+/**
+ * Map a `my_enquiries` RPC row → EnquiryThread (CONTRACT §6).
+ *
+ * @param {object} row
+ * @returns {import('../contract.js').EnquiryThread}
+ */
+export function mapEnquiryThread(row) {
+  const lastMessage = row.last_message ?? '';
+  return {
+    id: String(row.enquiry_id),
+    businessId: String(row.business_id),
+    businessName: String(row.business_name ?? ''),
+    customerName: String(row.customer_name ?? 'Customer'),
+    productId: row.product_id ? String(row.product_id) : null,
+    productName: row.product_name ? String(row.product_name) : null,
+    status: row.status,
+    lastMessageAt: String(row.last_message_at ?? ''),
+    lastMessagePreview: lastMessage.slice(0, 80),
+    unreadCount: Number(row.unread ?? 0),
+  };
+}
+
+/**
+ * Map an `enquiry_messages` table row → EnquiryMessage (CONTRACT §6).
+ *
+ * @param {object} row
+ * @param {string|null|undefined} [currentUserId]
+ * @returns {import('../contract.js').EnquiryMessage}
+ */
+export function mapEnquiryMessage(row, currentUserId) {
+  return {
+    id: String(row.id),
+    threadId: String(row.enquiry_id),
+    fromMe: Boolean(currentUserId && row.sender_id === currentUserId),
+    body: String(row.body ?? ''),
+    createdAt: String(row.created_at ?? ''),
+    readAt: row.read_at ? String(row.read_at) : null,
+  };
+}
+
