@@ -143,9 +143,18 @@ export function useSubmitChecklist() {
   return useSellerQuery(CHECKLIST_KEY, () => getSubmitChecklist());
 }
 
-/** `submitForReview()`; also refreshes the stats card. */
+/**
+ * `submitForReview()`. Refreshes the business whether it worked or not: a failure can still mean the
+ * status moved (the RPC succeeded but the re-read failed, or an admin acted meanwhile), and the page
+ * must follow the real status rather than offer Submit again.
+ */
 export function useSubmitForReview() {
-  return useSellerMutation(() => submitForReview(), [qk.myStats]);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => submitForReview(),
+    onSettled: () =>
+      Promise.all([qk.myBusiness, qk.myProducts, qk.myStats].map((queryKey) => queryClient.invalidateQueries({ queryKey }))),
+  });
 }
 
 /** `mutate({ kind: 'business'|'product', id, value })`. */

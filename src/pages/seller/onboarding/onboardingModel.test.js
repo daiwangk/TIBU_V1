@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { businessToInput, clampStep, firstIncompleteStep, groupLeafCategories, isStepComplete } from './onboardingModel.js';
+import { businessToInput, clampStep, firstIncompleteStep, groupLeafCategories, isStepComplete, missingFromError } from './onboardingModel.js';
 
 const base = {
   name: 'Sweet Crumbs',
@@ -115,5 +115,25 @@ describe('groupLeafCategories', () => {
     expect(singles.map((c) => c.slug)).toEqual(['desserts']);
     expect(groups.map((g) => g.parent.slug)).toEqual(['handmade', 'fashion']);
     expect(groups[0].children.map((c) => c.slug)).toEqual(['crochet', 'candles']);
+  });
+});
+
+describe('missingFromError', () => {
+  it('maps the keys submit_business_for_review reports to labels and steps', () => {
+    const err = { code: 'validation', cause: { missing: ['logo', 'contacts', 'at_least_one_product'] } };
+    expect(missingFromError(err)).toEqual([
+      { key: 'logo', label: 'Logo', step: 4 },
+      { key: 'contacts', label: 'Phone & WhatsApp', step: 3 },
+      { key: 'at_least_one_product', label: 'At least one product', step: 5 },
+    ]);
+  });
+
+  it('keeps an unknown key, sending the seller to step 1', () => {
+    expect(missingFromError({ cause: { missing: ['something_new'] } })).toEqual([{ key: 'something_new', label: 'something_new', step: 1 }]);
+    expect(missingFromError({ cause: { missing: ['constructor'] } })[0].step).toBe(1);
+  });
+
+  it('returns null for any other error', () => {
+    for (const err of [null, undefined, new Error('x'), { cause: {} }, { cause: { missing: [] } }]) expect(missingFromError(err)).toBeNull();
   });
 });

@@ -44,7 +44,6 @@ const SellerGate = lazy(() => import('./pages/seller/SellerGate'));
 const SellerPlaceholder = lazy(() => import('./pages/seller/SellerPlaceholder'));
 const SellerDashboard = lazy(() => import('./SellerDashboard'));
 const SellerProductDetail = lazy(() => import('./SellerProductDetail'));
-const SellerRegister = lazy(() => import('./SellerRegister'));
 const TermsPage = lazy(() => import('./pages/static/TermsPage'));
 
 
@@ -108,7 +107,6 @@ function LegacyPage({ Component, extraProps = {} }) {
       gifts: '/category/gifts',
       fashion: '/category/fashion',
       handmade: '/category/handmade',
-      sellerregister: '/seller/register',
       sellerdashboard: '/seller/dashboard',
       sellerproduct: '/seller/products/view',
       selleraddproduct: '/seller/products/new',
@@ -190,7 +188,7 @@ function AppRoutes() {
         {/* Sell landing (public) */}
         <Route path="/sell" element={<SellLandingPage />} />
 
-        {/* Seller area — gated (seller role; no submitted shop → onboarding). Pages are placeholders until B4.2 / B4.3. */}
+        {/* Seller area — gated (seller role; no submitted shop → onboarding). The other seller pages are placeholders until B4.3. */}
         <Route path="/seller" element={<SellerGate />}>
           <Route index element={<SellerPlaceholder title="Seller dashboard" backTo="/profile" />} />
           <Route path="onboarding" element={<OnboardingPage />} />
@@ -199,8 +197,7 @@ function AppRoutes() {
           <Route path="business" element={<SellerPlaceholder title="Edit business" />} />
         </Route>
 
-        {/* Legacy seller routes — BottomNav hidden via /seller/ prefix. Removed when B4.2 / B4.3 replace them. */}
-        <Route path="/seller/register" element={L(SellerRegister)} />
+        {/* Legacy seller routes — BottomNav hidden via /seller/ prefix. Removed when B4.3 replaces them. */}
         <Route path="/seller/dashboard" element={L(SellerDashboard)} />
         <Route path="/seller/products/view" element={L(SellerProductDetail)} />
         <Route path="/seller/products/:id" element={L(SellerProductDetail)} />

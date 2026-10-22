@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { basicsSchema, contactSchema, locationSchema, toTenDigitMobile } from './onboardingSchemas.js';
+import { basicsSchema, contactSchema, locationSchema, toTenDigitMobile, videoSchema } from './onboardingSchemas.js';
 
 const firstError = (result) => result.error?.issues[0]?.message;
 
@@ -84,5 +84,19 @@ describe('toTenDigitMobile', () => {
   it('stores the 10-digit form', () => {
     expect(toTenDigitMobile('+91 98765 43210')).toBe('9876543210');
     expect(toTenDigitMobile('0123')).toBeNull();
+  });
+});
+
+describe('videoSchema', () => {
+  it('accepts a public reel link with an optional caption', () => {
+    expect(videoSchema.safeParse({ instagramUrl: 'https://www.instagram.com/reel/Cookie_123/', caption: '' }).success).toBe(true);
+    expect(videoSchema.safeParse({ instagramUrl: ' https://instagram.com/reels/Cookie_123?igsh=x ', caption: 'Baking day' }).success).toBe(true);
+  });
+
+  it('rejects other links and long captions', () => {
+    for (const instagramUrl of ['', 'https://instagram.com/tibu', 'https://youtube.com/reel/Cookie_123', 'not a link']) {
+      expect(videoSchema.safeParse({ instagramUrl, caption: '' }).success, instagramUrl).toBe(false);
+    }
+    expect(videoSchema.safeParse({ instagramUrl: 'https://www.instagram.com/reel/Cookie_123/', caption: 'x'.repeat(201) }).success).toBe(false);
   });
 });

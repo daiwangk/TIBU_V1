@@ -110,3 +110,34 @@ export function groupLeafCategories(categories) {
   }
   return { groups, singles };
 }
+
+/**
+ * Label and onboarding step for each submit-checklist key (CONTRACT §5). Keep in step with
+ * SUBMIT_CHECKLIST_ITEMS in src/services/supabase/seller.js — pages can't import the adapter.
+ */
+const CHECKLIST_ITEMS = {
+  category: { label: 'Category', step: 1 },
+  description: { label: 'Description', step: 1 },
+  location: { label: 'Location', step: 2 },
+  contacts: { label: 'Phone & WhatsApp', step: 3 },
+  instagram_handle: { label: 'Instagram handle', step: 3 },
+  logo: { label: 'Logo', step: 4 },
+  at_least_one_product: { label: 'At least one product', step: 5 },
+  product_image: { label: 'Product photo', step: 5 },
+};
+
+/**
+ * The items `submitForReview` reported missing (an AppError('validation') whose cause carries the
+ * keys from submit_business_for_review), with labels and steps; null when the error is something else.
+ *
+ * @param {unknown} error
+ * @returns {Array<{ key: string, label: string, step: number }>|null}
+ */
+export function missingFromError(error) {
+  const keys = /** @type {any} */ (error)?.cause?.missing;
+  if (!Array.isArray(keys) || keys.length === 0) return null;
+  return keys.map((key) => {
+    const item = Object.hasOwn(CHECKLIST_ITEMS, key) ? CHECKLIST_ITEMS[key] : null;
+    return { key, label: item?.label ?? key, step: item?.step ?? 1 };
+  });
+}

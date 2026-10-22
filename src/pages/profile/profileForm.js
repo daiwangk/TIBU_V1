@@ -62,7 +62,7 @@ export function formToPatch(values) {
 
 /**
  * Account rows shown under the header, by role. Customers get "Sell on Tibu" (/sell) and sellers
- * "Seller dashboard" (/seller); the legacy /seller/register screen (fake OTP) is not linked from here.
+ * "Seller dashboard" (/seller).
  *
  * @param {'customer'|'seller'|'admin'|null|undefined} role null for a guest
  * @returns {Array<{ key: string, label: string, to: string }>}
