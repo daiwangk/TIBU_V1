@@ -73,9 +73,19 @@ export function useMyBusiness() {
   return useSellerQuery(qk.myBusiness, () => getMyBusiness());
 }
 
-/** `saveMyBusiness(input)` — creates the draft on first save. */
+/**
+ * `saveMyBusiness(input)` — creates the draft on first save. The saved business goes straight into the
+ * cache (the onboarding steps build the next save from it) before the usual refetch.
+ */
 export function useSaveMyBusiness() {
-  return useSellerMutation((input) => saveMyBusiness(input));
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input) => saveMyBusiness(input),
+    onSuccess: (business) => {
+      queryClient.setQueryData(qk.myBusiness, business);
+      return Promise.all([qk.myBusiness, qk.myProducts].map((queryKey) => queryClient.invalidateQueries({ queryKey })));
+    },
+  });
 }
 
 /** `saveMyContacts({ phone, whatsapp })`. */

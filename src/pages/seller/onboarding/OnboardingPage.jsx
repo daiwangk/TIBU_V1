@@ -20,6 +20,8 @@ const STEP_COMPONENTS = { 1: BasicsStep, 2: LocationStep, 3: ContactStep };
  */
 export default function OnboardingPage() {
   const { data: business, isLoading, isError, error, refetch } = useMyBusiness();
+  // A failed background refetch keeps the data, so it must not throw away what the seller is typing.
+  const showError = isError && business === undefined;
   const [params, setParams] = useSearchParams();
   const step = clampStep(params.get('step'), business);
 
@@ -27,8 +29,9 @@ export default function OnboardingPage() {
     window.scrollTo(0, 0);
   }, [step]);
 
+  // The first move from a bare URL replaces it, so browser Back doesn't land on a URL that resolves to the same step.
   function goTo(n) {
-    setParams({ step: String(Math.min(Math.max(n, 1), STEP_COUNT)) });
+    setParams({ step: String(Math.min(Math.max(n, 1), STEP_COUNT)) }, { replace: !params.has('step') });
   }
 
   const StepComponent = STEP_COMPONENTS[step] ?? StepComingSoon;
@@ -44,8 +47,8 @@ export default function OnboardingPage() {
             <Skeleton className="h-11 w-full" />
           </div>
         )}
-        {isError && <ErrorState error={error} onRetry={() => refetch()} />}
-        {!isLoading && !isError && (
+        {showError && <ErrorState error={error} onRetry={() => refetch()} />}
+        {!isLoading && !showError && (
           <>
             <ProgressHeader step={step} />
             <StepComponent
