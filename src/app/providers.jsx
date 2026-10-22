@@ -9,10 +9,10 @@ import AuthBootstrap from './AuthBootstrap';
  * The message doubles as the toast id so repeated failures don't stack.
  *
  * @param {unknown} error
- * @param {{ meta?: { silent?: boolean } }} source query or mutation
+ * @param {{ meta?: { silent?: boolean } }|undefined} source query or mutation
  */
 function handleError(error, source) {
-  if (!shouldToast(error, source.meta)) return;
+  if (!shouldToast(error, source?.meta)) return;
   const message = userMessage(error);
   toast.error(message, { id: message });
 }
@@ -27,7 +27,9 @@ function shouldRetry(failureCount, error) {
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({ onError: handleError }),
-  mutationCache: new MutationCache({ onError: handleError }),
+  // A MutationCache passes (error, variables, onMutateResult, mutation): the mutation (with its meta) is
+  // the fourth argument, not the second.
+  mutationCache: new MutationCache({ onError: (error, _variables, _onMutateResult, mutation) => handleError(error, mutation) }),
   defaultOptions: {
     queries: {
       staleTime: 60_000,

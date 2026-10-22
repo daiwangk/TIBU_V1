@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { normalizeInstagramHandle } from '../../../lib/instagram.js';
+import { normalizeInstagramHandle, parseInstagramShortcode } from '../../../lib/instagram.js';
 import { normalizeIndianMobile } from '../../../lib/whatsapp.js';
 
 /** 10-digit mobile as stored (CONTRACT §12), or null when invalid. */
@@ -52,3 +52,12 @@ export const contactSchema = z
       ctx.addIssue({ code: 'custom', path: ['whatsapp'], message: MOBILE_MESSAGE });
     }
   });
+
+/** Step 6: one reel to add. */
+export const videoSchema = z.object({
+  instagramUrl: z
+    .string()
+    .trim()
+    .refine((v) => parseInstagramShortcode(v) !== null, "That doesn't look like a public Instagram reel link"),
+  caption: z.string().trim().max(200, 'Keep the caption to 200 characters'),
+});
