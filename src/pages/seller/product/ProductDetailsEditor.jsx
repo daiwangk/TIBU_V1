@@ -21,7 +21,7 @@ export default function ProductDetailsEditor({ fields, register, append, remove,
     <fieldset className="flex flex-col gap-3">
       <legend className="font-body text-sm font-semibold text-ink">Details (optional)</legend>
       <p className="font-body text-xs text-muted">
-        Facts customers look for, like weight or size. Rows without a value are not saved.
+        Facts customers look for, like weight or size. A row needs both a label and a value to be saved.
       </p>
       {fashion && (
         <p className="font-body text-xs text-body">

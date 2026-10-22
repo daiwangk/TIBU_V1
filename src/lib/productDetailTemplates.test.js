@@ -23,7 +23,7 @@ describe('templateFor', () => {
   });
 
   it('returns nothing for an unknown or missing slug', () => {
-    for (const slug of ['nope', '', null, undefined]) expect(templateFor(slug), String(slug)).toEqual([]);
+    for (const slug of ['nope', '', null, undefined, 'constructor', 'toString', '__proto__']) expect(templateFor(slug), String(slug)).toEqual([]);
   });
 
   it('returns a copy, so a caller cannot change the template', () => {
@@ -41,6 +41,6 @@ describe('templateFor', () => {
 describe('isFashionCategory', () => {
   it('is true for fashion and its children only', () => {
     for (const slug of ['fashion', 'womens-fashion', 'mens-fashion']) expect(isFashionCategory(slug), slug).toBe(true);
-    for (const slug of ['jewellery', 'desserts', 'crochet', '', null]) expect(isFashionCategory(slug), String(slug)).toBe(false);
+    for (const slug of ['jewellery', 'desserts', 'crochet', '', null, 'constructor']) expect(isFashionCategory(slug), String(slug)).toBe(false);
   });
 });

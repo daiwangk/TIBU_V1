@@ -1,39 +1,14 @@
 import { useState } from 'react';
 import { Package, Plus } from 'lucide-react';
-import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 import EmptyState from '../../../components/ui/EmptyState';
-import ImagePlaceholder from '../../../components/ui/ImagePlaceholder';
-import { formatPrice } from '../../../lib/format';
 import ProductForm from '../product/ProductForm';
+import ProductRow from '../product/ProductRow';
 import { isStepComplete } from './onboardingModel';
 import StepFooter from './StepFooter';
 
-function ProductRow({ product, onEdit }) {
-  const cover = product.images[0]?.url;
-  return (
-    <li className="flex items-center gap-3 rounded-card border border-border bg-surface p-3">
-      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-card">
-        {cover ? (
-          <img src={cover} alt={product.name} className="h-full w-full object-cover" />
-        ) : (
-          <ImagePlaceholder aspect="1/1" className="h-full" />
-        )}
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <p className="truncate font-body text-sm font-semibold text-ink">{product.name}</p>
-        <p className="font-body text-sm text-body">{formatPrice(product.price)}</p>
-        <div className="flex flex-wrap gap-1">
-          {!cover && <Badge tone="warning">Needs a photo</Badge>}
-          {!product.isActive && <Badge>Hidden</Badge>}
-        </div>
-      </div>
-      <Button type="button" variant="secondary" onClick={onEdit} aria-label={`Edit ${product.name}`}>
-        Edit
-      </Button>
-    </li>
-  );
-}
+/** Oldest first, so a product keeps its place after it is edited (every product's sort_order is 0). */
+const byCreated = (a, b) => String(a.createdAt ?? '').localeCompare(String(b.createdAt ?? '')) || a.id.localeCompare(b.id);
 
 /**
  * Step 5: the shop's products. At least one active product with a photo is needed to continue. Adding
@@ -43,7 +18,7 @@ function ProductRow({ product, onEdit }) {
  */
 export default function ProductsStep({ business, onBack, onSaved }) {
   const [editing, setEditing] = useState(null); // null = the list, 'new' = a blank form, else a product id
-  const [needMore, setNeedMore] = useState(false);
+  const [triedNext, setTriedNext] = useState(false);
 
   if (editing !== null) {
     return (
@@ -56,13 +31,14 @@ export default function ProductsStep({ business, onBack, onSaved }) {
     );
   }
 
+  const complete = isStepComplete(5, business);
+  const products = [...business.products].sort(byCreated);
+
   function handleSubmit(e) {
     e.preventDefault();
-    if (isStepComplete(5, business)) onSaved();
-    else setNeedMore(true);
+    if (complete) onSaved();
+    else setTriedNext(true);
   }
-
-  const products = business.products;
 
   return (
     <div className="flex flex-col gap-4">
@@ -88,7 +64,7 @@ export default function ProductsStep({ business, onBack, onSaved }) {
       )}
 
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-        {needMore && (
+        {triedNext && !complete && (
           <p role="alert" className="font-body text-sm font-semibold text-error">
             Add at least one product that is shown to customers and has a photo.
           </p>

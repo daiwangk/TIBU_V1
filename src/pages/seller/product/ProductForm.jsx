@@ -3,9 +3,9 @@ import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 import PhotoGrid from '../../../components/PhotoGrid';
 import Button from '../../../components/ui/Button';
-import Dialog from '../../../components/ui/Dialog';
 import Select from '../../../components/ui/Select';
 import Switch from '../../../components/ui/Switch';
 import Textarea from '../../../components/ui/Textarea';
@@ -19,12 +19,13 @@ import { groupLeafCategories } from '../onboarding/onboardingModel';
 import { SWITCH_ROW } from '../switchRow';
 import ProductDeliveryField from './ProductDeliveryField';
 import ProductDetailsEditor from './ProductDetailsEditor';
+import ProductFormLoading from './ProductFormLoading';
 import { formToProductInput, PRODUCT_IMAGES_MAX, prefillDetails, productSchema, productToForm } from './productModel';
 
 /**
  * Add or edit one product (shared by onboarding step 5 and the seller dashboard). A new product is
  * saved first, then its photos can be added (they need the product to exist). Save keeps the form open
- * so photos can be added; "Done" goes back.
+ * so photos can be added; "Done" goes back, asking first if there are unsaved changes.
  *
  * @param {{
  *   business: import('../../../services/contract.js').MyBusiness,
@@ -44,11 +45,14 @@ export default function ProductForm({ business, productId, onClose }) {
   const [failure, setFailure] = useState(null);
   const [justSaved, setJustSaved] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const [photosBusy, setPhotosBusy] = useState(false);
 
   const [defaults] = useState(() => {
     const values = productToForm(product, business);
-    if (values.details.length === 0) values.details = prefillDetails([], templateFor(business.categorySlug)) ?? [];
+    if (values.details.length === 0) {
+      values.details = prefillDetails([], templateFor(values.categorySlug || business.categorySlug)) ?? [];
+    }
     return values;
   });
   const {
@@ -56,8 +60,9 @@ export default function ProductForm({ business, productId, onClose }) {
     handleSubmit,
     setValue,
     getValues,
+    reset,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm({ resolver: zodResolver(productSchema), defaultValues: defaults });
   const { fields, append, remove, replace } = useFieldArray({ control, name: 'details' });
   const [categorySlug, availableToday, isActive, deliveryMode, deliveryAvailable, pickupAvailable, deliveryTime] = useWatch({
@@ -65,8 +70,12 @@ export default function ProductForm({ business, productId, onClose }) {
     name: ['categorySlug', 'availableToday', 'isActive', 'deliveryMode', 'deliveryAvailable', 'pickupAvailable', 'deliveryTime'],
   });
   const { groups, singles } = useMemo(() => groupLeafCategories(categories.data ?? []), [categories.data]);
-  const effectiveCategory = categorySlug || business.categorySlug;
   const set = (name, value) => setValue(name, value, { shouldDirty: true, shouldValidate: true });
+
+  function requestClose() {
+    if (isDirty) setConfirmLeave(true);
+    else onClose();
+  }
 
   async function onValid(values) {
     setFailure(null);
@@ -74,6 +83,7 @@ export default function ProductForm({ business, productId, onClose }) {
       const saved = await saveProduct.mutateAsync(formToProductInput(values, currentId));
       setCurrentId(saved.id);
       setJustSaved(true);
+      reset(values);
     } catch (err) {
       // Network / unknown errors already raise the global toast; show the rest here.
       if (!shouldToast(err)) setFailure(err);
@@ -83,6 +93,7 @@ export default function ProductForm({ business, productId, onClose }) {
   async function handleDelete() {
     try {
       await deleteProduct.mutateAsync(currentId);
+      setConfirmDelete(false);
       onClose();
     } catch (err) {
       setConfirmDelete(false);
@@ -90,10 +101,15 @@ export default function ProductForm({ business, productId, onClose }) {
     }
   }
 
+  // The category select reads its value once, when it mounts, so wait until the options exist.
+  if (!categories.isSuccess) {
+    return <ProductFormLoading error={categories.isError ? categories.error : undefined} onRetry={() => categories.refetch()} onClose={onClose} />;
+  }
+
   return (
     <form onSubmit={handleSubmit(onValid)} noValidate className="flex flex-col gap-5">
       <div className="flex items-center gap-2">
-        <Button type="button" variant="ghost" onClick={onClose} disabled={photosBusy}>
+        <Button type="button" variant="ghost" onClick={requestClose} disabled={photosBusy}>
           <ChevronLeft size={18} aria-hidden="true" />
           Products
         </Button>
@@ -101,7 +117,7 @@ export default function ProductForm({ business, productId, onClose }) {
       </div>
 
       {failure && <FormAlert>{userMessage(failure)}</FormAlert>}
-      {justSaved && !failure && (
+      {justSaved && !isDirty && !failure && (
         <FormAlert tone="success">
           Saved.{(product?.images.length ?? 0) === 0 ? ' Now add at least one photo.' : ''}
         </FormAlert>
@@ -121,8 +137,6 @@ export default function ProductForm({ business, productId, onClose }) {
       <Select
         id={`${id}-category`}
         label="Category"
-        hint={categories.isError ? "Couldn't load categories" : undefined}
-        disabled={categories.isLoading}
         {...register('categorySlug', {
           onChange: (e) => {
             const rows = prefillDetails(getValues('details'), templateFor(e.target.value || business.categorySlug));
@@ -165,7 +179,7 @@ export default function ProductForm({ business, productId, onClose }) {
         append={append}
         remove={remove}
         errors={errors.details}
-        fashion={isFashionCategory(effectiveCategory)}
+        fashion={isFashionCategory(categorySlug || business.categorySlug)}
       />
 
       <ProductDeliveryField
@@ -187,7 +201,7 @@ export default function ProductForm({ business, productId, onClose }) {
           {currentId ? 'Save changes' : 'Save product'}
         </Button>
         {currentId && (
-          <Button type="button" variant="secondary" size="lg" className="flex-1" onClick={onClose} disabled={photosBusy || isSubmitting}>
+          <Button type="button" variant="secondary" size="lg" className="flex-1" onClick={requestClose} disabled={photosBusy || isSubmitting}>
             Done
           </Button>
         )}
@@ -199,15 +213,24 @@ export default function ProductForm({ business, productId, onClose }) {
         </Button>
       )}
 
-      <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} title="Delete this product?">
-        <div className="flex flex-col gap-4 px-4 pb-4">
-          <p className="font-body text-sm text-body">This removes the product and its photos. You can&apos;t undo it.</p>
-          <div className="flex gap-3">
-            <Button type="button" variant="secondary" className="flex-1" onClick={() => setConfirmDelete(false)}>Keep it</Button>
-            <Button type="button" variant="danger" className="flex-1" loading={deleteProduct.isPending} onClick={handleDelete}>Delete</Button>
-          </div>
-        </div>
-      </Dialog>
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Delete this product?"
+        text="This removes the product and its photos. You can't undo it."
+        confirmLabel="Delete"
+        loading={deleteProduct.isPending}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
+      <ConfirmDialog
+        open={confirmLeave}
+        title="Discard your changes?"
+        text="You have changes that are not saved."
+        confirmLabel="Discard"
+        cancelLabel="Keep editing"
+        onConfirm={onClose}
+        onCancel={() => setConfirmLeave(false)}
+      />
     </form>
   );
 }

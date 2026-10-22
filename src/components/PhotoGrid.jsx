@@ -9,7 +9,8 @@ import IconButton from './ui/IconButton';
 
 /**
  * A grid of saved photos (each with a Remove button) plus the ones still uploading, and an "Add photos"
- * button until `max` is reached. Uploads run one at a time. `onBusyChange(true)` while any is in flight.
+ * button until `max` is reached. Uploads run one at a time; a failed one waits for Retry or Remove without
+ * holding up the rest. `onBusyChange(true)` while any upload is waiting or in flight.
  *
  * @param {{
  *   images: Array<{ id: string, url: string }>,
@@ -23,6 +24,7 @@ import IconButton from './ui/IconButton';
  */
 export default function PhotoGrid({ images, max, upload, remove, noun = 'photo', disabled = false, onBusyChange }) {
   const [pending, setPending] = useState([]);
+  const [statuses, setStatuses] = useState({}); // pending key -> 'waiting' | 'uploading' | 'error'
   const [removingId, setRemovingId] = useState(null);
   const nextKey = useRef(0);
   const pendingRef = useRef([]);
@@ -33,7 +35,9 @@ export default function PhotoGrid({ images, max, upload, remove, noun = 'photo',
   // Preview URLs are made when files are chosen and revoked when their row goes, or with the grid.
   useEffect(() => () => pendingRef.current.forEach((p) => p.preview && URL.revokeObjectURL(p.preview)), []);
 
-  const busy = pending.length > 0;
+  const busy = pending.some((p) => statuses[p.key] !== 'error');
+  // One upload at a time: the one in flight, else the first waiting (a retried row queues behind it).
+  const activeKey = (pending.find((p) => statuses[p.key] === 'uploading') ?? pending.find((p) => (statuses[p.key] ?? 'waiting') === 'waiting'))?.key;
   useEffect(() => {
     onBusyChange?.(busy);
   }, [busy, onBusyChange]);
@@ -84,9 +88,17 @@ export default function PhotoGrid({ images, max, upload, remove, noun = 'photo',
       )}
       {pending.length > 0 && (
         <ul className="flex flex-col gap-2">
-          {pending.map((p, i) => (
+          {pending.map((p) => (
             <li key={p.key}>
-              <PendingUpload file={p.file} preview={p.preview} upload={upload} active={i === 0} onDone={() => drop(p.key)} onDismiss={() => drop(p.key)} />
+              <PendingUpload
+                file={p.file}
+                preview={p.preview}
+                upload={upload}
+                active={p.key === activeKey}
+                onStatusChange={(status) => setStatuses((s) => ({ ...s, [p.key]: status }))}
+                onDone={() => drop(p.key)}
+                onDismiss={() => drop(p.key)}
+              />
             </li>
           ))}
         </ul>

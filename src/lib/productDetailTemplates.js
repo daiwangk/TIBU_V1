@@ -35,7 +35,9 @@ const PARENT_OF = {
  */
 export function templateFor(categorySlug) {
   if (!categorySlug) return [];
-  const labels = TEMPLATES[categorySlug] ?? TEMPLATES[PARENT_OF[categorySlug]];
+  const own = Object.hasOwn(TEMPLATES, categorySlug) ? TEMPLATES[categorySlug] : null;
+  const parent = Object.hasOwn(PARENT_OF, categorySlug) ? TEMPLATES[PARENT_OF[categorySlug]] : null;
+  const labels = own ?? parent;
   return labels ? [...labels] : [];
 }
 
@@ -46,5 +48,5 @@ export function templateFor(categorySlug) {
  * @returns {boolean}
  */
 export function isFashionCategory(categorySlug) {
-  return categorySlug === 'fashion' || PARENT_OF[categorySlug] === 'fashion';
+  return categorySlug === 'fashion' || (Object.hasOwn(PARENT_OF, categorySlug) && PARENT_OF[categorySlug] === 'fashion');
 }

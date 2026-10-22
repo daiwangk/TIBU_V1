@@ -22,8 +22,10 @@ import ImagePlaceholder from './ui/ImagePlaceholder';
  */
 export default function ImageSlot({ label, hint, imageUrl, alt, shape = 'square', upload, error, onBusyChange }) {
   const [picked, setPicked] = useState(null); // { file, preview } while a photo is on its way
+  const [failed, setFailed] = useState(false);
   const pickedRef = useRef(null);
-  const busy = picked !== null;
+  // A failed upload waits for Retry or Remove without locking the step's buttons.
+  const busy = picked !== null && !failed;
 
   useEffect(() => {
     pickedRef.current = picked;
@@ -35,11 +37,13 @@ export default function ImageSlot({ label, hint, imageUrl, alt, shape = 'square'
 
   function pick(file) {
     if (picked?.preview) URL.revokeObjectURL(picked.preview);
+    setFailed(false);
     setPicked({ file, preview: fileToObjectUrl(file) });
   }
 
   function clear() {
     if (picked?.preview) URL.revokeObjectURL(picked.preview);
+    setFailed(false);
     setPicked(null);
   }
 
@@ -55,7 +59,7 @@ export default function ImageSlot({ label, hint, imageUrl, alt, shape = 'square'
       <p className="font-body text-sm font-semibold text-ink">{label}</p>
       <div className={picked ? 'w-full' : frame}>
         {picked ? (
-          <PendingUpload key={picked.file.name + picked.file.size} file={picked.file} preview={picked.preview} upload={upload} onDone={clear} onDismiss={clear} />
+          <PendingUpload key={picked.file.name + picked.file.size} file={picked.file} preview={picked.preview} upload={upload} onStatusChange={(status) => setFailed(status === 'error')} onDone={clear} onDismiss={clear} />
         ) : imageUrl ? (
           <img src={imageUrl} alt={alt} className={`${aspect} w-full rounded-card border border-border object-cover`} />
         ) : (
