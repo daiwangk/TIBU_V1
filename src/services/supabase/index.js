@@ -42,6 +42,12 @@ import {
   uploadBusinessImage,
   uploadProductImage,
 } from './seller.js';
+import {
+  listApplications,
+  getApplication,
+  decideApplication,
+} from './admin.js';
+
 
 const notImplemented = async () => {
   throw new AppError('config', 'Supabase adapter not implemented yet');
@@ -81,9 +87,8 @@ export {
   uploadProductImage,
   removeProductImage,
 };
-export const listApplications = notImplemented;
-export const getApplication = notImplemented;
-export const decideApplication = notImplemented;
+export { listApplications, getApplication, decideApplication };
+
 export const sendEnquiry = notImplemented;
 export const findMyThread = notImplemented;
 export const listMyThreads = notImplemented;
