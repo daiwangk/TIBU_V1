@@ -44,25 +44,25 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ✓ | ID | Task | Who | Day | Est | Needs |
 |---|---|---|---|---|---|---|
 | ☑ | A3.1 | Auth + profile services, store, guards (no PKCE) | A | Mon | 2.5 | A1.5 |
-| ☐ | B3.1 | Auth pages (+ iPhone email handling) | B | Mon–Tue | 3 | A3.1 |
+| ☑ | B3.1 | Auth pages (+ iPhone email handling) | B | Mon–Tue | 3 | A3.1 |
 | ☑ | A3.2 | Login gate + reveal contact | A | Tue | 2.5 | A3.1 |
 | ☑ | A3.3 | Saved items | A | Tue | 2 | A3.1 |
 | ☑ | A3.4 | Recently viewed + previously connected | A | Wed | 2 | A3.1 |
-| ☐ | B3.2 | Login sheet | B | Wed | 2 | A3.2 |
-| ☐ | B3.3 | WhatsApp + Call live (two real phones) | B | Wed | 1.5 | B3.2 |
+| ☑ | B3.2 | Login sheet | B | Wed | 2 | A3.2 |
+| ☑ | B3.3 | WhatsApp + Call live (two real phones) | B | Wed | 1.5 | B3.2 |
 | ◐ | A3.5 | Profile location default ✓; Resend SMTP waits on domain | A | Thu | 1 | domain |
-| ☐ | B3.4 | Profile + Edit profile (**+ add-on**) | B | Thu | 2 | A3.1 |
-| ☐ | B3.5 | Saved, Recently viewed, Previously connected | B | Fri | 3 | A3.3, A3.4 |
-| ☐ | Exit | Incognito → WhatsApp → sign up → confirm → WhatsApp opens | both | Fri | — | — |
+| ☑ | B3.4 | Profile + Edit profile (**+ add-on**) | B | Thu | 2 | A3.1 |
+| ☑ | B3.5 | Saved, Recently viewed, Previously connected | B | Fri | 3 | A3.3, A3.4 |
+| ☑ | Exit | Incognito → WhatsApp → sign up → confirm → WhatsApp opens | both | Fri | — | — |
 
 ## Week 4 — 19–24 Oct, Dussehra Tue 20 (`WEEK4_DEEP_DIVE.md`)
 | ✓ | ID | Task | Who | Day | Est | Needs |
 |---|---|---|---|---|---|---|
-| ☐ | A4.1 | Seller services **+ R3 add-on** | A | Mon | 3.5 | A3.1 |
+| ☑ | A4.1 | Seller services **+ R3 add-on** — merged as PR #44; no live tibu-dev smoke yet | A | Mon | 3.5 | A3.1 |
 | ☐ | B4.1 | Sell landing, seller gate, hooks | B | Mon | 1.5 | A4.1 |
 | ☐ | B4.2a | Onboarding shell + steps 1–3 (**+ R4 add-on**) | B | Mon–Wed | 2.5 | B4.1 |
-| ☐ | A4.3 | Admin services | A | Tue/Thu | 1.5 | A3.1 |
-| ☑ | A4.2 | Image pipeline (**+ A4.2 path correction**), WhatsApp WebP check | A | Wed | 2 | A4.1 |
+| ☑ | A4.3 | Admin services — merged as PR #46 | A | Tue/Thu | 1.5 | A3.1 |
+| ☑ | A4.2 | Image pipeline (**+ A4.2 path correction**), WhatsApp WebP check — merged as PR #45 | A | Wed | 2 | A4.1 |
 | ☐ | B4.4 | Admin panel | A | Thu | 3 | A4.3 |
 | ☐ | B4.2b | Onboarding steps 4–7 (**+ R4 add-on**) | B | Thu | 2.5 | A4.2 |
 | ☐ | A4.4 | Chat (enquiry) backend | A | Fri | 2 | A3.1 |

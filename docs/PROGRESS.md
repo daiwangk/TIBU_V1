@@ -3,14 +3,15 @@
 Every AI session starts by reading **Now** and ends by adding a **Log** entry. When a tool runs out of quota mid-task, write the entry anyway (or ask the tool to) so the next tool or person can continue.
 
 ## Now
-- Week: 3 (12–16 Oct 2026) · Target: Accounts, contact, retention
+- Week: 4 (19–24 Oct 2026) · Target: Seller onboarding, admin, chat backend
 - Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
-- Last green commit on main: `87167f0` (Merge PR #42, docs only; Actions `check` green on 18 Oct 2026; `npm run check` on main: 38 files / 320 tests, build OK as of `f5b6a2f`, no code changed since)
+- Last green commit on main: `2399edb` (Merge PR #46, A4.3; Actions `check` run 39778150794 green on 22 Oct 2026: guards OK, lint, 41 test files / 374 tests, build OK). The `npm audit` step is advisory and reports 1 high vulnerability in `vite` 8.0.0–8.1.5 (dev-server advisories; `npm audit fix` available, needs an OK before a dependency bump). The A4.3 entry below quotes 63 files / 568 tests from a local run; CI counts 41 / 374 — treat CI as the reference.
 - Database: linked CLI project is `tibu-dev` (ref `lxsnktdqjwgiymlakwem`); `npx supabase migration list` on 18 Oct 2026 shows migrations 0001–0010 applied on the remote, including 0008, 0009 and 0010. R1 SQL checks (5 rows · 18 tables · 0 rows without RLS) passed on 19 Oct 2026 and `docs/kit/rpc-signatures.txt` is current (see Log).
 - Merged this week: A3.1 auth and profile services, auth store, route guards (#21) · B3.1 auth pages (#26, includes the contract commit `023e5d6` — `resendConfirmation`, CONTRACT v1.2.2, D39) · B3.2 login sheet (#27) · B3.3 contact buttons live (#28) · B3.4 profile and edit profile (#29) · B3.5 saved / recently viewed / previously connected (#30) · gitlink removal (#31) · gitlink guard in `npm run check` (#32) · saved-products fix (#33: `products` has `category_id`, not `category_slug`) · edit-profile phone-error fix (#34) · Week 3 close in PROGRESS (#35) · A3.5 profile home area → default search location (#36) · client design references (#37)
 - Design refresh (D40), merged to main on 18 Oct 2026 as merge commits after a real-phone check: D1 theme, fonts, wordmark and shell (#38 → `6735333`) · D2 components (#39 → `7021930`) · D3 group 1 Home, Search, Saved/Recent/Connected (#40 → `406ba7a`). D3 group 2 (Profile, auth, Product, Business) deferred. Screenshots in `docs/design-review/d1/`, `d2/`, `d3/`. Known gaps: card image placeholders are still lavender · no category photos yet (pastel icon circles, `TODO(category-photos)`) · the logo is the placeholder wordmark (`TODO(logo)`).
-- In progress: B4.1 sell landing, seller gate, hooks
-- Next task: B4.1 / B4.2a (seller onboarding wizard)
+- Merged this week (Week 4): A4.1 seller services + R3 (#44) · A4.2 image pipeline (#45) · A4.3 admin services (#46). All three are services only: no UI, no query hooks yet, and A4.1 has had no live `tibu-dev` smoke test.
+- In progress: B4.1 sell landing, seller gate, hooks — no branch or PR on GitHub as of 22 Oct 2026; if the work exists it is unpushed.
+- Next task: B4.1 / B4.2a (seller onboarding wizard); then B4.2b, B4.4 (admin panel) and A4.4 (chat backend), which are all unblocked. M2 demo is Mon 26 Oct.
 - Completed this session: A4.3 admin services (CONTRACT §6, §7; `src/services/supabase/admin.js`, mappers, pure `validateTransition` tests, 63 test files / 568 tests passed)
 - Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
 - Carry-overs: (1) un-hide the "Sell on Tibu" / "Seller dashboard" profile rows in B4.1 (`TODO(B4.1)` in `src/pages/profile/profileForm.js`); (2) the Admin row on /profile points to a 404 until Week 4; (3) `src/pages/search/SearchPage.jsx` was 321 lines vs the 250-line limit — 222 after the D3 split (#40), carry-over closed; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
@@ -21,6 +22,13 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-22 · Week 4 status sync (docs only) · dk · Claude Code (Sonnet 5.5)
+- Done: ticked A4.1, A4.2, A4.3 and the Week 3 rows B3.1–B3.5 and Exit in `docs/TRACKER.md` (all were already merged: #44–#46 and #26–#30); refreshed PROGRESS "Now" (week, last green commit, merged list, in-progress note).
+- Files: `docs/TRACKER.md`, `docs/PROGRESS.md` only. No code changed.
+- How verified: `git fetch`, `gh pr list --state all`, and Actions run 39778150794 (green on `2399edb`) read on 22 Oct 2026. `npm run check` was not re-run locally.
+- Not done / left out (why): B4.1 is not ticked — no branch or PR exists on GitHub. The test-count mismatch (CI 41 files / 374 tests vs 63 / 568 in the A4.3 entry) is noted, not resolved. The `vite` audit warning is not fixed (dependency bump needs an OK). F5, A1.7 and the Week 2 real-phone items were not re-checked, so their ticks are unchanged.
+- Next step: push B4.1, then B4.2a, A4.4 and B4.4.
 
 ### 2026-10-22 · A4.3 — Admin services (no UI) · dk · Antigravity (Claude Sonnet 4.6 Thinking)
 - Done: **Admin adapter** in `src/services/supabase/admin.js`, exported from `src/services/supabase/index.js` (CONTRACT §6, §7, §11):
