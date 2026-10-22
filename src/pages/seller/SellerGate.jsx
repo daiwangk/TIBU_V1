@@ -8,6 +8,8 @@ import { useMyBusiness } from '../../queries/seller';
 function BusinessCheck() {
   const { pathname } = useLocation();
   const { data: business, isLoading, isError, error, refetch } = useMyBusiness();
+  // A failed background refetch keeps the data, so it must not unmount the page a seller is working on.
+  const showError = isError && business === undefined;
 
   if (isLoading) {
     return (
@@ -16,7 +18,7 @@ function BusinessCheck() {
       </div>
     );
   }
-  if (isError) return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (showError) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const redirectTo = sellerGateRedirect(business, pathname);
   if (redirectTo) return <Navigate to={redirectTo} replace />;

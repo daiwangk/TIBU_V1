@@ -87,3 +87,23 @@ export function getBrowserLocation({ timeoutMs = 10_000 } = {}) {
     }
   });
 }
+
+/**
+ * The listed area closest to `point`, or null when none is within `maxMeters`.
+ * @param {{ lat: number, lng: number }} point
+ * @param {ReadonlyArray<{ name: string, lat: number, lng: number }>} [areas]
+ * @param {number} [maxMeters]
+ * @returns {{ name: string, lat: number, lng: number }|null}
+ */
+export function nearestArea(point, areas = MUMBAI_AREAS, maxMeters = Infinity) {
+  let best = null;
+  let bestMeters = Infinity;
+  for (const area of areas) {
+    const meters = haversineMeters(point, area);
+    if (meters < bestMeters) {
+      best = area;
+      bestMeters = meters;
+    }
+  }
+  return best && bestMeters <= maxMeters ? best : null;
+}

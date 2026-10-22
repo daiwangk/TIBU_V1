@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseInstagramShortcode, reelEmbedUrl } from './instagram.js';
+import { normalizeInstagramHandle, parseInstagramShortcode, reelEmbedUrl } from './instagram.js';
 
 describe('Instagram helpers', () => {
   it.each([
@@ -33,5 +33,23 @@ describe('Instagram helpers', () => {
     expect(reelEmbedUrl('a'.repeat(40))).not.toBeNull();
     expect(reelEmbedUrl('a'.repeat(4))).toBeNull();
     expect(reelEmbedUrl('a'.repeat(5))).not.toBeNull();
+  });
+});
+
+describe('normalizeInstagramHandle', () => {
+  it.each([
+    ['tibu.shop', 'tibu.shop'],
+    ['@tibu_shop', 'tibu_shop'],
+    ['  @Tibu  ', 'Tibu'],
+    ['instagram.com/tibu', 'tibu'],
+    ['https://www.instagram.com/tibu/?hl=en', 'tibu'],
+  ])('reads %s', (raw, expected) => {
+    expect(normalizeInstagramHandle(raw)).toBe(expected);
+  });
+
+  it('rejects empty, invalid and non-profile input', () => {
+    for (const raw of ['', '   ', '@', 'two words', 'a'.repeat(31), 'bad/handle', 'https://www.instagram.com/reel/Cookie_123/', 'https://instagram.com/p/abc', null, undefined]) {
+      expect(normalizeInstagramHandle(raw), String(raw)).toBeNull();
+    }
   });
 });
