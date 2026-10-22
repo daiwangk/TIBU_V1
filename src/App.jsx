@@ -39,6 +39,7 @@ const RecentPage = lazy(() => import('./pages/saved/RecentPage'));
 const SavedPage = lazy(() => import('./pages/saved/SavedPage'));
 const SearchPage = lazy(() => import('./pages/search/SearchPage'));
 const SellLandingPage = lazy(() => import('./pages/seller/SellLandingPage'));
+const OnboardingPage = lazy(() => import('./pages/seller/onboarding/OnboardingPage'));
 const SellerGate = lazy(() => import('./pages/seller/SellerGate'));
 const SellerPlaceholder = lazy(() => import('./pages/seller/SellerPlaceholder'));
 const SellerDashboard = lazy(() => import('./SellerDashboard'));
@@ -192,7 +193,7 @@ function AppRoutes() {
         {/* Seller area — gated (seller role; no submitted shop → onboarding). Pages are placeholders until B4.2 / B4.3. */}
         <Route path="/seller" element={<SellerGate />}>
           <Route index element={<SellerPlaceholder title="Seller dashboard" backTo="/profile" />} />
-          <Route path="onboarding" element={<SellerPlaceholder title="Set up your shop" backTo="/profile" />} />
+          <Route path="onboarding" element={<OnboardingPage />} />
           <Route path="products" element={<SellerPlaceholder title="Products" />} />
           <Route path="videos" element={<SellerPlaceholder title="Videos" />} />
           <Route path="business" element={<SellerPlaceholder title="Edit business" />} />

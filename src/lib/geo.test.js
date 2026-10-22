@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AppError } from '../services/errors.js';
-import { filterAreas, getBrowserLocation, haversineMeters, MUMBAI_AREAS, roundCoord } from './geo.js';
+import { filterAreas, getBrowserLocation, haversineMeters, MUMBAI_AREAS, nearestArea, roundCoord } from './geo.js';
 
 describe('geo helpers', () => {
   it('rounds coordinates to 3 decimals (D38)', () => {
@@ -90,5 +90,17 @@ describe('geo helpers', () => {
       expect(result).not.toBe(MUMBAI_AREAS);
       expect(Object.isFrozen(result)).toBe(false);
     });
+  });
+});
+
+describe('nearestArea', () => {
+  it('picks the closest listed area', () => {
+    expect(nearestArea({ lat: 19.06, lng: 72.83 }).name).toBe('Bandra West');
+    expect(nearestArea({ lat: 19.12, lng: 72.9 }).name).toBe('Powai');
+  });
+
+  it('returns null when nothing is within the limit', () => {
+    expect(nearestArea({ lat: 28.61, lng: 77.2 }, MUMBAI_AREAS, 30_000)).toBeNull();
+    expect(nearestArea({ lat: 19.06, lng: 72.83 }, MUMBAI_AREAS, 30_000)?.name).toBe('Bandra West');
   });
 });
