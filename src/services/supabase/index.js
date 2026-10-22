@@ -47,6 +47,14 @@ import {
   getApplication,
   decideApplication,
 } from './admin.js';
+import {
+  findMyThread,
+  getThread,
+  listMyThreads,
+  markThreadRead,
+  sendEnquiry,
+  sendMessage,
+} from './enquiries.js';
 
 
 const notImplemented = async () => {
@@ -88,13 +96,15 @@ export {
   removeProductImage,
 };
 export { listApplications, getApplication, decideApplication };
+export {
+  sendEnquiry,
+  findMyThread,
+  listMyThreads,
+  getThread,
+  sendMessage,
+  markThreadRead,
+};
 
-export const sendEnquiry = notImplemented;
-export const findMyThread = notImplemented;
-export const listMyThreads = notImplemented;
-export const getThread = notImplemented;
-export const sendMessage = notImplemented;
-export const markThreadRead = notImplemented;
 export const listNotifications = notImplemented;
 export const markNotificationsRead = notImplemented;
 export const getUnreadCounts = notImplemented;
