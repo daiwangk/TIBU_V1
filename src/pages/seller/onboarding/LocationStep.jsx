@@ -6,15 +6,12 @@ import { shouldToast, userMessage } from '../../../lib/errors';
 import { useSaveMyBusiness } from '../../../queries/seller';
 import FormAlert from '../../auth/FormAlert';
 import TextField from '../../auth/TextField';
+import { SWITCH_ROW } from '../switchRow';
 import DeliveryTimeField from './DeliveryTimeField';
 import LocationField from './LocationField';
 import { businessToInput } from './onboardingModel';
 import { locationSchema } from './onboardingSchemas';
 import StepFooter from './StepFooter';
-
-// The label fills the 48 px row and a pseudo-element gives the 24 px switch a 44 px hit area.
-const SWITCH_ROW =
-  'flex-1 [&_label]:flex [&_label]:min-h-12 [&_label]:items-center [&_button]:before:absolute [&_button]:before:inset-x-0 [&_button]:before:-inset-y-2.5 [&_button]:before:content-[\'\']';
 
 /**
  * Step 2: where the shop is (current location or an area), address line, city and delivery / pick-up.
