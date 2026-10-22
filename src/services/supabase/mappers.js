@@ -271,3 +271,41 @@ export function mapReview(row, currentUserId = null) {
     isMine: Boolean(currentUserId && row.user_id === currentUserId),
   };
 }
+
+/**
+ * Map the business_contacts embed on an admin query row → ContactInfo.
+ * Allowed only on admin shapes (CONTRACT §1 rule 7, §6).
+ * @param {object|object[]|null|undefined} raw
+ * @returns {{ phone: string|null, whatsapp: string|null }|null}
+ */
+export function mapAdminContactInfo(raw) {
+  const row = Array.isArray(raw) ? raw[0] : raw;
+  if (!row) return null;
+  return { phone: row.phone ?? null, whatsapp: row.whatsapp ?? null };
+}
+
+/**
+ * Map an `admin_list_businesses` RPC row → ApplicationRow.
+ * Note: the RPC return table declares the PK as `id` (not `business_id`); we rename it here.
+ * SQL wins over CONTRACT naming — mapper handles the rename (per AGENTS §3 rule 2).
+ *
+ * @param {object} row
+ * @returns {import('../contract.js').ApplicationRow}
+ */
+export function mapApplicationRow(row) {
+  return {
+    businessId: String(row.id),
+    name: String(row.name ?? ''),
+    slug: String(row.slug ?? ''),
+    status: row.status,
+    categoryName: row.category_name ?? null,
+    ownerName: row.owner_name ?? null,
+    ownerEmail: String(row.owner_email ?? ''),
+    phone: row.phone ?? null,
+    whatsapp: row.whatsapp ?? null,
+    instagramHandle: row.instagram_handle ?? null,
+    locality: row.locality ?? null,
+    submittedAt: row.submitted_at ? String(row.submitted_at) : null,
+    productCount: Number(row.product_count ?? 0),
+  };
+}

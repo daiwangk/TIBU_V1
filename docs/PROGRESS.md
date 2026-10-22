@@ -10,7 +10,8 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Merged this week: A3.1 auth and profile services, auth store, route guards (#21) · B3.1 auth pages (#26, includes the contract commit `023e5d6` — `resendConfirmation`, CONTRACT v1.2.2, D39) · B3.2 login sheet (#27) · B3.3 contact buttons live (#28) · B3.4 profile and edit profile (#29) · B3.5 saved / recently viewed / previously connected (#30) · gitlink removal (#31) · gitlink guard in `npm run check` (#32) · saved-products fix (#33: `products` has `category_id`, not `category_slug`) · edit-profile phone-error fix (#34) · Week 3 close in PROGRESS (#35) · A3.5 profile home area → default search location (#36) · client design references (#37)
 - Design refresh (D40), merged to main on 18 Oct 2026 as merge commits after a real-phone check: D1 theme, fonts, wordmark and shell (#38 → `6735333`) · D2 components (#39 → `7021930`) · D3 group 1 Home, Search, Saved/Recent/Connected (#40 → `406ba7a`). D3 group 2 (Profile, auth, Product, Business) deferred. Screenshots in `docs/design-review/d1/`, `d2/`, `d3/`. Known gaps: card image placeholders are still lavender · no category photos yet (pastel icon circles, `TODO(category-photos)`) · the logo is the placeholder wordmark (`TODO(logo)`).
 - In progress: B4.1 sell landing, seller gate, hooks
-- Next task: B4.1 / B4.2a; A4.3 admin services
+- Next task: B4.1 / B4.2a (seller onboarding wizard)
+- Completed this session: A4.3 admin services (CONTRACT §6, §7; `src/services/supabase/admin.js`, mappers, pure `validateTransition` tests, 63 test files / 568 tests passed)
 - Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
 - Carry-overs: (1) un-hide the "Sell on Tibu" / "Seller dashboard" profile rows in B4.1 (`TODO(B4.1)` in `src/pages/profile/profileForm.js`); (2) the Admin row on /profile points to a 404 until Week 4; (3) `src/pages/search/SearchPage.jsx` was 321 lines vs the 250-line limit — 222 after the D3 split (#40), carry-over closed; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
 - Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
@@ -20,6 +21,20 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-22 · A4.3 — Admin services (no UI) · dk · Antigravity (Claude Sonnet 4.6 Thinking)
+- Done: **Admin adapter** in `src/services/supabase/admin.js`, exported from `src/services/supabase/index.js` (CONTRACT §6, §7, §11):
+  1. `listApplications({ status })` → `rpc('admin_list_businesses', { p_status: status ?? null })` → `ApplicationRow[]`. Note: RPC returns column `id` (not `business_id`); new `mapApplicationRow` in mappers.js renames it (SQL wins per AGENTS §3).
+  2. `getApplication(businessId)` → `ApplicationDetail|null`. Three parallel queries: (a) full `businesses` table select with admin RLS (any status), contacts, images, videos, products (all active/inactive); (b) `admin_list_businesses(null)` for owner email/phone/whatsapp (only source); (c) `admin_actions` with `profiles!admin_id(full_name)` join — works because `profiles` RLS allows `is_admin()` to read any profile. Returns `null` on PGRST116.
+  3. `decideApplication({ businessId, action, reason })` → fetches current status, calls pure `validateTransition(currentStatus, action, reason)` for a fast client-side guard, then `rpc('admin_set_business_status', { p_business, p_status, p_reason })`. action map: approve/republish → `'approved'`, reject → `'rejected'`, unpublish → `'unpublished'`. Both client-side and server-side `reason_required` → `validation`; `invalid_transition` → `conflict` via `mapSupabaseError`.
+  4. Two new mapper functions in `mappers.js`: `mapAdminContactInfo` (phone/whatsapp from contacts embed, admin shapes only per CONTRACT §1.7) and `mapApplicationRow` (RPC row → `ApplicationRow`).
+  5. `mapMyProduct` reused from `seller.js` with `includeInactive: true` so admin sees all products.
+  6. Unit tests in `admin.test.js`: 5 allowed transitions, 6 disallowed ones (`conflict`), 3 missing-reason cases (`validation`), 2 no-reason-needed cases — 16 tests total.
+- Files: created `src/services/supabase/admin.js`, `src/services/supabase/admin.test.js`; modified `src/services/supabase/mappers.js`, `src/services/supabase/index.js`, `docs/PROGRESS.md`.
+- How verified: `npm run check` green — check-guards OK (258 source files, 2 legacy allowlist entries), ESLint 0 errors, Vitest **63 test files / 568 tests passed** (0 failing, +1 file +16 tests vs A4.2), Vite production build OK.
+- Not done / left out (why): No UI (out of scope for A4.3). No live smoke test against `tibu-dev` (no admin session in this environment). Admin queries/hooks (TanStack) belong to the UI task.
+- Next step: B4.1 sell landing + seller hooks, or B4.2 onboarding wizard.
+- Gotchas for next person: `admin_list_businesses` RPC column is `id`, not `business_id` — `mapApplicationRow` handles the rename. Admin can read any profile via the `is_admin()` branch in `profiles_select_own`, so the `profiles!admin_id` join in the history query works. `getApplication` gracefully falls back to a minimal `ApplicationRow` from the business row itself if the RPC list doesn't include the business (race condition safety).
 
 ### 2026-10-21 · A4.2 — Compress → upload → image rows · dk · Antigravity (Gemini Flash)
 - Done: **Image pipeline** implemented in `src/services/supabase/seller.js` and exported from `src/services/supabase/index.js` (CONTRACT §5, §7, §12, §13):
