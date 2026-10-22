@@ -49,19 +49,25 @@ function SellCta() {
   }
   if (isLoading) return <CtaSkeleton />;
   if (isError) return <ErrorState error={error} onRetry={() => refetch()} className="py-4" />;
-  if (!profile) return <CtaSkeleton />;
+  if (!profile) {
+    return <ErrorState message="We couldn't find your profile." onRetry={() => refetch()} className="py-4" />;
+  }
 
   if (profile.role === 'seller') {
     return <Button to="/seller" size="lg" className="w-full">Go to your seller area</Button>;
   }
   if (profile.role === 'admin') {
-    return <Button to="/admin" size="lg" className="w-full">Open the admin panel</Button>;
+    return <p className="font-body text-sm font-semibold text-ink">You&apos;re signed in as an admin, so there&apos;s no seller account to set up.</p>;
   }
 
   function handleStart() {
     becomeSeller.mutate(undefined, {
       onSuccess: () => navigate(ONBOARDING),
-      onError: (err) => toast.error(authErrorMessage(err)),
+      // The session can expire between loading the page and tapping: send them to log in, no toast.
+      onError: (err) => {
+        if (err?.code === 'auth_required') navigate(withNext('/login', '/sell'));
+        else toast.error(authErrorMessage(err));
+      },
     });
   }
 
