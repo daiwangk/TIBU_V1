@@ -12,7 +12,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Merged this week (Week 4): A4.1 seller services + R3 (#44) · A4.2 image pipeline (#45) · A4.3 admin services (#46). All three are services only: no UI, no query hooks yet, and A4.1 has had no live `tibu-dev` smoke test.
 - Merged: B4.1 (#48), B4.2a (#49), B4.2b-1 (#50). In progress: B4.2b-2 onboarding steps 6–7 + status screens — branch `feat/b4-2b2-onboarding-submit`; see its log entry. The whole B4.2 wizard still needs its hand-verify on `tibu-dev`.
 - Next task: hand-verify the B4.2 wizard on `tibu-dev`; then B4.3 (seller dashboard), B4.4 (admin panel) and A4.4 (chat backend), which are unblocked. M2 demo is Mon 26 Oct.
-- Completed this session: A4.3 admin services (CONTRACT §6, §7; `src/services/supabase/admin.js`, mappers, pure `validateTransition` tests, 63 test files / 568 tests passed)
+- Completed this session: A4.5 repeatable RLS probe script (`scripts/rls-matrix.mjs`, verified live on `tibu-dev` with 23/23 PASS)
 - Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
 - Carry-overs: (1) DONE in B4.1: the "Sell on Tibu" / "Seller dashboard" profile rows are live; (2) the Admin row on /profile points to a 404 until Week 4; (3) `src/pages/search/SearchPage.jsx` was 321 lines vs the 250-line limit — 222 after the D3 split (#40), carry-over closed; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
 - Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
@@ -22,6 +22,27 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-23 · A4.5 — Repeatable RLS probe script · dk · Antigravity (Claude Sonnet 4.6 Thinking + Gemini 3.8 Flash)
+- Done: **`scripts/rls-matrix.mjs`** — Node 22 ESM script, not imported by `src/`. Run: `node --env-file=.env.seed scripts/rls-matrix.mjs`. Uses only `SUPABASE_ANON_KEY` + real user sign-ins via supabase-js; never the service-role key. Refuses to run unless `SUPABASE_URL` hostname === `SEED_ALLOWED_REF.supabase.co`. Test password from `TEST_PASSWORD` env var; `ADMIN_EMAIL` from env.
+- Actors: guest (anon), `customer1@tibu.test`, `seller1@tibu.test` (A, owns `mithai-and-more`), `seller2@tibu.test` (B, owns `ammas-kitchen`), and admin (`ADMIN_EMAIL` = `admin@tibu.test`).
+- Automated checks (23 checks across 15 rows + controls):
+  1. guest / customer / seller B cannot read `business_contacts` → positive control: seller A reads own contacts
+  2. guest / customer / seller cannot read `admin_actions` → positive control: admin reads (non-error response)
+  3. guest cannot read `contact_events` → positive control: customer reads own contact_events
+  4. guest cannot see non-approved businesses → positive control: seller A reads own biz by id
+  5. customer cannot see pending/draft/rejected businesses
+  6. seller B cannot read seller A's enquiries → positive control: seller A reads own enquiries
+  7. seller B cannot upload to seller A's `business-media/<bizId>/` path (blocked by RLS) → positive control: seller A uploads to own path
+  8. customer cannot update `profiles.role` to admin (blocked by trigger `role_change_not_allowed`; role unchanged)
+  9. customer cannot call `admin_set_business_status` (blocked by `forbidden`) → positive control: admin reaches RPC (gets `not_found`, not forbidden)
+  10. seller A cannot self-approve via `admin_set_business_status` (blocked by `forbidden`)
+  11. anon `reveal_contact` → `login_required` (28000) → positive control: customer1 calls it and receives contacts
+- 5 MANUAL rows noted in the output (draft-business isolation, role-change trigger, admin storage write block, direct `contact_events` insert block, self-review block) — confirmed by `rls_smoke_test.sql`.
+- Output: aligned table (Actor · Action · Expected · Actual · Result) + MANUAL section. Exit code 1 on any FAIL.
+- Files: created `scripts/rls-matrix.mjs`; updated `.env.seed.example` & `.env.seed`; modified `docs/PROGRESS.md`.
+- How verified: Run live against `tibu-dev` (`https://lxsnktdqjwgiymlakwem.supabase.co`): **23/23 PASS, 0 FAIL**. `npm run check` green — check-guards OK, ESLint 0 errors, Vitest 46 files / 433 tests, build OK.
+- Next step: hand-verify B4.2 wizard on `tibu-dev`; then B4.3 (seller dashboard), B4.4 (admin panel), A4.4 (chat backend).
 
 ### 2026-10-23 · B4.2b-2 — Onboarding steps 6–7, submit, status screens; legacy SellerRegister removed · dk · Claude Code (Opus 5.5)
 - Done: **Step 6 Videos** (`VideosStep`, optional): add a public Instagram reel link + caption (≤ 200; `videoSchema` validates with `parseInstagramShortcode`), saved at once and shown with `ReelEmbed`; duplicate reels refused client-side; remove with a confirm; Next warns if a new reel link was typed but not added. **Step 7 Review & submit** (`ReviewStep`): `useSubmitChecklist` — "Everything is ready" or "Still to do" with each item linking to its step ("Go to step N"); Submit disabled until ready; `submitForReview`; if the RPC still reports `incomplete_application`, those keys (`AppError.cause.missing`) are listed via `missingFromError`. **Status screen** (`StatusScreen`, shown instead of the wizard once the shop is not a draft): pending "Under review" (Edit details, Go to seller home), rejected "Changes needed" with Tibu's reason prominently (`RejectionReason`) and "Fix and resubmit", approved "Your shop is live" (+ link to `/b/<slug>`), unpublished with the reason. `?edit=1` opens the wizard for a submitted shop (the step-pinning keeps other params); step 7 in edit mode for pending / live shops just confirms the changes are saved. A resume now skips the optional videos step (lands on 7).
