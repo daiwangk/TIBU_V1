@@ -7,7 +7,8 @@ import { useMyBusiness } from '../../queries/seller';
  * Frame for every seller screen after onboarding: a header with a way back, and the shop's data with
  * loading and error states handled once. `children` is a function that receives the loaded business
  * (SellerGate has already sent drafts to onboarding, so it is never a draft here). A failed background
- * refetch keeps showing the data.
+ * refetch keeps showing the data. The function runs during render: keep it to plain JSX and put
+ * anything that uses hooks in its own component.
  *
  * @param {{
  *   title: string,

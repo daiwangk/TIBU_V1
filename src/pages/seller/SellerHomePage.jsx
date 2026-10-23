@@ -74,7 +74,8 @@ export default function SellerHomePage() {
         <>
           <h2 className="font-heading text-2xl font-bold text-ink">{business.name}</h2>
           <SellerStatusBanner business={business} />
-          <AvailableTodayCard business={business} />
+          {/* Home only lists approved shops, so the switch means nothing for any other status. */}
+          {business.status === 'approved' && <AvailableTodayCard business={business} />}
           <SellerStats />
           <QuickLinks business={business} />
         </>

@@ -24,6 +24,8 @@ export default function SellerProductRow({ product, business }) {
   // Show the new value straight away while the save and refresh are in flight.
   const availableToday = setAvailable.isPending ? setAvailable.variables.value : product.availableToday;
   const isActive = saveProduct.isPending ? saveProduct.variables.isActive : product.isActive;
+  // Both writes touch the same product row (Active saves every field), so never run them at once.
+  const busy = setAvailable.isPending || saveProduct.isPending;
 
   return (
     <li className="flex flex-col rounded-card border border-border bg-surface">
@@ -46,7 +48,7 @@ export default function SellerProductRow({ product, business }) {
           className={SWITCH_ROW}
           label="Available today"
           checked={availableToday}
-          disabled={setAvailable.isPending}
+          disabled={busy}
           onChange={(value) => setAvailable.mutate({ kind: 'product', id: product.id, value }, { onError })}
         />
         <Switch
@@ -54,7 +56,7 @@ export default function SellerProductRow({ product, business }) {
           className={SWITCH_ROW}
           label="Shown to customers"
           checked={isActive}
-          disabled={saveProduct.isPending}
+          disabled={busy}
           onChange={(value) => saveProduct.mutate(productWithActive(product, business, value), { onError })}
         />
       </div>

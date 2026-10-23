@@ -10,7 +10,7 @@ export default function SellerProductPage() {
   const navigate = useNavigate();
 
   return (
-    <SellerPage title={id ? 'Edit product' : 'Add product'} backTo="/seller/products">
+    <SellerPage title="Products" backTo="/seller/products">
       {(business) =>
         id && !business.products.some((p) => p.id === id) ? (
           <EmptyState
