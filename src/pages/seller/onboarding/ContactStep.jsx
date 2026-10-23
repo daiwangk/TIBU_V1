@@ -14,9 +14,9 @@ import StepFooter from './StepFooter';
  * Step 3: phone, WhatsApp ("same as phone" by default) and the Instagram handle Tibu uses to verify the
  * business. The numbers are only ever shown to logged-in customers, through revealContact().
  *
- * @param {{ business: import('../../../services/contract.js').MyBusiness|null, onBack?: () => void, onSaved: () => void }} props
+ * @param {{ business: import('../../../services/contract.js').MyBusiness|null, onBack?: () => void, onSaved: () => void, submitLabel?: string }} props
  */
-export default function ContactStep({ business, onBack, onSaved }) {
+export default function ContactStep({ business, onBack, onSaved, submitLabel = 'Next' }) {
   const id = useId();
   const saveBusiness = useSaveMyBusiness();
   const saveContacts = useSaveMyContacts();
@@ -109,7 +109,7 @@ export default function ContactStep({ business, onBack, onSaved }) {
         )}
       </div>
 
-      <StepFooter onBack={onBack} loading={isSubmitting} />
+      <StepFooter onBack={onBack} loading={isSubmitting} nextLabel={submitLabel} />
     </form>
   );
 }

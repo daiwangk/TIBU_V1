@@ -17,9 +17,9 @@ import StepFooter from './StepFooter';
  * Step 2: where the shop is (current location or an area), address line, city and delivery / pick-up.
  * Next saves the lot onto the draft business.
  *
- * @param {{ business: import('../../../services/contract.js').MyBusiness|null, onBack?: () => void, onSaved: () => void }} props
+ * @param {{ business: import('../../../services/contract.js').MyBusiness|null, onBack?: () => void, onSaved: () => void, submitLabel?: string }} props
  */
-export default function LocationStep({ business, onBack, onSaved }) {
+export default function LocationStep({ business, onBack, onSaved, submitLabel = 'Next' }) {
   const id = useId();
   const saveBusiness = useSaveMyBusiness();
   const [failure, setFailure] = useState(null);
@@ -120,7 +120,7 @@ export default function LocationStep({ business, onBack, onSaved }) {
         />
       )}
 
-      <StepFooter onBack={onBack} loading={isSubmitting} />
+      <StepFooter onBack={onBack} loading={isSubmitting} nextLabel={submitLabel} />
     </form>
   );
 }

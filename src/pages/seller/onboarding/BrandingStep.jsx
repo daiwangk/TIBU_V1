@@ -10,9 +10,9 @@ const GALLERY_MAX = 6;
  * Step 4: logo (required), banner (optional) and up to 6 gallery photos. Each photo is compressed and
  * saved as soon as it is chosen, so Next only checks that a logo is there.
  *
- * @param {{ business: import('../../../services/contract.js').MyBusiness, onBack?: () => void, onSaved: () => void }} props
+ * @param {{ business: import('../../../services/contract.js').MyBusiness, onBack?: () => void, onSaved: () => void, showFooter?: boolean }} props
  */
-export default function BrandingStep({ business, onBack, onSaved }) {
+export default function BrandingStep({ business, onBack, onSaved, showFooter = true }) {
   const upload = useUploadBusinessImage();
   const removeImage = useRemoveBusinessImage();
   const [logoBusy, setLogoBusy] = useState(false);
@@ -64,7 +64,7 @@ export default function BrandingStep({ business, onBack, onSaved }) {
         />
       </div>
 
-      <StepFooter onBack={onBack} loading={busy} />
+      {showFooter && <StepFooter onBack={onBack} loading={busy} />}
     </form>
   );
 }
