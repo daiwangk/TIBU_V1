@@ -60,12 +60,12 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 |---|---|---|---|---|---|---|
 | ☑ | A4.1 | Seller services **+ R3 add-on** — merged as PR #44; no live tibu-dev smoke yet | A | Mon | 3.5 | A3.1 |
 | ☑ | B4.1 | Sell landing, seller gate, hooks — merged as PR #48; logged-in hand-verify still to do | B | Mon | 1.5 | A4.1 |
-| ◐ | B4.2a | Onboarding shell + steps 1–3 (**+ R4 add-on**) — merged as PR #49; hand-verify on tibu-dev still to do | B | Mon–Wed | 2.5 | B4.1 |
+| ☑ | B4.2a | Onboarding shell + steps 1–3 (**+ R4 add-on**) — merged as PR #49; hand-verified on tibu-dev 23 Oct | B | Mon–Wed | 2.5 | B4.1 |
 | ☑ | A4.3 | Admin services — merged as PR #46 | A | Tue/Thu | 1.5 | A3.1 |
 | ☑ | A4.2 | Image pipeline (**+ A4.2 path correction**), WhatsApp WebP check — merged as PR #45 | A | Wed | 2 | A4.1 |
 | ☐ | B4.4 | Admin panel | A | Thu | 3 | A4.3 |
-| ◐ | B4.2b-1 | Onboarding steps 4–5: branding uploads, products + shared ProductForm (**+ R4 product parts**) — merged as PR #50; hand-verify on tibu-dev still to do | B | Thu | 1.5 | A4.2 |
-| ◐ | B4.2b-2 | Onboarding steps 6–7: videos, review & submit, pending / rejected status screens; deletes `SellerRegister.jsx` — PR open; hand-verify on tibu-dev still to do | B | Thu | 1 | B4.2b-1 |
+| ☑ | B4.2b-1 | Onboarding steps 4–5: branding uploads, products + shared ProductForm (**+ R4 product parts**) — merged as PR #50; hand-verified on tibu-dev 23 Oct | B | Thu | 1.5 | A4.2 |
+| ☑ | B4.2b-2 | Onboarding steps 6–7: videos, review & submit, pending / rejected status screens; deletes `SellerRegister.jsx` — merged as PR #51; hand-verified on tibu-dev 23 Oct | B | Thu | 1 | B4.2b-1 |
 | ☐ | A4.4 | Chat (enquiry) backend | A | Fri | 2 | A3.1 |
 | ☐ | B4.3 | Seller dashboard, products, videos, business edit | B | Fri–Sat | 4 | B4.2b-2 |
 | ☐ | A4.5 | RLS role matrix (4 accounts, curl) → PROGRESS | A | Sat | 1.5 | A4.1–A4.4 |
