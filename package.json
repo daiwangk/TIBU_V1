@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
+    "probes": "bash scripts/prod-probes.sh",
     "check": "node scripts/check-guards.mjs && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
