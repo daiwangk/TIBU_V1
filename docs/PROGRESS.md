@@ -11,8 +11,8 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Design refresh (D40), merged to main on 18 Oct 2026 as merge commits after a real-phone check: D1 theme, fonts, wordmark and shell (#38 → `6735333`) · D2 components (#39 → `7021930`) · D3 group 1 Home, Search, Saved/Recent/Connected (#40 → `406ba7a`). D3 group 2 (Profile, auth, Product, Business) deferred. Screenshots in `docs/design-review/d1/`, `d2/`, `d3/`. Known gaps: card image placeholders are still lavender · no category photos yet (pastel icon circles, `TODO(category-photos)`) · the logo is the placeholder wordmark (`TODO(logo)`).
 - Merged this week (Week 4): A4.1 seller services + R3 (#44) · A4.2 image pipeline (#45) · A4.3 admin services (#46). All three are services only: no UI, no query hooks yet, and A4.1 has had no live `tibu-dev` smoke test.
 - Merged: B4.1 (#48), B4.2a (#49), B4.2b-1 (#50), B4.2b-2 (#51), A4.4 (#52), A4.5 (#53), B4.3 (#55).
-- Next task: B4.4 (admin panel) and A5.1 notifications service merge. M2 demo is Mon 26 Oct.
-- Completed this session: A5.1 notifications adapter + hooks (no UI)
+- Next task: B4.4 (admin panel) and A5.2 production setup / merge. M2 demo is Mon 26 Oct.
+- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS).
 - Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
 - Carry-overs: (1) DONE in B4.1: the "Sell on Tibu" / "Seller dashboard" profile rows are live; (2) the Admin row on /profile points to a 404 until Week 4; (3) `src/pages/search/SearchPage.jsx` was 321 lines vs the 250-line limit — 222 after the D3 split (#40), carry-over closed; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
 - Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
@@ -22,6 +22,20 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-25 · A5.2-probes — Production RLS probes script · dk · Antigravity (Gemini 3.8 Flash)
+- Done: `scripts/prod-probes.sh` — standalone Bash + curl production verification script (no external npm dependencies or jq required).
+  - Safety gates: refuses to run if `SUPABASE_URL` or `SUPABASE_ANON_KEY` is missing; rejects `sb_secret_` prefix or decoded JWT role `service_role`.
+  - GET-only RLS probes: verifies `business_contacts`, `businesses?status=neq.approved`, `admin_actions`, and `contact_events` return `[]` or permission error with zero data leakage; verifies `categories?limit=3` returns 3 rows.
+  - Category slugs check: asserts all 12 canonical category slugs from CONTRACT §2 exist in the database.
+  - Site & Open Graph probes: when `SITE_URL` is set, verifies `/p/$PRODUCT_ID` returns `og:title` and `og:image` under WhatsApp user-agent (skips with notice if unset); verifies hard-load of `/p/anything` returns HTTP 200 SPA fallback shell.
+  - Exits with code 1 if any probe fails.
+- Files: created `scripts/prod-probes.sh`; modified `package.json`, `docs/PROGRESS.md`.
+- How verified:
+  1. Unit safety checks: missing env vars exits 1 with usage; `service_role` JWT exits 1 with safety error; `sb_secret_*` prefix exits 1 with safety error.
+  2. Live probe execution: ran live against `https://lxsnktdqjwgiymlakwem.supabase.co` with `SITE_URL=https://tibu-app.pages.dev` and product `5d3996cc-bfb5-4251-a6a4-8929da0fdfe4`: 4/4 RLS probes PASS, public categories PASS (3 rows), CONTRACT §2 all 12 slugs PASS, WhatsApp OG tags PASS (`og:title`, `og:image`), and SPA fallback PASS (HTTP 200).
+  3. `npm run check` green — check-guards OK (302 source files, 1 legacy allowlist entry), ESLint clean, Vitest 72 files / 694 tests, production build OK.
+- Added `"probes": "bash scripts/prod-probes.sh"` to `package.json` for convenience without modifying `npm run check`.
 
 ### 2026-10-25 · A5.1 — Notifications service and hooks · dk · Antigravity (Gemini 3.8 Flash)
 - Done: Supabase adapter for `listNotifications`, `markNotificationsRead` (`read_at` only; `'all'` = unread rows), and `getUnreadCounts` (`rpc('unread_counts')`). `mapNotification` in mappers (bigint id → string; `payload` dropped). Query hooks `useNotifications`, `useMarkNotificationsRead`, `useUnreadCounts` (`qk.unread`, 60s poll + focus, authenticated only). Mock still throws `unavailable_in_mock`.
