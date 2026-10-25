@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formToProductInput, prefillDetails, productSchema, productToForm } from './productModel.js';
+import { byCreated, formToProductInput, prefillDetails, productSchema, productToForm, productWithActive } from './productModel.js';
 
 const business = { categorySlug: 'desserts', deliveryAvailable: true, pickupAvailable: false };
 
@@ -143,5 +143,48 @@ describe('prefillDetails', () => {
 
   it('returns no rows for a category without a template', () => {
     expect(prefillDetails([], [])).toEqual([]);
+  });
+});
+
+describe('productWithActive', () => {
+  const product = {
+    id: 'p1',
+    name: 'Pillar candle',
+    price: 450,
+    description: 'Soy wax',
+    categorySlug: 'candles',
+    details: [{ label: 'Burn time', value: '20 h' }],
+    availableToday: true,
+    isActive: true,
+    deliveryOverride: { deliveryAvailable: false, pickupAvailable: true, deliveryTime: null },
+  };
+
+  it('changes only the active flag and keeps everything else saved', () => {
+    const off = productWithActive(product, business, false);
+    expect(off).toMatchObject({
+      id: 'p1',
+      name: 'Pillar candle',
+      price: 450,
+      description: 'Soy wax',
+      categorySlug: 'candles',
+      details: [{ label: 'Burn time', value: '20 h' }],
+      availableToday: true,
+      isActive: false,
+      deliveryOverride: { deliveryAvailable: false, pickupAvailable: true, deliveryTime: null },
+    });
+    expect(productWithActive({ ...product, isActive: false }, business, true).isActive).toBe(true);
+  });
+
+  it('keeps "same as my shop" for category and delivery', () => {
+    const input = productWithActive({ ...product, categorySlug: 'desserts', deliveryOverride: null }, business, false);
+    expect(input.categorySlug).toBeNull();
+    expect(input.deliveryOverride).toBeNull();
+  });
+});
+
+describe('byCreated', () => {
+  it('orders oldest first, with the id as a tiebreak, and tolerates a missing date', () => {
+    const list = [{ id: 'b', createdAt: '2026-10-02' }, { id: 'a', createdAt: '2026-10-02' }, { id: 'c', createdAt: '2026-10-01' }, { id: 'd' }];
+    expect(list.sort(byCreated).map((p) => p.id)).toEqual(['d', 'c', 'a', 'b']);
   });
 });

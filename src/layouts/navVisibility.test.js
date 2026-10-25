@@ -9,7 +9,7 @@ describe('isBottomNavHidden', () => {
   });
 
   it('keeps hiding it on detail, seller and dev screens', () => {
-    for (const p of ['/p/abc', '/b/sweet-crumbs', '/seller', '/seller/dashboard', '/dev/ui']) {
+    for (const p of ['/p/abc', '/b/sweet-crumbs', '/seller', '/seller/products', '/dev/ui']) {
       expect(isBottomNavHidden(p), p).toBe(true);
     }
   });

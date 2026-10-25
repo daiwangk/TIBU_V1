@@ -21,9 +21,9 @@ const DESCRIPTION_MAX = 2000;
  * Step 1: name, category, description and (optional) year started. Next creates the draft business on
  * the first save and updates it afterwards.
  *
- * @param {{ business: import('../../../services/contract.js').MyBusiness|null, onBack?: () => void, onSaved: () => void }} props
+ * @param {{ business: import('../../../services/contract.js').MyBusiness|null, onBack?: () => void, onSaved: () => void, submitLabel?: string }} props
  */
-export default function BasicsStep({ business, onBack, onSaved }) {
+export default function BasicsStep({ business, onBack, onSaved, submitLabel = 'Next' }) {
   const id = useId();
   const categories = useCategories();
   const saveBusiness = useSaveMyBusiness();
@@ -121,7 +121,7 @@ export default function BasicsStep({ business, onBack, onSaved }) {
         {...register('establishedYear')}
       />
 
-      <StepFooter onBack={onBack} loading={isSubmitting} />
+      <StepFooter onBack={onBack} loading={isSubmitting} nextLabel={submitLabel} />
     </form>
   );
 }

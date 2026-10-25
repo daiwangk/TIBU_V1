@@ -88,6 +88,27 @@ export function formToProductInput(values, id = null) {
 }
 
 /**
+ * `saveProduct` input for the same product with only `isActive` changed (the Active switch on the
+ * products list), keeping every other saved value.
+ *
+ * @param {import('../../../services/contract.js').MyProduct} product
+ * @param {import('../../../services/contract.js').MyBusiness} business
+ * @param {boolean} isActive
+ * @returns {import('../../../services/contract.js').ProductInput}
+ */
+export function productWithActive(product, business, isActive) {
+  return formToProductInput({ ...productToForm(product, business), isActive }, product.id);
+}
+
+/**
+ * Oldest first, so a product keeps its place after it is edited (every product's sort_order is 0).
+ *
+ * @param {{ id: string, createdAt?: string }} a
+ * @param {{ id: string, createdAt?: string }} b
+ */
+export const byCreated = (a, b) => String(a.createdAt ?? '').localeCompare(String(b.createdAt ?? '')) || a.id.localeCompare(b.id);
+
+/**
  * Rows to prefill from a category template when the details list is empty or untouched (no values yet).
  *
  * @param {Array<{ label: string, value: string }>} rows current rows

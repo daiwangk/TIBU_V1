@@ -67,7 +67,7 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ☑ | B4.2b-1 | Onboarding steps 4–5: branding uploads, products + shared ProductForm (**+ R4 product parts**) — merged as PR #50; hand-verified on tibu-dev 23 Oct | B | Thu | 1.5 | A4.2 |
 | ☑ | B4.2b-2 | Onboarding steps 6–7: videos, review & submit, pending / rejected status screens; deletes `SellerRegister.jsx` — merged as PR #51; hand-verified on tibu-dev 23 Oct | B | Thu | 1 | B4.2b-1 |
 | ☐ | A4.4 | Chat (enquiry) backend | A | Fri | 2 | A3.1 |
-| ☐ | B4.3 | Seller dashboard, products, videos, business edit | B | Fri–Sat | 4 | B4.2b-2 |
+| ◐ | B4.3 | Seller dashboard, products, videos, business edit — code complete, hand-verify on tibu-dev still to do (also the nightly Available-today reset cron). Photo / video reorder not built (no service) | B | Fri–Sat | 4 | B4.2b-2 |
 | ☐ | A4.5 | RLS role matrix (4 accounts, curl) → PROGRESS | A | Sat | 1.5 | A4.1–A4.4 |
 | ☐ | **M2** | **Demo + invoice 30% ₹3,600** (`11` §6.3) | both | Mon 26 | 1 | — |
 

@@ -3,12 +3,10 @@ import { Package, Plus } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import EmptyState from '../../../components/ui/EmptyState';
 import ProductForm from '../product/ProductForm';
+import { byCreated } from '../product/productModel';
 import ProductRow from '../product/ProductRow';
 import { isStepComplete } from './onboardingModel';
 import StepFooter from './StepFooter';
-
-/** Oldest first, so a product keeps its place after it is edited (every product's sort_order is 0). */
-const byCreated = (a, b) => String(a.createdAt ?? '').localeCompare(String(b.createdAt ?? '')) || a.id.localeCompare(b.id);
 
 /**
  * Step 5: the shop's products. At least one active product with a photo is needed to continue. Adding

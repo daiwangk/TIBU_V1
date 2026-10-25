@@ -42,8 +42,11 @@ const SellLandingPage = lazy(() => import('./pages/seller/SellLandingPage'));
 const OnboardingPage = lazy(() => import('./pages/seller/onboarding/OnboardingPage'));
 const SellerGate = lazy(() => import('./pages/seller/SellerGate'));
 const SellerPlaceholder = lazy(() => import('./pages/seller/SellerPlaceholder'));
-const SellerDashboard = lazy(() => import('./SellerDashboard'));
-const SellerProductDetail = lazy(() => import('./SellerProductDetail'));
+const SellerBusinessPage = lazy(() => import('./pages/seller/SellerBusinessPage'));
+const SellerHomePage = lazy(() => import('./pages/seller/SellerHomePage'));
+const SellerProductPage = lazy(() => import('./pages/seller/SellerProductPage'));
+const SellerProductsPage = lazy(() => import('./pages/seller/SellerProductsPage'));
+const SellerVideosPage = lazy(() => import('./pages/seller/SellerVideosPage'));
 const TermsPage = lazy(() => import('./pages/static/TermsPage'));
 
 
@@ -107,12 +110,6 @@ function LegacyPage({ Component, extraProps = {} }) {
       gifts: '/category/gifts',
       fashion: '/category/fashion',
       handmade: '/category/handmade',
-      sellerdashboard: '/seller/dashboard',
-      sellerproduct: '/seller/products/view',
-      selleraddproduct: '/seller/products/new',
-      selleraddvideo: '/seller/videos/new',
-      sellerposts: '/seller/posts',
-      sellerreviews: '/seller/reviews',
       privacySecurity: '/privacy',
       helpFeedback: '/help',
       termsConditions: '/terms',
@@ -188,24 +185,20 @@ function AppRoutes() {
         {/* Sell landing (public) */}
         <Route path="/sell" element={<SellLandingPage />} />
 
-        {/* Seller area — gated (seller role; no submitted shop → onboarding). The other seller pages are placeholders until B4.3. */}
+        {/* Seller area — gated (seller role; no submitted shop → onboarding). BottomNav hidden via navVisibility.js. */}
         <Route path="/seller" element={<SellerGate />}>
-          <Route index element={<SellerPlaceholder title="Seller dashboard" backTo="/profile" />} />
+          <Route index element={<SellerHomePage />} />
           <Route path="onboarding" element={<OnboardingPage />} />
-          <Route path="products" element={<SellerPlaceholder title="Products" />} />
-          <Route path="videos" element={<SellerPlaceholder title="Videos" />} />
-          <Route path="business" element={<SellerPlaceholder title="Edit business" />} />
+          <Route path="products" element={<SellerProductsPage />} />
+          <Route path="products/new" element={<SellerProductPage />} />
+          <Route path="products/:id" element={<SellerProductPage />} />
+          <Route path="videos" element={<SellerVideosPage />} />
+          <Route path="business" element={<SellerBusinessPage />} />
+          {/* Placeholders until B5.1 (messages) and B5.2 (reviews); /seller/enquiries/<id> is a CONTRACT §14 notification link. */}
+          <Route path="enquiries" element={<SellerPlaceholder title="Messages" />} />
+          <Route path="enquiries/:threadId" element={<SellerPlaceholder title="Messages" backTo="/seller/enquiries" />} />
+          <Route path="reviews" element={<SellerPlaceholder title="Reviews" />} />
         </Route>
-
-        {/* Legacy seller routes — BottomNav hidden via /seller/ prefix. Removed when B4.3 replaces them. */}
-        <Route path="/seller/dashboard" element={L(SellerDashboard)} />
-        <Route path="/seller/products/view" element={L(SellerProductDetail)} />
-        <Route path="/seller/products/:id" element={L(SellerProductDetail)} />
-        {/* Seller sub-routes added so setPage calls from SellerDashboard don't blank the screen */}
-        <Route path="/seller/products/new" element={L(SellerDashboard)} />
-        <Route path="/seller/videos/new" element={L(SellerDashboard)} />
-        <Route path="/seller/posts" element={L(SellerDashboard)} />
-        <Route path="/seller/reviews" element={L(SellerDashboard)} />
 
         {/* DEV only — UI component gallery */}
         {import.meta.env.DEV && UiGalleryPage && (
