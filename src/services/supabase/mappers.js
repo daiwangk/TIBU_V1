@@ -350,3 +350,22 @@ export function mapEnquiryMessage(row, currentUserId) {
   };
 }
 
+/**
+ * Map a `notifications` table row → Notification (CONTRACT §6).
+ * Bigint ids become strings. `payload` is never returned.
+ *
+ * @param {object} row
+ * @returns {import('../contract.js').Notification}
+ */
+export function mapNotification(row) {
+  return {
+    id: String(row.id),
+    type: row.type,
+    title: String(row.title ?? ''),
+    body: String(row.body ?? ''),
+    link: row.link == null || row.link === '' ? null : String(row.link),
+    createdAt: String(row.created_at ?? ''),
+    readAt: row.read_at ? String(row.read_at) : null,
+  };
+}
+
