@@ -6,6 +6,7 @@ import {
   mapProductDetail,
   mapProductSummaryFromSearch,
   mapProductSummaryNested,
+  mapNotification,
   mapReview,
   paiseToRupees,
   rupeesToPaise,
@@ -683,6 +684,50 @@ describe('supabase mappers', () => {
         'updatedAt',
       ]);
       expect(review.isMine).toBe(true);
+    });
+
+    it('Notification matches CONTRACT.md §6 (bigint id → string)', () => {
+      const notification = mapNotification({
+        id: 42,
+        type: 'enquiry_reply',
+        title: 'Reply from Sweet Crumbs',
+        body: null,
+        link: '/enquiries/abc',
+        payload: { enquiry_id: 'abc' },
+        created_at: '2026-10-24T10:00:00Z',
+        read_at: null,
+      });
+      expect(notification).toEqual({
+        id: '42',
+        type: 'enquiry_reply',
+        title: 'Reply from Sweet Crumbs',
+        body: '',
+        link: '/enquiries/abc',
+        createdAt: '2026-10-24T10:00:00Z',
+        readAt: null,
+      });
+      expect(Object.keys(notification).sort()).toEqual([
+        'body',
+        'createdAt',
+        'id',
+        'link',
+        'readAt',
+        'title',
+        'type',
+      ]);
+      expect(mapNotification({
+        id: 7n,
+        type: 'system',
+        title: 'Hello',
+        body: 'Hi',
+        link: '',
+        created_at: '2026-10-24T11:00:00Z',
+        read_at: '2026-10-24T12:00:00Z',
+      })).toMatchObject({
+        id: '7',
+        link: null,
+        readAt: '2026-10-24T12:00:00Z',
+      });
     });
   });
 });
