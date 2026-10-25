@@ -14,6 +14,13 @@ describe('isBottomNavHidden', () => {
     }
   });
 
+  it('hides it on admin screens', () => {
+    for (const p of ['/admin', '/admin/applications/abc']) {
+      expect(isBottomNavHidden(p), p).toBe(true);
+    }
+    expect(isBottomNavHidden('/administrator')).toBe(false);
+  });
+
   it('shows it on the main tabs', () => {
     for (const p of ['/', '/search', '/saved', '/profile', '/sell', '/category/desserts']) {
       expect(isBottomNavHidden(p), p).toBe(false);
