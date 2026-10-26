@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import Switch from '../../components/ui/Switch';
 import { shouldToast, userMessage } from '../../lib/errors';
+import { useMyThreads } from '../../queries/enquiries';
 import { useSetAvailableToday } from '../../queries/seller';
 import SellerPage from './SellerPage';
 import SellerStatusBanner from './SellerStatusBanner';
@@ -37,11 +38,14 @@ function AvailableTodayCard({ business }) {
 }
 
 function QuickLinks({ business }) {
+  const { data: threads } = useMyThreads({ as: 'seller' });
+  const unreadCount = threads?.reduce((acc, t) => acc + (t.unreadCount || 0), 0) ?? 0;
+
   const links = [
     { to: '/seller/products', label: 'Products', Icon: Package },
     { to: '/seller/videos', label: 'Videos', Icon: Clapperboard },
     { to: '/seller/business', label: 'Edit business', Icon: Pencil },
-    { to: '/seller/enquiries', label: 'Messages', Icon: MessageCircle },
+    { to: '/seller/enquiries', label: 'Messages', Icon: MessageCircle, count: unreadCount },
     { to: '/seller/reviews', label: 'Reviews', Icon: Star },
   ];
   if (business.status === 'approved') links.push({ to: `/b/${business.slug}`, label: 'View public page', Icon: ExternalLink });
@@ -49,7 +53,7 @@ function QuickLinks({ business }) {
   return (
     <nav aria-label="Seller sections">
       <ul className="overflow-hidden rounded-card border border-border bg-surface">
-        {links.map(({ to, label, Icon }) => (
+        {links.map(({ to, label, Icon, count }) => (
           <li key={to} className="border-b border-border last:border-b-0">
             <Link
               to={to}
@@ -57,6 +61,11 @@ function QuickLinks({ business }) {
             >
               <Icon size={20} strokeWidth={1.75} className="text-primary" aria-hidden="true" />
               <span className="flex-1">{label}</span>
+              {count > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-error px-1.5 font-body text-xs font-semibold text-white">
+                  {count}
+                </span>
+              )}
               <ChevronRight size={18} className="text-muted" aria-hidden="true" />
             </Link>
           </li>

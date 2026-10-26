@@ -1,15 +1,20 @@
-import { Store, Share2 } from 'lucide-react';
+import { MessageSquare, Share2, Store } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useBusiness } from '../../queries/catalog';
 import { useTrackView } from '../../queries/activity.js';
 import { useContactAction } from '../../queries/contact.js';
-import PageHeader from '../../components/ui/PageHeader';
+import { useMyThread } from '../../queries/enquiries.js';
+import { useMyBusiness } from '../../queries/seller.js';
+import Button from '../../components/ui/Button';
+import ContactButtons from '../../components/ContactButtons';
 import EmptyState from '../../components/ui/EmptyState';
+import EnquirySheet from '../../components/EnquirySheet';
 import ErrorState from '../../components/ui/ErrorState';
 import IconButton from '../../components/ui/IconButton';
+import PageHeader from '../../components/ui/PageHeader';
 import SaveButton from '../../components/SaveButton';
-import ContactButtons from '../../components/ContactButtons';
 import Tabs from '../../components/ui/Tabs';
 import BusinessSkeleton from './BusinessSkeleton';
 import BusinessHeader from './BusinessHeader';
@@ -30,6 +35,19 @@ export default function BusinessPage() {
   // slug is the local id (for guest localStorage); business.id is the UUID (for the RPC).
   useTrackView('business', slug, { enabled: !!business, serverId: business?.id });
   const { start: startContact, pendingChannel, ready: contactReady } = useContactAction();
+  const { data: myBusiness } = useMyBusiness();
+  const { data: existingThreadId } = useMyThread(business?.id);
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
+
+  const isOwner = Boolean(myBusiness?.id && business?.id && myBusiness.id === business.id);
+
+  function handleEnquiryClick() {
+    if (existingThreadId) {
+      navigate(`/enquiries/${encodeURIComponent(existingThreadId)}`);
+      return;
+    }
+    setEnquiryOpen(true);
+  }
 
   if (isLoading) {
     return <BusinessSkeleton />;
@@ -124,9 +142,28 @@ export default function BusinessPage() {
       </main>
 
       {/* Sticky Bottom Bar */}
-      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-surface/95 backdrop-blur-sm border-t border-border px-screen py-3 z-20">
+      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-surface/95 backdrop-blur-sm border-t border-border px-screen py-3 z-20 flex flex-col gap-2">
+        {!isOwner && (
+          <Button
+            variant="secondary"
+            size="md"
+            className="w-full"
+            onClick={handleEnquiryClick}
+          >
+            <MessageSquare size={18} aria-hidden="true" />
+            Send enquiry
+          </Button>
+        )}
         <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} disabled={!contactReady} />
       </footer>
+
+      {business && !isOwner && (
+        <EnquirySheet
+          open={enquiryOpen}
+          onClose={() => setEnquiryOpen(false)}
+          business={{ id: business.id, name: business.name, slug: business.slug }}
+        />
+      )}
     </div>
   );
 }

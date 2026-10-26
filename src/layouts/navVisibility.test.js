@@ -8,14 +8,14 @@ describe('isBottomNavHidden', () => {
     }
   });
 
-  it('keeps hiding it on detail, seller and dev screens', () => {
-    for (const p of ['/p/abc', '/b/sweet-crumbs', '/seller', '/seller/products', '/dev/ui']) {
+  it('keeps hiding it on detail, seller, thread and dev screens', () => {
+    for (const p of ['/p/abc', '/b/sweet-crumbs', '/seller', '/seller/products', '/dev/ui', '/enquiries/thread-123']) {
       expect(isBottomNavHidden(p), p).toBe(true);
     }
   });
 
   it('shows it on the main tabs', () => {
-    for (const p of ['/', '/search', '/saved', '/profile', '/sell', '/category/desserts']) {
+    for (const p of ['/', '/search', '/saved', '/profile', '/sell', '/category/desserts', '/enquiries']) {
       expect(isBottomNavHidden(p), p).toBe(false);
     }
   });

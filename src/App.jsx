@@ -28,6 +28,8 @@ const BusinessPage = lazy(() => import('./pages/business/BusinessPage'));
 const CategoryPage = lazy(() => import('./pages/category/CategoryPage'));
 const EditProfilePage = lazy(() => import('./pages/profile/EditProfilePage'));
 const HelpPage = lazy(() => import('./pages/static/HelpPage'));
+const InboxPage = lazy(() => import('./pages/enquiries/InboxPage'));
+const ThreadPage = lazy(() => import('./pages/enquiries/ThreadPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const NotificationPreferences = lazy(() => import('./NotificationPreferences'));
 const Notification = lazy(() => import('./legacy/pages/Notification'));
@@ -159,6 +161,8 @@ function AppRoutes() {
         <Route path="/connected" element={<RequireAuth><ConnectedPage /></RequireAuth>} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/edit" element={<RequireAuth><EditProfilePage /></RequireAuth>} />
+        <Route path="/enquiries" element={<RequireAuth><InboxPage /></RequireAuth>} />
+        <Route path="/enquiries/:threadId" element={<RequireAuth><ThreadPage /></RequireAuth>} />
         <Route path="/notifications" element={L(Notification)} />
         {/* Temporary: both paths show the legacy screen until B5.3 builds /notifications/settings */}
         <Route path="/notifications/settings" element={L(NotificationPreferences)} />
@@ -194,9 +198,9 @@ function AppRoutes() {
           <Route path="products/:id" element={<SellerProductPage />} />
           <Route path="videos" element={<SellerVideosPage />} />
           <Route path="business" element={<SellerBusinessPage />} />
-          {/* Placeholders until B5.1 (messages) and B5.2 (reviews); /seller/enquiries/<id> is a CONTRACT §14 notification link. */}
-          <Route path="enquiries" element={<SellerPlaceholder title="Messages" />} />
-          <Route path="enquiries/:threadId" element={<SellerPlaceholder title="Messages" backTo="/seller/enquiries" />} />
+          {/* Seller enquiries: B5.1 reuse of InboxPage and ThreadPage; /seller/enquiries/<id> is a CONTRACT §14 notification link. */}
+          <Route path="enquiries" element={<InboxPage as="seller" />} />
+          <Route path="enquiries/:threadId" element={<ThreadPage as="seller" />} />
           <Route path="reviews" element={<SellerPlaceholder title="Reviews" />} />
         </Route>
 

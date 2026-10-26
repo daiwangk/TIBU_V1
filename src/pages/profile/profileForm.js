@@ -70,6 +70,7 @@ export function formToPatch(values) {
 export function accountRows(role) {
   if (!role) return [{ key: 'recent', label: 'Recently viewed', to: '/recent' }];
   const rows = [
+    { key: 'enquiries', label: 'Enquiries', to: '/enquiries' },
     { key: 'saved', label: 'Saved', to: '/saved' },
     { key: 'recent', label: 'Recently viewed', to: '/recent' },
     { key: 'connected', label: 'Previously connected', to: '/connected' },
