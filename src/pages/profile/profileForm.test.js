@@ -84,7 +84,8 @@ describe('accountRows', () => {
   });
 
   it('members get the retention rows and notification settings', () => {
-    expect(keys('customer')).toEqual(['saved', 'recent', 'connected', 'notifications', 'sell']);
+    expect(keys('customer')).toEqual(['enquiries', 'saved', 'recent', 'connected', 'notifications', 'sell']);
+    expect(accountRows('customer').find((r) => r.key === 'enquiries').to).toBe('/enquiries');
     expect(accountRows('customer').find((r) => r.key === 'notifications').to).toBe('/notifications/settings');
   });
 

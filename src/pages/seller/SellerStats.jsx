@@ -1,6 +1,7 @@
 import ErrorState from '../../components/ui/ErrorState';
 import Rating from '../../components/Rating';
 import Skeleton from '../../components/ui/Skeleton';
+import { useMyThreads } from '../../queries/enquiries';
 import { useMyStats } from '../../queries/seller';
 
 function StatCard({ label, children, note }) {
@@ -19,6 +20,8 @@ function StatCard({ label, children, note }) {
  */
 export default function SellerStats() {
   const { data: stats, isLoading, isError, error, refetch } = useMyStats();
+  const { data: threads } = useMyThreads({ as: 'seller' });
+  const unreadCount = threads?.reduce((acc, t) => acc + (t.unreadCount || 0), 0) ?? 0;
 
   return (
     <section aria-labelledby="seller-stats" className="flex flex-col gap-3">
@@ -37,7 +40,9 @@ export default function SellerStats() {
           <StatCard label="WhatsApp taps · 30 days">{stats.whatsapp30d}</StatCard>
           <StatCard label="Calls · 30 days">{stats.calls30d}</StatCard>
           <StatCard label="Saves">{stats.saves}</StatCard>
-          <StatCard label="Open enquiries">{stats.openEnquiries}</StatCard>
+          <StatCard label="Enquiries" note={unreadCount > 0 ? `${unreadCount} unread` : `${stats.openEnquiries} open`}>
+            {unreadCount}
+          </StatCard>
           <StatCard label="Rating" note={stats.reviewCount === 0 ? 'No reviews yet' : undefined}>
             {stats.reviewCount === 0 ? '—' : <Rating rating={stats.rating} reviewCount={stats.reviewCount} />}
           </StatCard>

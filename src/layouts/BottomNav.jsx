@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Search, Heart, User } from 'lucide-react';
+import { useUnreadCounts } from '../queries/notifications';
 import { isBottomNavHidden } from './navVisibility';
 
 const NAV_ITEMS = [
@@ -11,6 +12,8 @@ const NAV_ITEMS = [
 
 export default function BottomNav() {
   const { pathname } = useLocation();
+  const { data: unread } = useUnreadCounts();
+  const hasEnquiryUnread = (unread?.enquiries ?? 0) > 0;
 
   if (isBottomNavHidden(pathname)) return null;
 
@@ -33,7 +36,15 @@ export default function BottomNav() {
         >
           {({ isActive }) => (
             <>
-              <Icon size={22} strokeWidth={isActive ? 2.25 : 1.75} aria-hidden="true" />
+              <div className="relative">
+                <Icon size={22} strokeWidth={isActive ? 2.25 : 1.75} aria-hidden="true" />
+                {to === '/profile' && hasEnquiryUnread && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-error"
+                    aria-label="Unread enquiries"
+                  />
+                )}
+              </div>
               <span>{label}</span>
               {/* Active marker: a 2px plum bar under the label; transparent keeps the height stable. */}
               <span

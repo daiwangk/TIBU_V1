@@ -55,6 +55,11 @@ import {
   sendEnquiry,
   sendMessage,
 } from './enquiries.js';
+import {
+  getUnreadCounts,
+  listNotifications,
+  markNotificationsRead,
+} from './notifications.js';
 
 
 const notImplemented = async () => {
@@ -105,9 +110,7 @@ export {
   markThreadRead,
 };
 
-export const listNotifications = notImplemented;
-export const markNotificationsRead = notImplemented;
-export const getUnreadCounts = notImplemented;
+export { listNotifications, markNotificationsRead, getUnreadCounts };
 
 export {
   getSession,

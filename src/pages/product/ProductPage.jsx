@@ -1,7 +1,9 @@
-import { PackageX, Share2 } from 'lucide-react';
+import { MessageSquare, PackageX, Share2 } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ContactButtons from '../../components/ContactButtons';
+import EnquirySheet from '../../components/EnquirySheet';
 import FulfilmentInfo from '../../components/FulfilmentInfo';
 import Distance from '../../components/Distance';
 import ImageGallery from '../../components/ImageGallery';
@@ -10,6 +12,7 @@ import Rating from '../../components/Rating';
 import SaveButton from '../../components/SaveButton';
 import Avatar from '../../components/ui/Avatar';
 import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import IconButton from '../../components/ui/IconButton';
@@ -17,6 +20,8 @@ import PageHeader from '../../components/ui/PageHeader';
 import { useProduct } from '../../queries/catalog';
 import { useContactAction } from '../../queries/contact.js';
 import { useTrackView } from '../../queries/activity.js';
+import { useMyThread } from '../../queries/enquiries.js';
+import { useMyBusiness } from '../../queries/seller.js';
 import ProductDetailsList from './ProductDetailsList';
 import ProductSkeleton from './ProductSkeleton';
 
@@ -30,6 +35,19 @@ export default function ProductPage() {
   const { data: product, isLoading, isError, error, refetch } = useProduct(productId);
   useTrackView('product', productId, { enabled: !!product });
   const { start: startContact, pendingChannel, ready: contactReady } = useContactAction();
+  const { data: myBusiness } = useMyBusiness();
+  const { data: existingThreadId } = useMyThread(product?.businessId);
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
+
+  const isOwner = Boolean(myBusiness?.id && product?.businessId && myBusiness.id === product.businessId);
+
+  function handleEnquiryClick() {
+    if (existingThreadId) {
+      navigate(`/enquiries/${encodeURIComponent(existingThreadId)}`);
+      return;
+    }
+    setEnquiryOpen(true);
+  }
 
   if (isLoading) {
     return <ProductSkeleton />;
@@ -172,9 +190,29 @@ export default function ProductPage() {
       </main>
 
       {/* Sticky Bottom Bar */}
-      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-surface/95 backdrop-blur-sm border-t border-border px-screen py-3 z-20">
+      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-surface/95 backdrop-blur-sm border-t border-border px-screen py-3 z-20 flex flex-col gap-2">
+        {!isOwner && (
+          <Button
+            variant="secondary"
+            size="md"
+            className="w-full"
+            onClick={handleEnquiryClick}
+          >
+            <MessageSquare size={18} aria-hidden="true" />
+            Send enquiry
+          </Button>
+        )}
         <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} disabled={!contactReady} />
       </footer>
+
+      {product && !isOwner && (
+        <EnquirySheet
+          open={enquiryOpen}
+          onClose={() => setEnquiryOpen(false)}
+          business={{ id: product.businessId, name: product.businessName, slug: product.businessSlug }}
+          product={{ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl }}
+        />
+      )}
     </div>
   );
 }
