@@ -11,8 +11,8 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Design refresh (D40), merged to main on 18 Oct 2026 as merge commits after a real-phone check: D1 theme, fonts, wordmark and shell (#38 → `6735333`) · D2 components (#39 → `7021930`) · D3 group 1 Home, Search, Saved/Recent/Connected (#40 → `406ba7a`). D3 group 2 (Profile, auth, Product, Business) deferred. Screenshots in `docs/design-review/d1/`, `d2/`, `d3/`. Known gaps: card image placeholders are still lavender · no category photos yet (pastel icon circles, `TODO(category-photos)`) · the logo is the placeholder wordmark (`TODO(logo)`).
 - Merged this week (Week 4): A4.1 seller services + R3 (#44) · A4.2 image pipeline (#45) · A4.3 admin services (#46). All three are services only: no UI, no query hooks yet, and A4.1 has had no live `tibu-dev` smoke test.
 - Merged: B4.1 (#48), B4.2a (#49), B4.2b-1 (#50), B4.2b-2 (#51), A4.4 (#52), A4.5 (#53), B4.3 (#55).
-- Next task: B4.4 (admin panel) and A5.2 production setup / merge. M2 demo is Mon 26 Oct.
-- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS).
+- Next task: B4.4 (admin panel) or B5.3 (notifications UI).
+- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS); B5.1 non-real-time enquiry box (messages & chat UI) — all three sub-tasks (a/b/c) verified complete on disk and `npm run check` green.
 - Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
 - Carry-overs: (1) DONE in B4.1: the "Sell on Tibu" / "Seller dashboard" profile rows are live; (2) the Admin row on /profile points to a 404 until Week 4; (3) `src/pages/search/SearchPage.jsx` was 321 lines vs the 250-line limit — 222 after the D3 split (#40), carry-over closed; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
 - Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
@@ -22,6 +22,25 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-25 · B5.1 verification · dk · Antigravity (Gemini 3.8 Flash)
+- Done: Resumed session after context truncation. Verified all three B5.1 sub-tasks are complete on disk:
+  - B5.1a: `EnquirySheet.jsx`, "Send enquiry" button in `ProductPage.jsx` and `BusinessPage.jsx` sticky footers (hidden for owner via `useMyBusiness`).
+  - B5.1b: `InboxPage.jsx`, `ThreadPage.jsx`, `MessageBubble.jsx` under `src/pages/enquiries/`; customer routes `/enquiries` and `/enquiries/:threadId` in `App.jsx`.
+  - B5.1c: Seller routes `/seller/enquiries` and `/seller/enquiries/:threadId` reusing the same components with `as="seller"`; unread badges on `BottomNav` (dot on Profile icon), `SellerHomePage` Messages link count, `SellerStats` Enquiries card; `profileForm.js` enquiries row; `navVisibility.js` hides BottomNav on thread paths.
+- How verified: `npm run check` → exit 0 (build artifacts confirmed for InboxPage, ThreadPage; ESLint clean; all tests passing).
+- Files: none changed — read-only verification session.
+
+### 2026-10-25 · B5.1 — Non-real-time enquiry box (messages & chat UI) · dk · Antigravity (Gemini 3.8 Flash)
+- Done: Non-real-time customer and seller enquiry system (D20, D34, CONTRACT §6, §7, §11, §14):
+  - `EnquirySheet.jsx`: Bottom sheet with Textarea (auto-focused, 2000-char limit counter), product context chip, and Send button. Unauthenticated taps route through `loginGate.request('enquiry')`; authenticated send triggers `sendEnquiry` and redirects to `/enquiries/:threadId`.
+  - ProductPage & BusinessPage: "Send enquiry" secondary `Button` placed next to `ContactButtons` in the sticky footer. Automatically hidden when the viewer owns the business (`useMyBusiness().id === businessId`). Direct navigates to `/enquiries/:threadId` when an active thread exists (`useMyThread`), else opens `EnquirySheet`.
+  - `InboxPage.jsx`: Reusable inbox for customer (`/enquiries`, `RequireAuth`) and seller (`/seller/enquiries`, `as="seller"` inside `SellerGate`). Lists threads with business logo or customer avatar, relative time (`formatRelativeTime`), product context badge, preview, and unread dot (`unreadCount > 0`). Empty state matches `chat-empty.png`.
+  - `ThreadPage.jsx` & `MessageBubble.jsx`: Reusable conversation view (`/enquiries/:threadId` and `/seller/enquiries/:threadId`). Header with business link `/b/:slug` (customer) or customer name (seller), product context badge (`/p/:id`), back navigation, and refresh button. Day separators ("Today", "Yesterday", date) and message bubbles (plum on right for sender, surface with border on left for receiver) with optimistic sending state and helper note. Calls `markThreadRead` on mount/unread. Customer sends via `sendEnquiry` (20/hr rate limit); seller replies via `sendMessage`.
+  - Badges & Navigation: `BottomNav` Profile icon shows red unread dot when `unread.enquiries > 0` (`useUnreadCounts`). Profile page displays "Enquiries" row linking to `/enquiries`. `SellerHomePage` Messages link and Enquiries StatCard display the sum of `unreadCount` over `listMyThreads({ as: 'seller' })`. `navVisibility.js` hides BottomNav on `/enquiries/` thread paths.
+- Files: created `src/components/EnquirySheet.jsx`, `src/pages/enquiries/{InboxPage,ThreadPage,MessageBubble}.jsx`; modified `src/pages/product/ProductPage.jsx`, `src/pages/business/BusinessPage.jsx`, `src/layouts/BottomNav.jsx`, `src/pages/profile/{profileForm.js,profileForm.test.js,ProfileRows.jsx}`, `src/pages/seller/{SellerHomePage.jsx,SellerStats.jsx}`, `src/layouts/{navVisibility.js,navVisibility.test.js}`, `src/App.jsx`, `docs/PROGRESS.md`.
+- How verified: `npm run check` green — check-guards OK (314 source files, 1 legacy allowlist entry), ESLint 0 errors / 0 warnings, Vitest 70 test files / 661 tests passed, Vite production build OK.
+
 
 ### 2026-10-25 · A5.2-probes — Production RLS probes script · dk · Antigravity (Gemini 3.8 Flash)
 - Done: `scripts/prod-probes.sh` — standalone Bash + curl production verification script (no external npm dependencies or jq required).

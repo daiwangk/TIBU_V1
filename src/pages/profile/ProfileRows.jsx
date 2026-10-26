@@ -2,6 +2,7 @@ import { Bell, ChevronRight, CircleHelp, FileText, Heart, History, Info, Lock, M
 import { Link } from 'react-router-dom';
 
 const ICONS = {
+  enquiries: MessageCircle,
   saved: Heart,
   recent: History,
   connected: MessageCircle,
