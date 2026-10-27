@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { GateResumer } from './app/GateResumer.jsx';
-import { RequireAuth } from './app/guards.jsx';
+import { RequireAuth, RequireRole } from './app/guards.jsx';
 import LoginSheet from './components/LoginSheet';
 import Spinner from './components/ui/Spinner';
 
@@ -19,6 +19,8 @@ import AppShell from './layouts/AppShell';
 import HomePage from './pages/home/HomePage';
 
 const AboutPage = lazy(() => import('./pages/static/AboutPage'));
+const AdminApplicationPage = lazy(() => import('./pages/admin/AdminApplicationPage'));
+const AdminListPage = lazy(() => import('./pages/admin/AdminListPage'));
 const AuthCallbackPage = lazy(() => import('./pages/auth/AuthCallbackPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -202,6 +204,12 @@ function AppRoutes() {
           <Route path="enquiries" element={<InboxPage as="seller" />} />
           <Route path="enquiries/:threadId" element={<ThreadPage as="seller" />} />
           <Route path="reviews" element={<SellerPlaceholder title="Reviews" />} />
+        </Route>
+
+        {/* Admin panel — admin role only (RequireRole includes RequireAuth). BottomNav hidden via navVisibility.js. */}
+        <Route path="/admin" element={<RequireRole roles={['admin']} />}>
+          <Route index element={<AdminListPage />} />
+          <Route path="applications/:businessId" element={<AdminApplicationPage />} />
         </Route>
 
         {/* DEV only — UI component gallery */}
