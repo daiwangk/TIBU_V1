@@ -12,7 +12,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Merged this week (Week 4): A4.1 seller services + R3 (#44) · A4.2 image pipeline (#45) · A4.3 admin services (#46). All three are services only: no UI, no query hooks yet, and A4.1 has had no live `tibu-dev` smoke test.
 - Merged: B4.1 (#48), B4.2a (#49), B4.2b-1 (#50), B4.2b-2 (#51), A4.4 (#52), A4.5 (#53), B4.3 (#55).
 - Next task: B4.4 (admin panel) or B5.3 (notifications UI).
-- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS); B5.1 non-real-time enquiry box (messages & chat UI) — all three sub-tasks (a/b/c) verified complete on disk and `npm run check` green.
+- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS); B5.1 non-real-time enquiry box (messages & chat UI); B5.2 write and manage reviews (ReviewSheet, ReviewsTab loginGate & write/edit/delete, SellerReviewsPage, supabase adapter & query hooks) — all verified complete on disk and `npm run check` green.
 - Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
 - Carry-overs: (1) DONE in B4.1: the "Sell on Tibu" / "Seller dashboard" profile rows are live; (2) the Admin row on /profile points to a 404 until Week 4; (3) `src/pages/search/SearchPage.jsx` was 321 lines vs the 250-line limit — 222 after the D3 split (#40), carry-over closed; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
 - Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
@@ -22,6 +22,40 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-30 · B5.2 — Write and manage reviews · dk · Antigravity (Gemini 3.8 Flash)
+- Done: Write and manage reviews for customers and sellers (CONTRACT §3, §7, §11, §12):
+  - Service functions in `src/services/supabase/reviews.js`: `getMyReview(businessId)`, `saveMyReview({ businessId, rating, body })`, and `deleteMyReview(businessId)` using `mapReview` and mapping Supabase errors (`conflict` on already reviewed, `forbidden` if owner). Re-exported in `src/services/supabase/index.js`.
+  - Keys and queries in `src/queries/keys.js` and `src/queries/reviews.js`: added `qk.myReview(businessId)`; created `useMyReview`, `useSaveMyReview`, `useDeleteMyReview` hooks with query cache invalidations for `['reviews', businessId]`, `['business']`, `qk.myReview(businessId)`, and `qk.me`. Registered `'review'` gate handler with `useReviewSheetStore` atom to auto-open `ReviewSheet` after login replay.
+  - Gate registration at boot: `src/app/GateResumer.jsx` imports `../queries/reviews.js`.
+  - `ReviewSheet.jsx`: Bottom sheet containing a 5-star radio group (`aria-checked`, `aria-label` per star), text area with live character counter (max 1000), Save/Update buttons (disabled until a star rating is picked), and Delete button in edit mode with a confirmation `Dialog`.
+  - `ReviewsTab.jsx`: Business page reviews tab updated to check `useMyReview` and `useMyBusiness`. Shows "Write a review" (or "Edit your review" if already reviewed); hidden if viewer owns the business. Unauthenticated users trigger `loginGate.request('review')`; authenticated users open `ReviewSheet`. Declarative `sheetOpen` derivation without synchronous `setState` in effect.
+  - `SellerReviewsPage.jsx`: Seller dashboard page `/seller/reviews` inside `SellerGate` wrapped with `SellerPage`. Displays rating summary card (average and count from `useMyBusiness`) and read-only list of all reviews via `useReviews` with all 4 states (loading skeleton, empty state, error with retry, data).
+  - Routes in `src/App.jsx`: Replaced `SellerPlaceholder` with lazy `SellerReviewsPage` for route `/seller/reviews`.
+- Files changed:
+  - Created: `src/services/supabase/reviews.js`, `src/queries/reviews.js`, `src/components/ReviewSheet.jsx`, `src/pages/seller/SellerReviewsPage.jsx`.
+  - Modified: `src/services/supabase/index.js`, `src/queries/keys.js`, `src/app/GateResumer.jsx`, `src/pages/business/ReviewsTab.jsx`, `src/App.jsx`, `docs/PROGRESS.md`.
+- How to verify:
+  - Run `npm run check` (guards, lint, vitest tests, vite build) — green exit code 0.
+  - Manual check on `/b/:slug?tab=reviews`:
+    1. Guest clicks "Write a review" → login sheet appears with returnTo preserved.
+    2. Logged-in user sees "Write a review", selects rating 1-5, enters review, saves → review appears.
+    3. User sees button change to "Edit your review", can edit or delete (with confirmation dialog).
+    4. Business owner viewing their own business page does not see "Write a review".
+  - Manual check on `/seller/reviews`:
+    - Shows rating summary card (average rating + count) and customer reviews list; displays empty state if no reviews yet.
+- Left out: Nothing. All acceptance criteria for B5.2 implemented.
+
+### 2026-10-28 · A5.3b — Optional Sentry error reporting · dk · Antigravity (Claude Sonnet 4.6)
+- Done: Wired `@sentry/react` as an opt-in, privacy-safe error reporter.
+  - `src/lib/sentry.js`: `initSentry()` is a strict no-op in dev mode (`import.meta.env.DEV`) or when `VITE_SENTRY_DSN` is blank/absent. When active it calls `Sentry.init` with `sendDefaultPii: false`, `tracesSampleRate: 0` (no perf tracing), no Session Replay integration. `beforeBreadcrumb` drops `fetch`, `xhr`, `console`, and `ui.input` categories so no URLs, request bodies, console messages or user-typed text leave the browser. `beforeSend` deletes `event.request.data` and `event.request.query_string` from every event. `Sentry.setUser()` is never called.
+  - `src/main.jsx`: `initSentry()` called first, before `createRoot`, so errors during the initial render are captured.
+  - `src/app/ErrorBoundary.jsx`: `componentDidCatch` now calls `Sentry.captureException(error)` (with `componentStack` in `extra`) guarded by `isSentryActive()` — no call if Sentry was not initialised.
+  - `.env.example`: `VITE_SENTRY_DSN=` added with a comment that it is a public DSN (safe in the browser) and that leaving it blank disables reporting. Not added to the guard script's secret list.
+- Dependency added: `@sentry/react` (9 packages).
+- Files changed: `src/lib/sentry.js` (created), `src/main.jsx`, `src/app/ErrorBoundary.jsx`, `.env.example`, `docs/PROGRESS.md`.
+- How to verify: (1) In dev, add any `VITE_SENTRY_DSN=https://…` to `.env.local` and confirm the console never shows Sentry network requests. (2) In a production build with a real DSN, throw `throw new Error('test')` inside any component and verify the event appears in the Sentry dashboard without any PII.
+- Left out: Sentry `ErrorBoundary` wrapper from `@sentry/react` — not used because the existing class-based `ErrorBoundary` already handles the UI and the task spec only asks for `captureException` in `componentDidCatch`.
 
 ### 2026-10-25 · B5.1 verification · dk · Antigravity (Gemini 3.8 Flash)
 - Done: Resumed session after context truncation. Verified all three B5.1 sub-tasks are complete on disk:

@@ -19,11 +19,12 @@ import { getWithExpiry } from '../lib/storage.js';
 import { resumePending } from '../stores/loginGate.js';
 import { useAuthStore } from '../stores/auth.js';
 
-// Side-effect imports — register gate handlers for 'whatsapp', 'call', 'save', and 'enquiry' at boot
+// Side-effect imports — register gate handlers for 'whatsapp', 'call', 'save', 'enquiry', and 'review' at boot
 import '../queries/contact.js';
 import '../queries/saved.js';
 import '../queries/activity.js';
 import '../queries/enquiries.js';
+import '../queries/reviews.js';
 import { flushLocalRecent } from '../queries/activity.js';
 
 const STORAGE_KEY = 'tibu.pendingAction';
