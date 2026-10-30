@@ -10,8 +10,8 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Merged this week: A3.1 auth and profile services, auth store, route guards (#21) · B3.1 auth pages (#26, includes the contract commit `023e5d6` — `resendConfirmation`, CONTRACT v1.2.2, D39) · B3.2 login sheet (#27) · B3.3 contact buttons live (#28) · B3.4 profile and edit profile (#29) · B3.5 saved / recently viewed / previously connected (#30) · gitlink removal (#31) · gitlink guard in `npm run check` (#32) · saved-products fix (#33: `products` has `category_id`, not `category_slug`) · edit-profile phone-error fix (#34) · Week 3 close in PROGRESS (#35) · A3.5 profile home area → default search location (#36) · client design references (#37)
 - Merged this week (Week 4): A4.1 seller services + R3 (#44) · A4.2 image pipeline (#45) · A4.3 admin services (#46). All three are services only: no UI, no query hooks yet, and A4.1 has had no live `tibu-dev` smoke test.
 - Merged: B4.1 (#48), B4.2a (#49), B4.2b-1 (#50), B4.2b-2 (#51), A4.4 (#52), A4.5 (#53), B4.3 (#55), A5.1 (#56), A5.2-probes (#57), B4.4 (#58), B5.1 (#59).
-- Next task: B5.3 (notifications UI). Also open: adapter fix for rejected → `approve` in `src/services/supabase/admin.js` (the UI sends `republish`; see the B4.4 log entry).
-- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS); B5.1 non-real-time enquiry box (messages & chat UI); B5.2 write and manage reviews (ReviewSheet, ReviewsTab loginGate & write/edit/delete, SellerReviewsPage, supabase adapter & query hooks) — all verified complete on disk and `npm run check` green.
+- Next task: Production launch / client domain on tibu-prod. Also open: adapter fix for rejected → `approve` in `src/services/supabase/admin.js` (the UI sends `republish`; see the B4.4 log entry).
+- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS); B5.1 non-real-time enquiry box (messages & chat UI); B5.2 write and manage reviews (ReviewSheet, ReviewsTab loginGate & write/edit/delete, SellerReviewsPage, supabase adapter & query hooks); B5.3 notifications UI, settings, bell badge, and final legacy code deletion — all verified complete on disk and `npm run check` green.
 - Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
 - Carry-overs: (1) DONE in B4.1: the "Sell on Tibu" / "Seller dashboard" profile rows are live; (2) DONE in B4.4: the Admin row on /profile resolves; (3) `src/pages/search/SearchPage.jsx` was 321 lines vs the 250-line limit — 222 after the D3 split (#40), carry-over closed; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
 - Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
@@ -21,6 +21,24 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-30 · B5.3 — Notifications screens & delete the last legacy code · dk · Antigravity (Gemini 3.8 Flash)
+- Done: Notifications UI and final legacy code removal (CONTRACT §6, §14; AGENTS.md §4, §5):
+  - `NotificationsPage.jsx` (/notifications, `RequireAuth`): displays notification items partitioned by "Today" and "Earlier" using `notificationsModel.js`. Rows render icons mapped to all 7 CONTRACT §6 types (`enquiry_new`, `enquiry_reply`, `business_approved`, `business_rejected`, `business_unpublished`, `review_new`, `digest_new_businesses`) with `Bell` fallback; title, body, relative time (`formatRelativeTime`), unread styling (lavender tint and unread dot). Tapping an unread item calls `markNotificationsRead` and navigates to `item.link` (supporting all 5 CONTRACT §14 routes). "Mark all as read" button in header action. Offset-based pagination with fixed limit 20 and "Load more" button without growing limit.
+  - `NotificationRow.jsx`: single notification item row component under 100 lines.
+  - `NotificationSettingsPage.jsx` (/notifications/settings and /notifications/preferences, `RequireAuth`): digest switch toggle using `Switch` wired to `useMe()` and `useUpdateMe({ notifyDigest })` with clear copy; zero browser push code or `Notification.requestPermission` anywhere (D21).
+  - `HomeHeader.jsx`: bell button reads `useUnreadCounts().notifications`, displays unread badge (hidden when 0; "9+" cap) with accessible aria-label.
+  - `notificationsModel.js` + unit tests: day grouping helpers, type-to-icon mapping for all 7 types, and badge count formatting.
+  - Deleted legacy files: `src/legacy/pages/Notification.jsx`, `src/NotificationPreferences.jsx`, `src/hooks/useAsync.js`, `src/services/businessService.js`, `src/legacy/components/{ProductCard,ReelCard,brand/Logo}.jsx`. Removed empty directories `src/legacy/` and `src/hooks/`. Removed file-level disable and duplicate key from `src/services/mock/data/dessertBusinesses.js`, leaving `scripts/legacy-allowlist.json` with 0 entries.
+  - Cleaned `src/App.jsx`: deleted `LegacyPage` component and `L()` helper entirely; removed unused `React`, `useNavigate`, `useLocation` imports.
+- Files:
+  - Created: `src/pages/notifications/NotificationsPage.jsx`, `src/pages/notifications/NotificationRow.jsx`, `src/pages/notifications/NotificationSettingsPage.jsx`, `src/pages/notifications/notificationsModel.js`, `src/pages/notifications/notificationsModel.test.js`.
+  - Modified: `src/pages/home/HomeHeader.jsx`, `src/App.jsx`, `scripts/legacy-allowlist.json`, `src/services/mock/data/dessertBusinesses.js`, `docs/PROGRESS.md`.
+  - Deleted: `src/NotificationPreferences.jsx`, `src/hooks/useAsync.js`, `src/services/businessService.js`, `src/legacy/components/ProductCard.jsx`, `src/legacy/components/ReelCard.jsx`, `src/legacy/components/brand/Logo.jsx`, `src/legacy/pages/Notification.jsx`.
+- How verified:
+  - `npm run check` green: `check-guards.mjs` OK (330 source files, 0 legacy allowlist entries), ESLint 0 errors / 0 warnings, Vitest 72 files / 686 tests passed, Vite production build OK.
+  - Zero imports remaining of `LegacyPage`, `L()`, `useAsync`, `Notification.jsx`, or any legacy components.
+- Left out: Nothing. All requirements of Task B5.3 satisfied.
 
 ### 2026-10-30 · B5.2 — Write and manage reviews · dk · Antigravity (Gemini 3.8 Flash)
 - Done: Write and manage reviews for customers and sellers (CONTRACT §3, §7, §11, §12):

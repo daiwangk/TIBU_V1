@@ -1,5 +1,5 @@
-import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GateResumer } from './app/GateResumer.jsx';
 import { RequireAuth, RequireRole } from './app/guards.jsx';
 import LoginSheet from './components/LoginSheet';
@@ -33,8 +33,8 @@ const HelpPage = lazy(() => import('./pages/static/HelpPage'));
 const InboxPage = lazy(() => import('./pages/enquiries/InboxPage'));
 const ThreadPage = lazy(() => import('./pages/enquiries/ThreadPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-const NotificationPreferences = lazy(() => import('./NotificationPreferences'));
-const Notification = lazy(() => import('./legacy/pages/Notification'));
+const NotificationSettingsPage = lazy(() => import('./pages/notifications/NotificationSettingsPage'));
+const NotificationsPage = lazy(() => import('./pages/notifications/NotificationsPage'));
 const PrivacyPage = lazy(() => import('./pages/static/PrivacyPage'));
 const ProductPage = lazy(() => import('./pages/product/ProductPage'));
 const ConnectedPage = lazy(() => import('./pages/saved/ConnectedPage'));
@@ -53,104 +53,6 @@ const SellerProductsPage = lazy(() => import('./pages/seller/SellerProductsPage'
 const SellerVideosPage = lazy(() => import('./pages/seller/SellerVideosPage'));
 const TermsPage = lazy(() => import('./pages/static/TermsPage'));
 
-
-/**
- * LegacyPage — wraps legacy pages that still need setPage + selected-entity
- * props forwarded from router location state.
- *
- * Legacy pages call setPage(key) and also read location.state for entities
- * selected before navigation (selectedProduct, selectedBusiness, etc.).
- *
- * This wrapper is intentionally minimal. Pages will be migrated to read
- * from contexts / route params directly in a later task.
- */
-function LegacyPage({ Component, extraProps = {} }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const state = location.state ?? {};
-  const selectedProductRef = React.useRef(null);
-  const selectedBusinessRef = React.useRef(null);
-
-
-  /** Shim: translate old page strings to navigate() calls */
-  function setPage(pageKey, entityState) {
-    if (pageKey === 'product') {
-      const p = selectedProductRef.current;
-      if (p?.id) {
-        navigate(`/p/${p.id}`, { state: entityState });
-        return;
-      }
-      navigate('/');
-      return;
-    }
-
-    if (pageKey === 'business') {
-      const b = selectedBusinessRef.current;
-      const rawId = b?.slug || b?.id || b?.businessName;
-      if (rawId) {
-        navigate(`/b/${encodeURIComponent(String(rawId).toLowerCase())}`);
-        return;
-      }
-      navigate('/');
-      return;
-    }
-
-    const urlMap = {
-      home: '/',
-      search: '/search',
-      saved: '/saved',
-      profile: '/profile',
-      editprofile: '/profile/edit',
-      notification: '/notifications',
-      notificationPreferences: '/notifications/preferences',
-      desserts: '/category/desserts',
-      crochet: '/category/crochet',
-      resin: '/category/resin-art',
-      candles: '/category/candles',
-      embroidery: '/category/embroidery',
-      jewellery: '/category/jewellery',
-      womenfashion: '/category/womens-fashion',
-      menfashion: '/category/mens-fashion',
-      gifts: '/category/gifts',
-      fashion: '/category/fashion',
-      handmade: '/category/handmade',
-      privacySecurity: '/privacy',
-      helpFeedback: '/help',
-      termsConditions: '/terms',
-      aboutTibu: '/about',
-    };
-    const url = urlMap[pageKey];
-    if (!url) {
-      console.warn(`[setPage shim] Unknown page key: "${pageKey}"`);
-      return;
-    }
-    navigate(url, { state: entityState });
-  }
-
-  const legacyProps = {
-    setPage,
-    // navigation state setters (forwarded as location state on next navigate)
-    setSelectedProduct: (p) => {
-      selectedProductRef.current = p;
-      navigate(location.pathname, { replace: true, state: { ...state, selectedProduct: p } });
-    },
-    setSelectedBusiness: (b) => {
-      selectedBusinessRef.current = b;
-      navigate(location.pathname, { replace: true, state: { ...state, selectedBusiness: b } });
-    },
-    setPreviousPage: (p) => navigate(location.pathname, { replace: true, state: { ...state, previousPage: p } }),
-    setSellerMode: () => {},   // dead prop per audit; keep stub to avoid crashes
-    ...extraProps,
-  };
-
-  return <Component {...legacyProps} />;
-}
-
-/** Shorthand for wrapping a page in LegacyPage */
-function L(Component, extraProps) {
-  return <LegacyPage Component={Component} extraProps={extraProps} />;
-}
-
 function AppRoutes() {
   return (
     <Routes>
@@ -165,10 +67,9 @@ function AppRoutes() {
         <Route path="/profile/edit" element={<RequireAuth><EditProfilePage /></RequireAuth>} />
         <Route path="/enquiries" element={<RequireAuth><InboxPage /></RequireAuth>} />
         <Route path="/enquiries/:threadId" element={<RequireAuth><ThreadPage /></RequireAuth>} />
-        <Route path="/notifications" element={L(Notification)} />
-        {/* Temporary: both paths show the legacy screen until B5.3 builds /notifications/settings */}
-        <Route path="/notifications/settings" element={L(NotificationPreferences)} />
-        <Route path="/notifications/preferences" element={L(NotificationPreferences)} />
+        <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
+        <Route path="/notifications/settings" element={<RequireAuth><NotificationSettingsPage /></RequireAuth>} />
+        <Route path="/notifications/preferences" element={<RequireAuth><NotificationSettingsPage /></RequireAuth>} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/help" element={<HelpPage />} />
         <Route path="/terms" element={<TermsPage />} />

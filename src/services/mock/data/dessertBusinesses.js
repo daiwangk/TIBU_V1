@@ -1,4 +1,3 @@
-/* eslint-disable */
 import dessertProducts from "./dessertProducts";
 
 const dessertBusinesses = [
@@ -106,7 +105,6 @@ const dessertBusinesses = [
     id: "molten-delights",
     businessName: "Molten Delights",
     businessEmoji: "🍰",
-    category: "Desserts",
     category: "Desserts",
     rating: "4.9",
     businessReviews: "142",
