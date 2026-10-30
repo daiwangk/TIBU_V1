@@ -45,7 +45,7 @@ const SearchPage = lazy(() => import('./pages/search/SearchPage'));
 const SellLandingPage = lazy(() => import('./pages/seller/SellLandingPage'));
 const OnboardingPage = lazy(() => import('./pages/seller/onboarding/OnboardingPage'));
 const SellerGate = lazy(() => import('./pages/seller/SellerGate'));
-const SellerPlaceholder = lazy(() => import('./pages/seller/SellerPlaceholder'));
+const SellerReviewsPage = lazy(() => import('./pages/seller/SellerReviewsPage'));
 const SellerBusinessPage = lazy(() => import('./pages/seller/SellerBusinessPage'));
 const SellerHomePage = lazy(() => import('./pages/seller/SellerHomePage'));
 const SellerProductPage = lazy(() => import('./pages/seller/SellerProductPage'));
@@ -203,7 +203,7 @@ function AppRoutes() {
           {/* Seller enquiries: B5.1 reuse of InboxPage and ThreadPage; /seller/enquiries/<id> is a CONTRACT §14 notification link. */}
           <Route path="enquiries" element={<InboxPage as="seller" />} />
           <Route path="enquiries/:threadId" element={<ThreadPage as="seller" />} />
-          <Route path="reviews" element={<SellerPlaceholder title="Reviews" />} />
+          <Route path="reviews" element={<SellerReviewsPage />} />
         </Route>
 
         {/* Admin panel — admin role only (RequireRole includes RequireAuth). BottomNav hidden via navVisibility.js. */}

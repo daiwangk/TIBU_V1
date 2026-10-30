@@ -8,6 +8,7 @@ export const qk = {
   reviews: (businessId, page) => ['reviews', businessId, page],
   me: ['me'], saved: ['saved'], savedBusinesses: ['savedBusinesses'], savedProducts: ['savedProducts'], recent: ['recent'], connected: ['connected'],
   myBusiness: ['myBusiness'], myProducts: ['myProducts'],
+  myReview: (businessId) => ['myReview', businessId],
   applications: (status) => ['applications', status], application: (id) => ['application', id],
   threads: (as) => ['threads', as], thread: (id) => ['thread', id], myThread: (businessId) => ['myThread', businessId],
   notifications: ['notifications'], unread: ['unread'], myStats: ['myStats'],

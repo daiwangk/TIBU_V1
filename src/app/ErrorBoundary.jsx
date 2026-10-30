@@ -1,4 +1,6 @@
 import { Component } from 'react';
+import * as Sentry from '@sentry/react';
+import { isSentryActive } from '../lib/sentry.js';
 
 /**
  * Catches render errors and shows a full-screen recovery UI.
@@ -17,6 +19,9 @@ export class ErrorBoundary extends Component {
   componentDidCatch(error, info) {
     if (import.meta.env.DEV) {
       console.error('ErrorBoundary caught:', error, info);
+    }
+    if (isSentryActive()) {
+      Sentry.captureException(error, { extra: { componentStack: info?.componentStack } });
     }
   }
 

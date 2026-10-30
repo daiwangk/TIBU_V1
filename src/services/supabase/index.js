@@ -1,4 +1,4 @@
-import { AppError } from '../errors.js';
+
 import {
   getBusinessBySlug,
   getCategory,
@@ -60,11 +60,7 @@ import {
   listNotifications,
   markNotificationsRead,
 } from './notifications.js';
-
-
-const notImplemented = async () => {
-  throw new AppError('config', 'Supabase adapter not implemented yet');
-};
+import { deleteMyReview, getMyReview, saveMyReview } from './reviews.js';
 
 export {
   listCategories,
@@ -74,11 +70,10 @@ export {
   getBusinessBySlug,
   getProductById,
   listReviews,
+  getMyReview,
+  saveMyReview,
+  deleteMyReview,
 };
-
-export const getMyReview = notImplemented;
-export const saveMyReview = notImplemented;
-export const deleteMyReview = notImplemented;
 export { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved };
 export { trackView, listRecent, listConnected };
 export {
