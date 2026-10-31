@@ -31,7 +31,7 @@ export default function Dialog({ open, onClose, title, children, className = '' 
     } else {
       if (dialog.open) dialog.close();
       document.body.style.overflow = '';
-      triggerRef.current?.focus();
+      if (triggerRef.current && document.body.contains(triggerRef.current)) triggerRef.current.focus();
     }
 
     return () => {

@@ -29,7 +29,10 @@ export default function NotificationRow({ item, onTap }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className="font-heading text-sm font-semibold text-ink line-clamp-1">{item.title}</p>
+          <p className="font-heading text-sm font-semibold text-ink line-clamp-1">
+            {isUnread && <span className="sr-only">Unread: </span>}
+            {item.title}
+          </p>
           <span className="flex-shrink-0 font-body text-xs text-muted">
             {formatRelativeTime(item.createdAt)}
           </span>
@@ -40,7 +43,7 @@ export default function NotificationRow({ item, onTap }) {
       {isUnread && (
         <span
           className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-primary"
-          aria-label="Unread notification"
+          aria-hidden="true"
         />
       )}
     </button>

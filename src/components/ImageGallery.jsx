@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ImagePlaceholder from './ui/ImagePlaceholder';
 
 /**
- * Swipeable scroll-snap image gallery with dot indicators.
+ * Swipeable scroll-snap image gallery with dot indicators, keyboard arrow navigation and prev/next buttons.
  *
  * @param {{
  *   images?: Array<{ url: string, alt?: string, sortOrder?: number }>,
@@ -12,6 +13,7 @@ import ImagePlaceholder from './ui/ImagePlaceholder';
  */
 export default function ImageGallery({ images = [], name = 'Product', className = '' }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const scrollerRef = useRef(null);
 
   if (!images || images.length === 0) {
     return (
@@ -31,13 +33,32 @@ export default function ImageGallery({ images = [], name = 'Product', className 
     }
   }
 
+  function scrollTo(index) {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const target = Math.max(0, Math.min(index, images.length - 1));
+    el.scrollTo({ left: target * el.clientWidth, behavior: 'smooth' });
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      scrollTo(activeIndex - 1);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      scrollTo(activeIndex + 1);
+    }
+  }
+
   return (
     <div className={`relative overflow-hidden rounded-card bg-surface ${className}`}>
       <div
+        ref={scrollerRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar"
+        onKeyDown={handleKeyDown}
+        className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
         tabIndex={0}
-        aria-label={`${name} images`}
+        aria-label={`${name} images. Use arrow keys to navigate.`}
       >
         {images.map((img, i) => (
           <div
@@ -56,6 +77,26 @@ export default function ImageGallery({ images = [], name = 'Product', className 
 
       {images.length > 1 && (
         <>
+          {/* Previous / Next buttons for mouse and touch access */}
+          <button
+            type="button"
+            onClick={() => scrollTo(activeIndex - 1)}
+            disabled={activeIndex === 0}
+            aria-label="Previous image"
+            className="absolute left-2 top-1/2 -translate-y-1/2 flex min-h-11 min-w-11 items-center justify-center rounded-full bg-surface/80 text-ink shadow-sm backdrop-blur-sm transition-opacity hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-0 disabled:pointer-events-none"
+          >
+            <ChevronLeft size={20} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollTo(activeIndex + 1)}
+            disabled={activeIndex === images.length - 1}
+            aria-label="Next image"
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex min-h-11 min-w-11 items-center justify-center rounded-full bg-surface/80 text-ink shadow-sm backdrop-blur-sm transition-opacity hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-0 disabled:pointer-events-none"
+          >
+            <ChevronRight size={20} aria-hidden="true" />
+          </button>
+
           {/* Dot indicators */}
           <div
             className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ink/40 backdrop-blur-sm pointer-events-none"

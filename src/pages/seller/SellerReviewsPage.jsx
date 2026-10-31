@@ -29,6 +29,9 @@ function RatingSummary({ rating, reviewCount }) {
         {formatRating(rating, reviewCount)}
       </div>
       <div className="flex flex-col gap-1">
+        <span className="sr-only">
+          {formatRating(rating, reviewCount)} out of 5 stars — {reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}
+        </span>
         <div className="flex" aria-hidden="true">
           {Array.from({ length: 5 }).map((_, i) => (
             <Star

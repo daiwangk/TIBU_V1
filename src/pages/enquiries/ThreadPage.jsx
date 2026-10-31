@@ -142,7 +142,7 @@ export default function ThreadPage({ as = 'customer' }) {
         {thread?.productName && thread?.productId && (
           <div className="border-t border-border/60 px-4 py-2 bg-bg/40 flex items-center justify-between">
             <span className="font-body text-xs text-muted">Enquiry about:</span>
-            <Link to={`/p/${thread.productId}`}>
+            <Link to={`/p/${thread.productId}`} aria-label={`View product: ${thread.productName}`}>
               <Badge variant="neutral" className="truncate max-w-[240px]">
                 {thread.productName}
               </Badge>

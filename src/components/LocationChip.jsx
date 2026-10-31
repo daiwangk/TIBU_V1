@@ -20,6 +20,7 @@ export default function LocationChip({ className = '' }) {
         onClick={() => setOpen(true)}
         aria-label={label ? `Change location: ${label}` : 'Change location'}
         aria-haspopup="dialog"
+        aria-expanded={open}
         className={`group inline-flex min-h-11 max-w-[11rem] items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className}`}
       >
         <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-mint py-1.5 pr-2.5 pl-2 font-body text-sm font-semibold text-ink group-hover:brightness-95 group-active:brightness-95 motion-safe:transition motion-safe:duration-150">

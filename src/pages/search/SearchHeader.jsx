@@ -43,7 +43,7 @@ export default function SearchHeader({ value, onValueChange, onEnter, onClear, o
               <button
                 type="button"
                 onClick={onOpenFilters}
-                aria-label="Open filters"
+                aria-label={filterCount > 0 ? `Open filters, ${filterCount} active` : 'Open filters'}
                 className="relative flex min-h-11 min-w-11 items-center justify-center rounded-full text-ink hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <SlidersHorizontal size={20} strokeWidth={1.75} aria-hidden="true" />

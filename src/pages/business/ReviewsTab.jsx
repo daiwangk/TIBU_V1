@@ -97,6 +97,9 @@ export default function ReviewsTab({ business }) {
             {formatRating(business.rating, business.reviewCount)}
           </div>
           <div className="flex flex-col">
+            <span className="sr-only">
+              {formatRating(business.rating, business.reviewCount)} out of 5 stars — {business.reviewCount} {business.reviewCount === 1 ? 'review' : 'reviews'}
+            </span>
             <div className="flex text-primary" aria-hidden="true">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
@@ -131,7 +134,8 @@ export default function ReviewsTab({ business }) {
       {/* Review list */}
       <div className="space-y-6">
         {isLoading && (
-          <div className="space-y-6">
+          <div className="space-y-6" role="status" aria-busy="true" aria-label="Loading reviews">
+            <span className="sr-only">Loading reviews</span>
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="space-y-2">
                 <div className="flex items-center gap-2">
