@@ -113,6 +113,7 @@ export default function SavedPage() {
       <header className="sticky top-0 z-10 bg-bg/95 backdrop-blur-[14px]">
         <h1 className="px-screen pt-5 pb-2 font-heading text-3xl font-extrabold text-primary">Saved</h1>
         <Tabs
+          label="Saved content"
           value={tab}
           onChange={(value) => setParams({ tab: value }, { replace: true })}
           items={[

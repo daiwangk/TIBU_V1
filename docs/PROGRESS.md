@@ -11,7 +11,7 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Merged this week (Week 4): A4.1 seller services + R3 (#44) · A4.2 image pipeline (#45) · A4.3 admin services (#46). All three are services only: no UI, no query hooks yet, and A4.1 has had no live `tibu-dev` smoke test.
 - Merged: B4.1 (#48), B4.2a (#49), B4.2b-1 (#50), B4.2b-2 (#51), A4.4 (#52), A4.5 (#53), B4.3 (#55), A5.1 (#56), A5.2-probes (#57), B4.4 (#58), B5.1 (#59).
 - Next task: Production launch / client domain on tibu-prod. Also open: adapter fix for rejected → `approve` in `src/services/supabase/admin.js` (the UI sends `republish`; see the B4.4 log entry).
-- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS); B5.1 non-real-time enquiry box (messages & chat UI); B5.2 write and manage reviews (ReviewSheet, ReviewsTab loginGate & write/edit/delete, SellerReviewsPage, supabase adapter & query hooks); B5.3 notifications UI, settings, bell badge, and final legacy code deletion — all verified complete on disk and `npm run check` green.
+- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS); B5.1 non-real-time enquiry box (messages & chat UI); B5.2 write and manage reviews (ReviewSheet, ReviewsTab loginGate & write/edit/delete, SellerReviewsPage, supabase adapter & query hooks); B5.3 notifications UI, settings, bell badge, and final legacy code deletion; B5.4 accessibility audit & fixes — all verified complete on disk and `npm run check` green.
 - Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
 - Carry-overs: (1) DONE in B4.1: the "Sell on Tibu" / "Seller dashboard" profile rows are live; (2) DONE in B4.4: the Admin row on /profile resolves; (3) `src/pages/search/SearchPage.jsx` was 321 lines vs the 250-line limit — 222 after the D3 split (#40), carry-over closed; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
 - Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
@@ -21,6 +21,26 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-10-31 · B5.4 — Accessibility audit & targeted fixes · dk · Antigravity (Gemini 3.8 Flash)
+- Done: Full accessibility audit and targeted fixes across the app (WCAG 2.1 AA, touch targets, keyboard navigation, ARIA labels):
+  - Audited all routes from docs/build/03_ARCHITECTURE_TARGET.md §3 against 4 data states, focus rings, keyboard tab order, alt attributes, and contrast (generated ui-a11y-audit.md artifact with 53 findings).
+  - Touch targets: Button.jsx size sm increased from 36px to min-h-[44px] (meets WCAG 2.5.5 / 2.5.8 touch target minimum for ReviewsTab and NotificationsPage buttons).
+  - Tabs keyboard navigation: Tabs.jsx now supports WAI-ARIA tablist arrow-key navigation (ArrowRight / ArrowLeft wrapping with focus transfer, tabIndex 0 on active, -1 on inactive, and optional label prop for role="tablist").
+  - ImageGallery navigation: ImageGallery.jsx now handles ArrowLeft / ArrowRight keyboard slide navigation on the scroll container and provides accessible Previous / Next overlay buttons (with aria-label and disabled states) for non-touch/keyboard users.
+  - BottomNav unread dot: BottomNav.jsx marked unread dot span as aria-hidden="true" and moved announcement to NavLink aria-label ("Profile, unread enquiries") to prevent duplicate AT reading.
+  - Star summary screen-reader text: added sr-only rating strings to summary rows in ReviewsTab.jsx and SellerReviewsPage.jsx.
+  - ReviewsTab skeleton: wrapped loading skeleton in role="status" aria-busy="true" with sr-only loading text.
+  - NotificationRow: added sr-only "Unread: " prefix to unread notification titles and marked decorative dot aria-hidden="true".
+  - LocationChip: added aria-expanded={open} to the location trigger button.
+  - SearchHeader: enhanced filter button aria-label with active filter count when filterCount > 0.
+  - ThreadPage: added explicit aria-label on the product enquiry badge link.
+  - Dialog: guarded triggerRef.current?.focus() to ensure the trigger is still attached to the DOM before focusing.
+  - SavedPage: added label="Saved content" to Tabs.
+  - Contrast check: verified no text-muted on bg-mint across the codebase (D40 compliance intact).
+- Files changed: src/components/ui/Button.jsx, src/components/ui/Tabs.jsx, src/components/ui/Dialog.jsx, src/components/ImageGallery.jsx, src/layouts/BottomNav.jsx, src/pages/business/ReviewsTab.jsx, src/pages/seller/SellerReviewsPage.jsx, src/pages/notifications/NotificationRow.jsx, src/components/LocationChip.jsx, src/pages/search/SearchHeader.jsx, src/pages/enquiries/ThreadPage.jsx, src/pages/saved/SavedPage.jsx, docs/TRACKER.md, docs/PROGRESS.md.
+- How verified: npm run check passed exit 0 (check-guards OK 330 source files, 0 legacy allowlist entries; ESLint 0 errors / 0 warnings; Vitest 72 files / 686 tests passed; Vite production build OK).
+- Left out: Real-device physical screen readers (TalkBack / VoiceOver) — belongs to B5.5 real-device regression.
 
 ### 2026-10-30 · B5.3 — Notifications screens & delete the last legacy code · dk · Antigravity (Gemini 3.8 Flash)
 - Done: Notifications UI and final legacy code removal (CONTRACT §6, §14; AGENTS.md §4, §5):

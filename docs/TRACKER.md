@@ -85,7 +85,7 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ☐ | R6 | Push frontend | B | Thu | 2.5 | R5, B5.3 |
 | ☐ | ⏱ | Push go/no-go on a real Android phone (D33) | both | Thu | — | R6 |
 | ☐ | A5.3 | Keep-alive, first backup, push on prod | A | Fri | 2 | A5.2 |
-| ☐ | B5.4 | Accessibility audit + fixes | B | Fri | 1.5 | — |
+| ☑ | B5.4 | Accessibility audit + fixes | B | Fri | 1.5 | — |
 | ☐ | B5.5 | Real-device regression on prod (rows 1–39) | B | Fri | 2 | A5.2 |
 | ☐ | — | Revision-round request sent (due Sun 1 Nov) | A | Fri | — | — |
 

@@ -27,7 +27,7 @@ export default function BottomNav() {
           key={to}
           to={to}
           end={to === '/'}
-          aria-label={label}
+          aria-label={to === '/profile' && hasEnquiryUnread ? 'Profile, unread enquiries' : label}
           className={({ isActive }) =>
             `flex min-h-11 min-w-12 flex-col items-center justify-center gap-[3px] rounded-btn font-body text-[11px] no-underline motion-safe:transition-colors motion-safe:duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
               isActive ? 'font-bold text-primary' : 'font-normal text-muted'
@@ -41,7 +41,7 @@ export default function BottomNav() {
                 {to === '/profile' && hasEnquiryUnread && (
                   <span
                     className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-error"
-                    aria-label="Unread enquiries"
+                    aria-hidden="true"
                   />
                 )}
               </div>
