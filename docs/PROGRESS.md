@@ -918,3 +918,21 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 - Not done / left out (why):
 - Next step (exact):
 - Gotchas for the next person:
+### 2026-10-31 - B5.5-prepass - dk - Antigravity (Claude Sonnet)
+- Done:
+  - Read-only SOW audit: all 33 rows (07_QA_AND_SIGNOFF.md s2) + 6 Rev2 rows (34-39) against https://tibu-app.pages.dev
+  - npm run check green: guards OK (330 files, 0 legacy), ESLint 0 errors, 72 test files / 686 tests, build OK
+  - RLS matrix (scripts/rls-matrix.mjs) 23/23 PASS against tibu-dev
+  - Prod probes (SPA fallback, RLS, categories, OG tags) all PASS
+  - Route sweep: 20 routes x 390+360px -- 0 JS errors, 0 overflow, 0 touch targets <44px, 0 broken links
+  - 4 majors identified; 7 DEVICE-ONLY rows; 2 partials (rows 24-25)
+- Files: none changed (audit only)
+- How verified: headless Chrome CDP probes, Supabase REST probes, source-code grep, live network fetches
+- Not done / left out (why):
+  - Rows 24-25 live enquiry->notification flow not triggered end-to-end (audit-only constraint)
+  - Row 39 push to locked screen not verifiable on desktop
+- Next step (exact): fix Row 38 label (Send enquiry -> Chat with seller in BusinessPage + ProductPage); add seed data for rows 3/22/34 before demo; run real-device regression for DEVICE-ONLY rows
+- Gotchas for the next person:
+  - Rows 3/22/34 are data gaps not code bugs -- UI renders correctly when data is present
+  - Row 38 IS a code bug -- button must read 'Chat with seller' per D34, not 'Send enquiry'
+  - All 20 seed products have available_today=false; business_videos table is empty; established_year and delivery_time are null for all seeded businesses
