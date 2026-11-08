@@ -5,22 +5,25 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 ## Now
 - Week: 5 (26–30 Oct 2026) · Target: Notifications UI, push, reviews, production on the client's domain. Week 4 is closed (all build tasks merged and hand-verified on `tibu-dev`; only the M2 demo + invoice remains, owner A).
 - Data source on preview: `supabase` · Production URL: `https://tibu-app.pages.dev`
-- Last green commit on main: `2399edb` (Merge PR #46, A4.3; Actions `check` run 39778150794 green on 22 Oct 2026: guards OK, lint, 41 test files / 374 tests, build OK). The `npm audit` step is advisory and reports 1 high vulnerability in `vite` 8.0.0–8.1.5 (dev-server advisories; `npm audit fix` available, needs an OK before a dependency bump). The A4.3 entry below quotes 63 files / 568 tests from a local run; CI counts 41 / 374 — treat CI as the reference.
+- Last green commit on main: `8446285` (merge PR #65; Actions CI run 42484861706 green on 8 Nov 2026). The PR's Cloudflare Pages check passed; the post-merge production deployment has not been independently verified.
 - Database: linked CLI project is `tibu-dev` (ref `lxsnktdqjwgiymlakwem`); `npx supabase migration list` on 18 Oct 2026 shows migrations 0001–0010 applied on the remote, including 0008, 0009 and 0010. R1 SQL checks (5 rows · 18 tables · 0 rows without RLS) passed on 19 Oct 2026 and `docs/kit/rpc-signatures.txt` is current (see Log).
 - Merged this week: A3.1 auth and profile services, auth store, route guards (#21) · B3.1 auth pages (#26, includes the contract commit `023e5d6` — `resendConfirmation`, CONTRACT v1.2.2, D39) · B3.2 login sheet (#27) · B3.3 contact buttons live (#28) · B3.4 profile and edit profile (#29) · B3.5 saved / recently viewed / previously connected (#30) · gitlink removal (#31) · gitlink guard in `npm run check` (#32) · saved-products fix (#33: `products` has `category_id`, not `category_slug`) · edit-profile phone-error fix (#34) · Week 3 close in PROGRESS (#35) · A3.5 profile home area → default search location (#36) · client design references (#37)
-- Merged this week (Week 4): A4.1 seller services + R3 (#44) · A4.2 image pipeline (#45) · A4.3 admin services (#46). All three are services only: no UI, no query hooks yet, and A4.1 has had no live `tibu-dev` smoke test.
+- Week 4: A4.1 seller services + R3 (#44) · A4.2 image pipeline (#45) · A4.3 admin services (#46); subsequent PRs added seller and admin UI and query hooks.
 - Merged: B4.1 (#48), B4.2a (#49), B4.2b-1 (#50), B4.2b-2 (#51), A4.4 (#52), A4.5 (#53), B4.3 (#55), A5.1 (#56), A5.2-probes (#57), B4.4 (#58), B5.1 (#59).
 - Next task: Production launch / client domain on tibu-prod. Also open: adapter fix for rejected → `approve` in `src/services/supabase/admin.js` (the UI sends `republish`; see the B4.4 log entry).
-- Completed this session: A5.1 notifications adapter + hooks (no UI); A5.2-pre production pre-flight audit; A5.2-probes production RLS and smoke probes script (`scripts/prod-probes.sh`, `npm run probes` tested live with 100% PASS); B5.1 non-real-time enquiry box (messages & chat UI); B5.2 write and manage reviews (ReviewSheet, ReviewsTab loginGate & write/edit/delete, SellerReviewsPage, supabase adapter & query hooks); B5.3 notifications UI, settings, bell badge, and final legacy code deletion; B5.4 accessibility audit & fixes — all verified complete on disk and `npm run check` green.
+- Implemented: A5.1 notifications adapter and hooks; B5.1 chat; B5.2 reviews; B5.3 notifications UI and legacy deletion; B5.4 accessibility fixes; A5.4 lazy routes and card images; W6 fixes merged in #65. Production setup, push and real-device regression remain open.
 - Open: A3.5 Resend SMTP half only — blocked on the client's domain (the profile home area → default search location half is DONE, PR #36)
 - Carry-overs: (1) DONE in B4.1: the "Sell on Tibu" / "Seller dashboard" profile rows are live; (2) DONE in B4.4: the Admin row on /profile resolves; (3) `src/pages/search/SearchPage.jsx` was 321 lines vs the 250-line limit — 222 after the D3 split (#40), carry-over closed; (4) `src/queries/contact.js` and the auth service now share `src/lib/siteUrl.js`.
 - Deferred follow-ups: none from Week 2 pages (the legacy Saved screen and its reel taps are gone with B3.5).
 - Blocked: SMTP / real-customer sign-up (needs the domain)
-- Waiting on client: domain · D12 answer (email confirmation stays ON — decisions list, docs/build/08_CLIENT_COMMS.md §2, not yet sent) · logo · reel links · real sellers · accounts-request message (docs/build/08_CLIENT_COMMS.md §3) — sent 27 Sep for GitHub + Supabase org; Resend and domain access still to be requested
+- Waiting on client (8 Nov 2026): real domain and Resend access; final privacy and terms text; support email and phone (replace the `src/lib/support.js` placeholder); logo; launch sellers. Also awaiting D12 answer and reel links.
 - Hosting: Cloudflare Pages project is `tibu-app` (`https://tibu-app.pages.dev`).
 - Unavailable evenings this week: —
 
 ## Log
+
+### 2026-11-08 · W6 docs sync · Codex
+- Updated progress and tracker, marked the master tracker historical, corrected milestone payments and clarified R6 prerequisites. Production deployment and real-device checks remain unverified.
 
 ### 2026-11-08 · W6-2 — messages navigation and profile alert · Codex
 - Done: Thread back now follows the shared history rule: it returns to the previous page when browser history exists, otherwise falls back to `/enquiries` for customers or `/seller/enquiries` for sellers. The empty conversation state now fills the available message area. Profile calls the unread-count hook and shows its enquiry count beside the renamed "Messages" row; a separate Notifications row leads to the notification inbox.
