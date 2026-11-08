@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { ArrowLeft, RefreshCw, Send } from 'lucide-react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import Badge from '../../components/ui/Badge.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
 import IconButton from '../../components/ui/IconButton.jsx';
@@ -29,6 +29,7 @@ export default function ThreadPage({ as = 'customer' }) {
   const { threadId } = useParams();
   const isSeller = as === 'seller';
   const navigate = useNavigate();
+  const location = useLocation();
   const textareaId = useId();
 
   const { data, isLoading, isError, error, refetch, isRefetching } = useThread(threadId, { as });
@@ -69,6 +70,14 @@ export default function ThreadPage({ as = 'customer' }) {
   const trimmed = body.trim();
   const canSend = trimmed.length > 0 && body.length <= MAX_BODY_LENGTH && !isSending;
 
+  function handleBack() {
+    if (location.key !== 'default') {
+      navigate(-1);
+    } else {
+      navigate(fallbackRoute);
+    }
+  }
+
   async function handleSend(e) {
     e?.preventDefault();
     if (!canSend || !thread) return;
@@ -103,10 +112,10 @@ export default function ThreadPage({ as = 'customer' }) {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-bg">
+    <div className="flex min-h-svh flex-col bg-bg">
       <header className="sticky top-0 z-20 flex flex-col border-b border-border bg-surface/95 backdrop-blur-sm">
         <div className="flex min-h-14 items-center gap-2 px-3">
-          <IconButton label="Back" onClick={() => navigate(fallbackRoute)}>
+          <IconButton label="Back" onClick={handleBack}>
             <ArrowLeft size={20} aria-hidden="true" />
           </IconButton>
 
@@ -151,7 +160,7 @@ export default function ThreadPage({ as = 'customer' }) {
         )}
       </header>
 
-      <main className="flex-1 overflow-y-auto px-screen py-4 overscroll-contain">
+      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto px-screen py-4 overscroll-contain">
         {isLoading && <ThreadSkeleton />}
 
         {isError && (
@@ -161,7 +170,7 @@ export default function ThreadPage({ as = 'customer' }) {
         )}
 
         {!isLoading && !isError && messages.length === 0 && (
-          <div className="py-12 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center px-4 py-12 text-center">
             <p className="font-heading text-sm font-semibold text-ink">No messages yet</p>
             <p className="mt-1 font-body text-xs text-muted">Send a message below to start the conversation.</p>
           </div>

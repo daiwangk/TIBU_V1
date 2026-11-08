@@ -12,10 +12,11 @@ import Badge from './ui/Badge';
  *   variant?: 'row' | 'grid',
  *   action?: React.ReactNode,
  *   className?: string,
+ *   eager?: boolean,
  * }} props
  * `action` (e.g. SaveButton) sits over the image corner, next to the link rather than inside it.
  */
-export default function ProductCard({ product, variant = 'grid', action, className = '' }) {
+export default function ProductCard({ product, variant = 'grid', action, className = '', eager = false }) {
   const {
     id,
     name,
@@ -46,6 +47,8 @@ export default function ProductCard({ product, variant = 'grid', action, classNa
           <img
             src={imageUrl}
             alt={name}
+            loading={eager ? 'eager' : 'lazy'}
+            decoding="async"
             className="w-full h-full object-cover"
           />
         ) : (

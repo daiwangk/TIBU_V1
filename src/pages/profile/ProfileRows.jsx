@@ -7,6 +7,7 @@ const ICONS = {
   recent: History,
   connected: MessageCircle,
   notifications: Bell,
+  notificationSettings: Bell,
   sell: Store,
   seller: Store,
   admin: ShieldCheck,
@@ -19,7 +20,7 @@ const ICONS = {
 /**
  * A titled group of navigation rows.
  *
- * @param {{ title: string, rows: Array<{ key: string, label: string, to: string }> }} props
+ * @param {{ title: string, rows: Array<{ key: string, label: string, to: string, badgeCount?: number }> }} props
  */
 export default function ProfileRows({ title, rows }) {
   const headingId = `rows-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
@@ -29,7 +30,7 @@ export default function ProfileRows({ title, rows }) {
         {title}
       </h2>
       <ul className="overflow-hidden rounded-card border border-border bg-surface">
-        {rows.map(({ key, label, to }) => {
+        {rows.map(({ key, label, to, badgeCount = 0 }) => {
           const Icon = ICONS[key] ?? ChevronRight;
           return (
             <li key={key} className="border-b border-border last:border-b-0">
@@ -39,6 +40,11 @@ export default function ProfileRows({ title, rows }) {
               >
                 <Icon size={20} strokeWidth={1.75} className="text-primary" aria-hidden="true" />
                 <span className="flex-1">{label}</span>
+                {badgeCount > 0 && (
+                  <span className="min-w-5 rounded-full bg-primary px-1.5 py-0.5 text-center font-body text-xs font-semibold text-primary-fg" aria-label={`${badgeCount} unread`}>
+                    {badgeCount > 9 ? '9+' : badgeCount}
+                  </span>
+                )}
                 <ChevronRight size={18} className="text-muted" aria-hidden="true" />
               </Link>
             </li>

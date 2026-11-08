@@ -30,10 +30,11 @@ export default function NewBusinessesSection() {
         text: 'Homegrown sellers are joining soon. Explore what is already on Tibu.',
         action: { label: 'Explore Tibu', onClick: () => navigate('/search') },
       }}
-      renderItem={(b) => (
+      renderItem={(b, index) => (
         <BusinessCard
           key={b.id}
           business={b}
+          eager={index === 0}
           className="w-72 flex-shrink-0 snap-start"
           action={<SaveButton kind="business" id={b.id} />}
         />

@@ -1,4 +1,4 @@
-import { MessageSquare, PackageX, Share2 } from 'lucide-react';
+import { MessageCircle, PackageX, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -198,8 +198,8 @@ export default function ProductPage() {
             className="w-full"
             onClick={handleEnquiryClick}
           >
-            <MessageSquare size={18} aria-hidden="true" />
-            Send enquiry
+            <MessageCircle size={18} aria-hidden="true" />
+            Chat with seller
           </Button>
         )}
         <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} disabled={!contactReady} />

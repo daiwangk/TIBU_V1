@@ -10,10 +10,11 @@ import ImagePlaceholder from './ui/ImagePlaceholder';
  *   business: import('../services/contract').BusinessSummary,
  *   action?: React.ReactNode,
  *   className?: string,
+ *   eager?: boolean,
  * }} props
  * `action` (e.g. SaveButton) sits next to the link, not inside it, so it is never a button nested in a link.
  */
-export default function BusinessCard({ business, action, className = '' }) {
+export default function BusinessCard({ business, action, className = '', eager = false }) {
   const {
     slug,
     name,
@@ -39,7 +40,7 @@ export default function BusinessCard({ business, action, className = '' }) {
       {/* Logo */}
       <div className="w-14 h-14 rounded-card overflow-hidden flex-shrink-0">
         {logoUrl ? (
-          <img src={logoUrl} alt={`${name} logo`} className="w-full h-full object-cover" />
+          <img src={logoUrl} alt={`${name} logo`} loading={eager ? 'eager' : 'lazy'} decoding="async" className="w-full h-full object-cover" />
         ) : (
           <ImagePlaceholder aspect="1/1" bg="mint" iconSize={20} className="w-full h-full" />
         )}

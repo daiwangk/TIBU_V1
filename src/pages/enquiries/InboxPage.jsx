@@ -37,7 +37,7 @@ export default function InboxPage({ as = 'customer' }) {
   const isSeller = as === 'seller';
   const { data: threads, isLoading, isError, error, refetch } = useMyThreads({ as });
 
-  const pageTitle = isSeller ? 'Messages' : 'Enquiries';
+  const pageTitle = 'Messages';
   const fallbackRoute = isSeller ? '/seller' : '/profile';
 
   return (
