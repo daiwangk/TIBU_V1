@@ -70,11 +70,12 @@ export function formToPatch(values) {
 export function accountRows(role) {
   if (!role) return [{ key: 'recent', label: 'Recently viewed', to: '/recent' }];
   const rows = [
-    { key: 'enquiries', label: 'Enquiries', to: '/enquiries' },
+    { key: 'enquiries', label: 'Messages', to: '/enquiries' },
+    { key: 'notifications', label: 'Notifications', to: '/notifications' },
     { key: 'saved', label: 'Saved', to: '/saved' },
     { key: 'recent', label: 'Recently viewed', to: '/recent' },
     { key: 'connected', label: 'Previously connected', to: '/connected' },
-    { key: 'notifications', label: 'Notification settings', to: '/notifications/settings' },
+    { key: 'notificationSettings', label: 'Notification settings', to: '/notifications/settings' },
   ];
   if (role === 'customer') rows.push({ key: 'sell', label: 'Sell on Tibu', to: '/sell' });
   if (role === 'seller') rows.push({ key: 'seller', label: 'Seller dashboard', to: '/seller' });

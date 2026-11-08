@@ -5,6 +5,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import Skeleton from '../../components/ui/Skeleton';
 import { useMe } from '../../queries/me';
+import { useUnreadCounts } from '../../queries/notifications';
 import { useAuthStore } from '../../stores/auth';
 import LogoutButton from './LogoutButton';
 import ProfileRows from './ProfileRows';
@@ -43,6 +44,7 @@ function HeaderSkeleton() {
 
 function MemberContent() {
   const { data: profile, isLoading, isError, error, refetch } = useMe();
+  const { data: unreadCounts } = useUnreadCounts();
 
   if (isLoading) return <>{srHeading}<div role="status" aria-label="Loading profile"><HeaderSkeleton /></div></>;
   if (isError) return <>{srHeading}<ErrorState error={error} onRetry={() => refetch()} /></>;
@@ -73,7 +75,12 @@ function MemberContent() {
           Edit
         </Button>
       </section>
-      <ProfileRows title="Your activity" rows={accountRows(profile.role)} />
+      <ProfileRows
+        title="Your activity"
+        rows={accountRows(profile.role).map((row) => (
+          row.key === 'enquiries' ? { ...row, badgeCount: unreadCounts?.enquiries ?? 0 } : row
+        ))}
+      />
     </>
   );
 }

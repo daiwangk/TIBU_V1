@@ -83,10 +83,12 @@ describe('accountRows', () => {
     expect(keys(null)).toEqual(['recent']);
   });
 
-  it('members get the retention rows and notification settings', () => {
-    expect(keys('customer')).toEqual(['enquiries', 'saved', 'recent', 'connected', 'notifications', 'sell']);
+  it('members get Messages, Notifications, and notification settings', () => {
+    expect(keys('customer')).toEqual(['enquiries', 'notifications', 'saved', 'recent', 'connected', 'notificationSettings', 'sell']);
     expect(accountRows('customer').find((r) => r.key === 'enquiries').to).toBe('/enquiries');
-    expect(accountRows('customer').find((r) => r.key === 'notifications').to).toBe('/notifications/settings');
+    expect(accountRows('customer').find((r) => r.key === 'enquiries').label).toBe('Messages');
+    expect(accountRows('customer').find((r) => r.key === 'notifications').to).toBe('/notifications');
+    expect(accountRows('customer').find((r) => r.key === 'notificationSettings').to).toBe('/notifications/settings');
   });
 
   it('customers get Sell on Tibu, sellers get the Seller dashboard, admins get neither', () => {
