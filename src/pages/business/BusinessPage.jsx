@@ -1,4 +1,4 @@
-import { MessageSquare, Share2, Store } from 'lucide-react';
+import { MessageCircle, Share2, Store } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -150,8 +150,8 @@ export default function BusinessPage() {
             className="w-full"
             onClick={handleEnquiryClick}
           >
-            <MessageSquare size={18} aria-hidden="true" />
-            Send enquiry
+            <MessageCircle size={18} aria-hidden="true" />
+            Chat with seller
           </Button>
         )}
         <ContactButtons onContact={handleContact} loadingChannel={pendingChannel} disabled={!contactReady} />

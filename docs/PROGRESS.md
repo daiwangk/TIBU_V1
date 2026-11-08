@@ -22,6 +22,17 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-08 · W6-2 — messages navigation and profile alert · Codex
+- Done: Thread back now follows the shared history rule: it returns to the previous page when browser history exists, otherwise falls back to `/enquiries` for customers or `/seller/enquiries` for sellers. The empty conversation state now fills the available message area. Profile calls the unread-count hook and shows its enquiry count beside the renamed "Messages" row; a separate Notifications row leads to the notification inbox.
+- Verified: A restarted Supabase-mode dev server resolves `/notifications/settings` to login for an unauthenticated visitor, not a 404. No app navigation link targets `/notifications/preferences`; the sole source reference is the intentional legacy-bookmark route in `src/App.jsx`.
+- Files: `src/pages/enquiries/ThreadPage.jsx`, `src/pages/profile/ProfilePage.jsx`, `src/pages/profile/ProfileRows.jsx`, `src/pages/profile/profileForm.js`, `src/pages/profile/profileForm.test.js`, `docs/PROGRESS.md`.
+
+### 2026-11-08 · W6-1 — audit code gaps · Codex
+- Done: Public chat buttons now say "Chat with seller" with MessageCircle; customer inbox title is "Messages" (seller dashboard already said "Messages"). Notification pagination now uses a `useInfiniteQuery` hook, and a missing notification profile shows a retryable error. Product and business cards lazy-decode images except the first card in Home's first row. Help opens a prefilled email draft using a single support-address placeholder.
+- Files: `src/pages/product/ProductPage.jsx`, `src/pages/business/BusinessPage.jsx`, `src/pages/enquiries/InboxPage.jsx`, `src/queries/notifications.js`, `src/pages/notifications/NotificationsPage.jsx`, `src/pages/notifications/NotificationSettingsPage.jsx`, `src/components/ProductCard.jsx`, `src/components/BusinessCard.jsx`, `src/pages/home/NewBusinessesSection.jsx`, `src/pages/static/HelpPage.jsx`, `src/lib/support.js`, `docs/PROGRESS.md`.
+- Verified: `npm run check` passed: guards OK (331 source files, 0 legacy), lint, 50 test files / 492 tests, build. Restored existing lockfile dependencies with `npm ci`; no dependency declaration changed.
+- Left out: Replace `SUPPORT_EMAIL = 'support@example.com'` with the client's real address before launch. No push or remote git commands.
+
 ### 2026-10-31 · B5.4 — Accessibility audit & targeted fixes · dk · Antigravity (Gemini 3.8 Flash)
 - Done: Full accessibility audit and targeted fixes across the app (WCAG 2.1 AA, touch targets, keyboard navigation, ARIA labels):
   - Audited all routes from docs/build/03_ARCHITECTURE_TARGET.md §3 against 4 data states, focus rings, keyboard tab order, alt attributes, and contrast (generated ui-a11y-audit.md artifact with 53 findings).

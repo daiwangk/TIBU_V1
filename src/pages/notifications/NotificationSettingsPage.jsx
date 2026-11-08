@@ -22,7 +22,7 @@ export default function NotificationSettingsPage() {
           </div>
         )}
 
-        {isError && (
+        {(isError || (!isPending && profile === null)) && (
           <ErrorState
             message="We couldn't load your notification settings. Please try again."
             onRetry={() => refetch()}

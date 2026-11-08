@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getUnreadCounts,
   listNotifications,
@@ -17,6 +17,19 @@ export function useNotifications({ limit = 20, offset = 0 } = {}) {
   return useQuery({
     queryKey: [...qk.notifications, { limit, offset }],
     queryFn: () => listNotifications({ limit, offset }),
+    enabled: authStatus === 'authenticated',
+  });
+}
+
+/** Signed-in notification pages, with the next offset derived from fetched pages. */
+export function useInfiniteNotifications({ limit = 20 } = {}) {
+  const authStatus = useAuthStore((s) => s.status);
+  return useInfiniteQuery({
+    queryKey: [...qk.notifications, { limit, infinite: true }],
+    queryFn: ({ pageParam }) => listNotifications({ limit, offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.length === limit ? pages.length * limit : undefined,
     enabled: authStatus === 'authenticated',
   });
 }

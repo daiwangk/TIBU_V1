@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { Bell } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -9,31 +8,24 @@ import ErrorState from '../../components/ui/ErrorState';
 import Skeleton from '../../components/ui/Skeleton';
 import NotificationRow from './NotificationRow';
 import { groupNotificationsByDay } from './notificationsModel';
-import { useNotifications, useMarkNotificationsRead } from '../../queries/notifications';
-import { listNotifications } from '../../services/index.js';
-import { qk } from '../../queries/keys.js';
+import { useInfiniteNotifications, useMarkNotificationsRead } from '../../queries/notifications';
 
 const PAGE_SIZE = 20;
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const [extraBatches, setExtraBatches] = useState([]);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [readIds, setReadIds] = useState(() => new Set());
   const [allMarkedRead, setAllMarkedRead] = useState(false);
 
-  const { data: initialData = [], isPending, isError, refetch } = useNotifications({
-    limit: PAGE_SIZE,
-    offset: 0,
-  });
+  const {
+    data, isPending, isError, refetch, fetchNextPage,
+    hasNextPage, isFetchingNextPage, isFetchNextPageError,
+  } = useInfiniteNotifications({ limit: PAGE_SIZE });
 
   const markReadMutation = useMarkNotificationsRead();
 
   // Combine initial batch with any loaded extra batches, deduplicated
-  const rawItems = [...initialData, ...extraBatches];
+  const rawItems = data?.pages.flat() ?? [];
   const seen = new Set();
   const items = rawItems
     .filter((n) => {
@@ -66,27 +58,7 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleLoadMore = async () => {
-    setIsFetchingMore(true);
-    try {
-      const nextOffset = PAGE_SIZE + extraBatches.length;
-      const nextBatch = await queryClient.fetchQuery({
-        queryKey: [...qk.notifications, { limit: PAGE_SIZE, offset: nextOffset }],
-        queryFn: () => listNotifications({ limit: PAGE_SIZE, offset: nextOffset }),
-      });
-      if (!nextBatch || nextBatch.length < PAGE_SIZE) {
-        setHasReachedEnd(true);
-      }
-      if (nextBatch && nextBatch.length > 0) {
-        setExtraBatches((prev) => [...prev, ...nextBatch]);
-      }
-    } finally {
-      setIsFetchingMore(false);
-    }
-  };
-
   const { today, earlier } = groupNotificationsByDay(items);
-  const canLoadMore = !hasReachedEnd && initialData.length === PAGE_SIZE;
 
   const headerActions = (
     <Button
@@ -167,13 +139,20 @@ export default function NotificationsPage() {
               </section>
             )}
 
-            {canLoadMore && (
+            {isFetchNextPageError && (
+              <ErrorState
+                message="We couldn't load more notifications. Please try again."
+                onRetry={() => fetchNextPage()}
+              />
+            )}
+
+            {hasNextPage && !isFetchNextPageError && (
               <div className="mt-2 flex justify-center">
                 <Button
                   variant="secondary"
-                  disabled={isFetchingMore}
-                  loading={isFetchingMore}
-                  onClick={handleLoadMore}
+                  disabled={isFetchingNextPage}
+                  loading={isFetchingNextPage}
+                  onClick={() => fetchNextPage()}
                 >
                   Load more
                 </Button>

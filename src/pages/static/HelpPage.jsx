@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { toast } from 'sonner';
 import Button from '../../components/ui/Button';
 import Textarea from '../../components/ui/Textarea';
+import { SUPPORT_EMAIL } from '../../lib/support';
 import StaticPage from './StaticPage';
 
 const SECTIONS = [
@@ -27,20 +27,7 @@ const SECTIONS = [
 
 export default function HelpPage() {
   const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    if (!message.trim()) {
-      setError('Please enter your message.');
-      return;
-    }
-    // Nothing is sent yet — the backend/inbox is connected before launch. Keep the text so it isn't lost.
-    setError('');
-    setSubmitted(true);
-    toast('Sending feedback is not switched on yet.');
-  }
+  const emailHref = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Tibu support')}&body=${encodeURIComponent(message)}`;
 
   return (
     <StaticPage
@@ -49,30 +36,21 @@ export default function HelpPage() {
       draft
       sections={SECTIONS}
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3" noValidate>
+      <div className="flex flex-col gap-3">
         <h2 className="font-heading text-lg font-bold text-ink">Send Us a Message</h2>
         <Textarea
           id="help-message"
           label="Your message"
           rows={6}
           value={message}
-          error={error}
           placeholder="Write your complaint, suggestion, question, or feedback..."
-          onChange={(e) => {
-            setMessage(e.target.value);
-            setSubmitted(false);
-            if (error) setError('');
-          }}
+          onChange={(e) => setMessage(e.target.value)}
         />
-        <Button type="submit" className="w-full">
-          Send Message
+        <Button href={emailHref} className="w-full">
+          Email Tibu support
         </Button>
-        {submitted && (
-          <p role="status" className="font-body text-sm font-semibold text-ink">
-            Sending feedback is not switched on yet, so your message has not been sent. We&apos;ll connect it before launch.
-          </p>
-        )}
-      </form>
+        <p className="font-body text-sm text-muted">Your email app will open with this message ready to send.</p>
+      </div>
     </StaticPage>
   );
 }
