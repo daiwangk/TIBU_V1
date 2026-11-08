@@ -93,13 +93,16 @@ export function useSendEnquiry() {
     mutationFn: ({ businessId, productId = null, body }) =>
       sendEnquiry({ businessId, productId, body }),
 
-    onSuccess: (threadId, { businessId }) => {
-      queryClient.invalidateQueries({ queryKey: qk.thread(threadId) });
-      queryClient.invalidateQueries({ queryKey: ['threads'] });
+    onSuccess: async (threadId, { businessId }) => {
+      const refreshes = [
+        queryClient.invalidateQueries({ queryKey: qk.thread(threadId) }),
+        queryClient.invalidateQueries({ queryKey: ['threads'] }),
+        queryClient.invalidateQueries({ queryKey: qk.unread }),
+      ];
       if (businessId) {
-        queryClient.invalidateQueries({ queryKey: qk.myThread(businessId) });
+        refreshes.push(queryClient.invalidateQueries({ queryKey: qk.myThread(businessId) }));
       }
-      queryClient.invalidateQueries({ queryKey: qk.unread });
+      await Promise.all(refreshes);
     },
 
     onError: (err) => {
@@ -120,11 +123,11 @@ export function useSendMessage() {
   return useMutation({
     mutationFn: ({ threadId, body }) => sendMessage({ threadId, body }),
 
-    onSuccess: (_data, { threadId }) => {
-      queryClient.invalidateQueries({ queryKey: qk.thread(threadId) });
-      queryClient.invalidateQueries({ queryKey: ['threads'] });
-      queryClient.invalidateQueries({ queryKey: qk.unread });
-    },
+    onSuccess: (_data, { threadId }) => Promise.all([
+      queryClient.invalidateQueries({ queryKey: qk.thread(threadId) }),
+      queryClient.invalidateQueries({ queryKey: ['threads'] }),
+      queryClient.invalidateQueries({ queryKey: qk.unread }),
+    ]),
 
     onError: (err) => {
       toast.error(userMessage(err));

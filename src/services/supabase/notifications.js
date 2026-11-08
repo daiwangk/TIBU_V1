@@ -37,11 +37,24 @@ export async function listNotifications({ limit, offset } = {}) {
 export async function markNotificationsRead(ids) {
   if (ids !== 'all' && (!Array.isArray(ids) || ids.length === 0)) return;
 
-  let query = getSupabase()
+  const client = getSupabase();
+  let lastExistingId;
+  if (ids === 'all') {
+    // Identity IDs increase: bound this action before the write so later arrivals stay unread.
+    const { data, error } = await client.from('notifications')
+      .select('id').order('id', { ascending: false }).limit(1).maybeSingle();
+    if (error) throw mapSupabaseError(error);
+    if (!data) return;
+    lastExistingId = data.id;
+  }
+
+  let query = client
     .from('notifications')
     .update({ read_at: new Date().toISOString() });
 
-  query = ids === 'all' ? query.is('read_at', null) : query.in('id', ids);
+  query = ids === 'all'
+    ? query.is('read_at', null).lte('id', lastExistingId)
+    : query.in('id', ids);
 
   const { error } = await query;
   if (error) throw mapSupabaseError(error);
