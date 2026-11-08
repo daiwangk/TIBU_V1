@@ -144,7 +144,7 @@ mkdir -p public/icons    # add icon-192.png, icon-512.png, icon-512-maskable.png
 ```
 Then Cursor Agent after S1:
 ```
-TASK R6 — Web Push opt-in (SOW Rev2 §3, DECISIONS D33). public/sw.js, public/manifest.webmanifest and src/lib/push.js (+ test) are already in place and tested — use them, don't rewrite them.
+TASK R6 — Web Push opt-in (SOW Rev2 §3, DECISIONS D33). As of 8 Nov 2026, public/sw.js, public/manifest.webmanifest and src/lib/push.js (+ test) are not in the repo; supply and verify the prerequisites above before implementing this task.
 Read: AGENTS.md, docs/build/12_PUSH_NOTIFICATIONS.md §1, §2 and §5, src/lib/push.js, src/pages/notifications/NotificationSettingsPage.jsx, src/queries/notifications.js, wherever signOut is called (git grep -n "signOut" src).
 1. index.html: <link rel="manifest" href="/manifest.webmanifest"> and <link rel="apple-touch-icon" href="/icons/icon-192.png">.
 2. src/queries/push.js: usePushState() (useQuery on getBrowserPushState, refetchOnWindowFocus), useEnablePush() (subscribeBrowser(import.meta.env.VITE_VAPID_PUBLIC_KEY) then savePushSubscription; invalidate usePushState), useDisablePush() (unsubscribeBrowser(); if it returns an endpoint, deletePushSubscription(endpoint)).

@@ -1,6 +1,6 @@
 # Tibu Phase 1 — Master Guide
 
-One document to understand the whole project and how to finish it. Read it once end to end, then use §5 as your tracker. Everything here points into the build kit (`tibu-build-kit/`) for detail.
+One document to understand the original project plan. The §5 tracker is historical; use `docs/TRACKER.md` for current status.
 
 ---
 
@@ -10,7 +10,7 @@ One document to understand the whole project and how to finish it. Read it once 
 
 **What Phase 1 must deliver (SOW §3).** Guest browsing; customer accounts (login required to contact a seller); Home with New Businesses / New Products / Available Today; search and category browsing with real distance sorting; Business and Product pages with WhatsApp (pre-filled message + product link) and Call; saved items, recently viewed, previously connected; reviews; seller signup, onboarding and product management with photos and Instagram reel videos; an in-app enquiry box with notifications; an admin approval panel; a real backend and database; deployment.
 
-**Money and milestones.** ₹12,000 total. 50% at Milestone 1 (stabilised, refined customer-facing frontend). 50% at completion, deployment and handover. Code ownership transfers after the final payment. One consolidated revision round. 30 days of bug-fix support after handover.
+**Money and milestones.** ₹12,000 total: 40% (₹4,800) at Milestone 1, 30% (₹3,600) at Milestone 2, and 30% (₹3,600) at completion and handover. Code ownership transfers after the final payment. One consolidated revision round. 30 days of bug-fix support after handover.
 
 **Timeline.** 4–5 weeks from sign-off, weekday evenings, plus a buffer week for client pauses and the revision round. Milestone 1 target: **Fri 9 Oct 2026**. Launch and handover target: **week of 2 Nov 2026**.
 
@@ -59,9 +59,9 @@ The strategy: keep the repo and JavaScript; rebuild each screen once, cleanly, a
 
 ---
 
-## 5. Full task tracker
+## 5. Full task tracker (historical)
 
-Tick each box when its **Verify** list (in the week's prompt file) passes and the PR is merged. Estimates are AI-assisted build time; real time is about 1.5×.
+This snapshot is historical and is not maintained. See `docs/TRACKER.md` for current status. Estimates are AI-assisted build time; real time is about 1.5×.
 
 ### Week 1 — `prompts/W1_stabilize_and_backend.md`
 | ✓ | ID | Task | Who | Est | Needs |
@@ -95,7 +95,7 @@ Tick each box when its **Verify** list (in the week's prompt file) passes and th
 | ☐ | A2.2 | Location store feeding searches | A | 2 h | A1.3, B1.5 |
 | ☐ | A2.3 | WhatsApp/OG link previews (tested on real phones) | A | 2.5 h | A1.6, B1.7 |
 | ☐ | A2.4 | Error mapping → toasts | A | 1 h | A1.5 |
-| ☐ | M1 | **Milestone 1 demo + invoice (₹6,000)** | both | 1 h | — |
+| ☐ | M1 | **Milestone 1 demo + invoice (₹4,800)** | both | 1 h | — |
 
 ### Week 3 — `prompts/W3_accounts_contact_retention.md`
 | ✓ | ID | Task | Who | Est | Needs |
@@ -143,7 +143,7 @@ Tick each box when its **Verify** list (in the week's prompt file) passes and th
 | ☐ | Send the revision-round request; fix regressions | both |
 | ☐ | Triage her list (in scope vs. Phase 2 backlog); implement in-scope fixes | both |
 | ☐ | Onboard 3–5 real sellers on prod; launch checklist (`07` §7) | both + client |
-| ☐ | Handover pack, final invoice (₹6,000), ownership transfer after payment | A |
+| ☐ | Handover pack, final invoice (₹3,600), ownership transfer after payment | A |
 
 ---
 

@@ -78,15 +78,16 @@ Done since: A1.5 · B1.7 · B1.8 (weekend) · A2.2 · A2.4 · B2.1 · B2.2 · B2
 | ☑ | B5.1a | Chat — customer side (**+ B5.1 add-on**) | B | Mon | 2 | A4.4 |
 | ☐ | A5.2 | Production on her domain (restore tibu-prod, Cloudflare account decided) | A | Tue | 3 | domain |
 | ☑ | B5.1b | Chat — seller side + badges | B | Tue | 2 | B5.1a |
-| ☐ | R5 | Push backend on dev | A | Wed | 2.5 | A5.1 |
-| ☐ | B5.3 | Notifications UI + last legacy deletion (**B5.3 change**) | B | Wed | 2 | A5.1 |
-| ☐ | B5.2 | Reviews | A | Thu | 2.5 | A3.1 |
-| ☑ | A5.4 | Lazy routes (done early, 7 Oct; main bundle 554 → 366 kB) | A | Thu | 1 | — |
+| ◐ | R5 | Push subscription services exist; backend deployment and live verification remain | A | Wed | 2.5 | A5.1 |
+| ☑ | B5.3 | Notifications UI + last legacy deletion (**B5.3 change**) | B | Wed | 2 | A5.1 |
+| ☑ | B5.2 | Reviews | A | Thu | 2.5 | A3.1 |
+| ☑ | A5.4 | Lazy routes and card image loading (PR #65) | A | Thu | 1 | — |
 | ☐ | R6 | Push frontend | B | Thu | 2.5 | R5, B5.3 |
 | ☐ | ⏱ | Push go/no-go on a real Android phone (D33) | both | Thu | — | R6 |
 | ☐ | A5.3 | Keep-alive, first backup, push on prod | A | Fri | 2 | A5.2 |
 | ☑ | B5.4 | Accessibility audit + fixes | B | Fri | 1.5 | — |
 | ☐ | B5.5 | Real-device regression on prod (rows 1–39) | B | Fri | 2 | A5.2 |
+| ☑ | W6 | Chat labels, notification query, lazy images, help email, messages navigation and profile rows (PR #65) | both | — | — | — |
 | ☐ | — | Revision-round request sent (due Sun 1 Nov) | A | Fri | — | — |
 
 ## Week 6 — 2–6 Nov, Diwali Sun 8 (`WEEK6_DEEP_DIVE.md`)
