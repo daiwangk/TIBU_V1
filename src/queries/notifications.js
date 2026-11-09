@@ -1,11 +1,11 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getUnreadCounts,
   listNotifications,
-  markNotificationsRead,
 } from '../services/index.js';
 import { useAuthStore } from '../stores/auth.js';
 import { qk } from './keys.js';
+import { notificationReadKey, notificationReadOptions, pendingReadSnapshot } from './notificationRead.js';
 
 /**
  * Signed-in user's notification inbox, newest first.
@@ -39,13 +39,16 @@ export function useInfiniteNotifications({ limit = 20 } = {}) {
  */
 export function useMarkNotificationsRead() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (ids) => markNotificationsRead(ids),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.notifications });
-      queryClient.invalidateQueries({ queryKey: qk.unread });
-    },
+  return useMutation(notificationReadOptions(queryClient));
+}
+
+/** Every pending write is tracked, including overlapping taps and navigation. */
+export function usePendingNotificationReads() {
+  const snapshots = useMutationState({
+    filters: { mutationKey: notificationReadKey, status: 'pending' },
+    select: pendingReadSnapshot,
   });
+  return new Set(snapshots.flat());
 }
 
 /**

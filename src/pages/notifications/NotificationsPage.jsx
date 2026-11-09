@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
@@ -8,14 +7,13 @@ import ErrorState from '../../components/ui/ErrorState';
 import Skeleton from '../../components/ui/Skeleton';
 import NotificationRow from './NotificationRow';
 import { groupNotificationsByDay } from './notificationsModel';
-import { useInfiniteNotifications, useMarkNotificationsRead } from '../../queries/notifications';
+import { useInfiniteNotifications, useMarkNotificationsRead, usePendingNotificationReads } from '../../queries/notifications';
 
 const PAGE_SIZE = 20;
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const [readIds, setReadIds] = useState(() => new Set());
-  const [allMarkedRead, setAllMarkedRead] = useState(false);
+  const readIds = usePendingNotificationReads();
 
   const {
     data, isPending, isError, refetch, fetchNextPage,
@@ -36,7 +34,7 @@ export default function NotificationsPage() {
     .map((item) => ({
       ...item,
       readAt:
-        allMarkedRead || readIds.has(item.id)
+        readIds.has(item.id)
           ? item.readAt ?? new Date().toISOString()
           : item.readAt,
     }));
@@ -44,13 +42,11 @@ export default function NotificationsPage() {
   const hasUnread = items.some((item) => !item.readAt);
 
   const handleMarkAllRead = () => {
-    setAllMarkedRead(true);
     markReadMutation.mutate('all');
   };
 
   const handleTapItem = (item) => {
     if (!item.readAt) {
-      setReadIds((prev) => new Set(prev).add(item.id));
       markReadMutation.mutate([item.id]);
     }
     if (item.link) {

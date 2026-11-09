@@ -1,12 +1,15 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { ArrowLeft, RefreshCw, Send } from 'lucide-react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import Badge from '../../components/ui/Badge.jsx';
 import ErrorState from '../../components/ui/ErrorState.jsx';
+import EmptyState from '../../components/ui/EmptyState.jsx';
 import IconButton from '../../components/ui/IconButton.jsx';
 import Skeleton from '../../components/ui/Skeleton.jsx';
 import { useMarkThreadRead, useSendEnquiry, useSendMessage, useThread } from '../../queries/enquiries.js';
 import MessageBubble from './MessageBubble.jsx';
+import useThreadComposer from './useThreadComposer.js';
+import { uniqueMessages } from './threadState.js';
 
 const MAX_BODY_LENGTH = 2000;
 
@@ -32,33 +35,27 @@ export default function ThreadPage({ as = 'customer' }) {
   const location = useLocation();
   const textareaId = useId();
 
-  const { data, isLoading, isError, error, refetch, isRefetching } = useThread(threadId, { as });
+  const { data, dataUpdatedAt, isLoading, isError, error, refetch, isRefetching } = useThread(threadId, { as });
   const markRead = useMarkThreadRead();
   const sendEnquiry = useSendEnquiry();
   const sendMessage = useSendMessage();
 
-  const [body, setBody] = useState('');
-  const [optimisticMessages, setOptimisticMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
   const thread = data?.thread;
-  const serverMessages = data?.messages ?? [];
-
-  // Combine server messages with any optimistic messages not yet settled
-  const messages = [
-    ...serverMessages,
-    ...optimisticMessages.filter(
-      (opt) => !serverMessages.some((msg) => msg.id === opt.id || msg.createdAt === opt.createdAt),
-    ),
-  ];
+  const messages = uniqueMessages(thread ? data.messages : []);
+  const { body, setBody, isSending, canSend, handleSend } = useThreadComposer({
+    threadId, as, thread, sendEnquiry, sendMessage,
+  });
 
   // Mark thread as read on open or when unreadCount > 0
   const unreadCount = thread?.unreadCount ?? 0;
+  const { mutate: markReadMutate } = markRead;
   useEffect(() => {
     if (threadId && unreadCount > 0) {
-      markRead.mutate(threadId);
+      markReadMutate(threadId);
     }
-  }, [threadId, unreadCount, markRead]);
+  }, [as, threadId, unreadCount, dataUpdatedAt, markReadMutate]);
 
   // Scroll to bottom on message updates
   useEffect(() => {
@@ -66,48 +63,12 @@ export default function ThreadPage({ as = 'customer' }) {
   }, [messages.length]);
 
   const fallbackRoute = isSeller ? '/seller/enquiries' : '/enquiries';
-  const isSending = sendEnquiry.isPending || sendMessage.isPending;
-  const trimmed = body.trim();
-  const canSend = trimmed.length > 0 && body.length <= MAX_BODY_LENGTH && !isSending;
 
   function handleBack() {
     if (location.key !== 'default') {
       navigate(-1);
     } else {
       navigate(fallbackRoute);
-    }
-  }
-
-  async function handleSend(e) {
-    e?.preventDefault();
-    if (!canSend || !thread) return;
-
-    const optimisticId = `opt-${Date.now()}`;
-    const newMsg = {
-      id: optimisticId,
-      threadId,
-      fromMe: true,
-      body: trimmed,
-      createdAt: new Date().toISOString(),
-      readAt: null,
-      isOptimistic: true,
-    };
-
-    setOptimisticMessages((prev) => [...prev, newMsg]);
-    setBody('');
-
-    try {
-      if (isSeller) {
-        await sendMessage.mutateAsync({ threadId, body: trimmed });
-      } else {
-        await sendEnquiry.mutateAsync({
-          businessId: thread.businessId,
-          productId: thread.productId ?? null,
-          body: trimmed,
-        });
-      }
-    } catch {
-      setOptimisticMessages((prev) => prev.filter((m) => m.id !== optimisticId));
     }
   }
 
@@ -169,7 +130,12 @@ export default function ThreadPage({ as = 'customer' }) {
           </div>
         )}
 
-        {!isLoading && !isError && messages.length === 0 && (
+        {!isLoading && !isError && !thread && (
+          <EmptyState title="Conversation unavailable" text="This conversation is no longer available."
+            action={{ label: 'Back to messages', to: fallbackRoute }} />
+        )}
+
+        {!isLoading && !isError && thread && messages.length === 0 && (
           <div className="flex flex-1 flex-col items-center justify-center px-4 py-12 text-center">
             <p className="font-heading text-sm font-semibold text-ink">No messages yet</p>
             <p className="mt-1 font-body text-xs text-muted">Send a message below to start the conversation.</p>
@@ -197,7 +163,8 @@ export default function ThreadPage({ as = 'customer' }) {
         )}
       </main>
 
-      <footer className="sticky bottom-0 border-t border-border bg-surface px-screen py-3 pb-[calc(12px+env(safe-area-inset-bottom))]">
+      {thread && !isError && <footer className="sticky bottom-0 border-t border-border bg-surface px-screen py-3 pb-[calc(12px+env(safe-area-inset-bottom))]">
+        {isSending && <p role="status" className="mb-2 text-sm text-muted">Sending message…</p>}
         <form onSubmit={handleSend} className="flex items-end gap-2">
           <div className="relative flex-1">
             <textarea
@@ -226,7 +193,7 @@ export default function ThreadPage({ as = 'customer' }) {
             <Send size={18} aria-hidden="true" />
           </IconButton>
         </form>
-      </footer>
+      </footer>}
     </div>
   );
 }

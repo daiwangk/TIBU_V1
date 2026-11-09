@@ -22,6 +22,14 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-08 · C1 — chat and notification state · Codex
+- Done: Conversation messages are deduplicated by persisted ID; pending sends are separate status only. Drafts clear after a successful send and survive failed writes. Thread/role changes and unavailable threads reset composer state; late responses cannot clear a different draft. Each successful send invalidates its thread query once. Notification read feedback follows pending mutations and rolls back on failure; new arrivals are not masked by an earlier mark-all action. Thread-read failures retain unread counts and no longer trigger a render-driven retry loop.
+- Files: `src/pages/enquiries/ThreadPage.jsx`, `ThreadPage.test.jsx`, `threadState.js`, `threadState.test.js`, `useThreadComposer.js`; `src/pages/notifications/NotificationsPage.jsx`; `src/queries/enquiries.js`, `enquiries.send.test.js`, `notifications.js`, `notificationRead.js`, `notificationRead.test.js`; `src/services/supabase/notifications.js`, `notifications.test.js`; this log.
+- Mark all read: The adapter captures the highest existing notification ID before updating, so arrivals between the snapshot and write stay unread. This uses existing RLS and changes no schema or service signature.
+- How verified: `npm run check` passed (guards, lint, 55 test files / 518 tests, production build). Regression tests cover duplicate IDs, customer/seller sends, failed drafts, unavailable/changed threads, late completion, failed individual/all reads, concurrent reads and newly arriving notifications. Isolated in-memory browser checks at 390×844 covered conversation loading/empty/error/data/unavailable, failed send/retry, seller reply, and notification rollback/new arrivals. No backend requests were made by the UI fixture.
+- Not done / left out: No database changes. C2 must address `send_enquiry` accepting a product from another business (`20260925000004_rpc.sql:198`) and direct message inserts bypassing its RPC-only hourly limit (`20260925000003_rls_policies.sql:114`). Live database/auth and real-phone verification remain separate.
+- Next step: Review the C1 PR; wait for the user's NEXT before planning C2.
+
 ### 2026-11-08 · W6 docs sync · Codex
 - Updated progress and tracker, marked the master tracker historical, corrected milestone payments and clarified R6 prerequisites. Production deployment and real-device checks remain unverified.
 
