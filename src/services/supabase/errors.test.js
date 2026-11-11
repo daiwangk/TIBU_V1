@@ -29,6 +29,15 @@ describe('mapSupabaseError (CONTRACT §11)', () => {
     expect(err.cause.missing).toEqual(['logo', 'location']);
   });
 
+  it('maps product_not_in_business before the generic check violation', () => {
+    const original = { message: 'product_not_in_business', code: '23514' };
+    expect(mapSupabaseError(original)).toMatchObject({
+      code: 'validation',
+      message: 'Choose a product from this shop.',
+      cause: original,
+    });
+  });
+
   it('maps forbidden / RLS / own-enquiry cases', () => {
     expect(mapSupabaseError({ message: 'forbidden', code: '42501' }).code).toBe('forbidden');
     expect(mapSupabaseError({ message: 'role_change_not_allowed', code: '42501' }).code).toBe(
