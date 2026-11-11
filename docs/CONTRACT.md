@@ -379,7 +379,8 @@ Match on the **message prefix first** (several share an errcode), then the code.
 |---|---|---|---|
 | `login_required` / 28000 | reveal_contact, send_enquiry, become_seller | `auth_required` | (open the login sheet, no toast) |
 | `business_not_available` / P0002 | reveal_contact, send_enquiry | `business_not_available` | "This business isn't available right now" |
-| `rate_limited` / 53400 | reveal_contact (60/h), send_enquiry (20/h) | `rate_limited` | "Too many requests — try again in a bit" |
+| `rate_limited` / 53400 | reveal_contact (60/h), enquiry message inserts through the RPC or directly (20 customer messages/h and 100 shop-owner replies/h per sender, counted separately) | `rate_limited` | "Too many requests — try again in a bit" |
+| `product_not_in_business` / 23514 | send_enquiry, when a new or changed product does not belong to the shop | `validation` | "Choose a product from this shop." |
 | `forbidden` / 42501, `role_change_not_allowed`, RLS "new row violates row-level security" | admin RPCs, profile guard, writes | `forbidden` | "You don't have access to that" |
 | `cannot_enquire_own_business` | send_enquiry | `forbidden` | "You can't send an enquiry to your own business" |
 | `not_found`, `no_business`; PostgREST `PGRST116` on `.single()` | mark_enquiry_read, admin, submit | `not_found` (get* functions return `null` instead) | — |
