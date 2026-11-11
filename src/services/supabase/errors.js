@@ -95,6 +95,9 @@ export function mapSupabaseError(err) {
   if (message.startsWith('reason_required')) {
     return new AppError('validation', 'Add a reason', err);
   }
+  if (message.startsWith('product_not_in_business')) {
+    return new AppError('validation', 'Choose a product from this shop.', err);
+  }
   if (
     message.startsWith('invalid_status:')
     || message.startsWith('invalid_transition:')

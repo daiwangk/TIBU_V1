@@ -22,6 +22,14 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-09 · C2 — enquiry integrity · Codex
+- Done: `send_enquiry` rejects a new or changed product ID if it does not belong to the target shop. Follow-ups can reuse a legacy product already stored on the thread. The app maps the new validation error to “Choose a product from this shop.”
+- Done: A message insert trigger enforces separate rolling limits of 20 customer messages and 100 shop-owner replies per sender per hour. It assigns timestamps from the database and serializes simultaneous sends for the same account. Existing row policies still restrict thread access and message inserts to participants.
+- Files: migration `20261108000011_enquiry_integrity.sql`, rollback-only `supabase/tests/enquiry_integrity_test.sql`, Supabase error mapper and unit test, CONTRACT §11, and this log.
+- How verified: `npm run check` passed (guards, lint, 55 test files / 519 tests, production build). The SQL test is ready for a database run after review.
+- Next step: User reviews the SQL before the branch is pushed, then applies and verifies the migration on dev.
+- 2026-11-11 C2b: Scoped RLS smoke-test queries to the Sweet Crumbs fixture, its product, and its enquiry. Dev verification pending.
+
 ### 2026-11-08 · C1 — chat and notification state · Codex
 - Done: Conversation messages are deduplicated by persisted ID; pending sends are separate status only. Drafts clear after a successful send and survive failed writes. Thread/role changes and unavailable threads reset composer state; late responses cannot clear a different draft. Each successful send invalidates its thread query once. Notification read feedback follows pending mutations and rolls back on failure; new arrivals are not masked by an earlier mark-all action. Thread-read failures retain unread counts and no longer trigger a render-driven retry loop.
 - Files: `src/pages/enquiries/ThreadPage.jsx`, `ThreadPage.test.jsx`, `threadState.js`, `threadState.test.js`, `useThreadComposer.js`; `src/pages/notifications/NotificationsPage.jsx`; `src/queries/enquiries.js`, `enquiries.send.test.js`, `notifications.js`, `notificationRead.js`, `notificationRead.test.js`; `src/services/supabase/notifications.js`, `notifications.test.js`; this log.
