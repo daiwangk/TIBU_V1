@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><title>H1 account switch integration test</title></head>
+  <body>
+    <pre id="results">Running account switch checks…</pre>
+    <div id="root"></div>
+    <script type="module">
+      // Run with VITE_DATA_SOURCE=mock npm run dev, then open this page on that local server.
+      import { act, createElement as h, useState } from 'react';
+      import { createRoot } from 'react-dom/client';
+      import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
+      import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+      import { GateResumer } from '/src/app/GateResumer.jsx';
+      import { startAuthSync } from '/src/app/authSync.js';
+      import AppShell from '/src/layouts/AppShell.jsx';
+      import { useAuthStore } from '/src/stores/auth.js';
+      import { registerGateHandler, useLoginGateStore } from '/src/stores/loginGate.js';
+      import { dataSource } from '/src/services/index.js';
+
+      const results = document.querySelector('#results');
+      const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      const root = createRoot(document.querySelector('#root'));
+      const trace = [];
+      let navigate, emit, stop;
+
+      function Probe() {
+        navigate = useNavigate();
+        const [count, setCount] = useState(0);
+        return h('button', { id: 'probe', onClick: () => setCount(count + 1) }, count);
+      }
+
+      function check(label, condition) {
+        if (!condition) throw new Error(label);
+        trace.push('PASS ' + label);
+      }
+
+      async function expectLocation(search) {
+        for (let attempt = 0; attempt < 50; attempt += 1) {
+          if (window.location.search === search) return;
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        }
+        throw new Error('Expected URL query ' + search + ', got ' + window.location.search);
+      }
+
+      const probe = () => document.querySelector('#probe');
+      const nav = () => document.querySelector('nav[aria-label="Main navigation"]');
+      const a = { userId: 'A', email: 'a@example.invalid' };
+      const b = { userId: 'B', email: 'b@example.invalid' };
+      window.IS_REACT_ACT_ENVIRONMENT = true;
+
+      try {
+        if (dataSource !== 'mock') throw new Error('Run this fixture with the mock adapter');
+        stop = startAuthSync({
+          dataSource: 'supabase',
+          getSession: () => new Promise(() => {}),
+          onAuthChange: (listener) => { emit = listener; return () => {}; },
+          queryClient: client,
+          setSession: useAuthStore.getState().setSession,
+        });
+        await act(async () => root.render(h(QueryClientProvider, { client },
+          h(BrowserRouter, null,
+            h(GateResumer),
+            h(Routes, null,
+              h(Route, { element: h(AppShell) }, h(Route, { path: '*', element: h(Probe) }))
+            )
+          )
+        )));
+
+        await act(async () => navigate('?step=first', { replace: true }));
+        await act(async () => navigate('?step=second'));
+        await act(async () => probe().click());
+        const originalProbe = probe();
+        const originalNav = nav();
+        await act(async () => emit(a, 'INITIAL_SESSION'));
+        check('First session preserves mounted content and state', probe() === originalProbe && probe().textContent === '1');
+        await act(async () => emit(a, 'TOKEN_REFRESHED'));
+        check('Token refresh preserves mounted content and state', probe() === originalProbe && probe().textContent === '1');
+        await act(async () => emit({ ...a, email: 'new@example.invalid' }, 'SIGNED_IN'));
+        check('Same-user sign-in preserves mounted content and state', probe() === originalProbe && probe().textContent === '1');
+
+        await act(async () => emit(b, 'SIGNED_IN'));
+        check('Account switch discards route component state', probe() !== originalProbe && probe().textContent === '0');
+        check('Account switch recreates bottom navigation', nav() && nav() !== originalNav);
+        check('Account switch preserves the URL', window.location.search === '?step=second');
+        await act(async () => { navigate(-1); await expectLocation('?step=first'); });
+        check('Back navigation retains the previous history entry', window.location.search === '?step=first');
+        await act(async () => { navigate(1); await expectLocation('?step=second'); });
+        check('Forward navigation retains the next history entry', window.location.search === '?step=second');
+
+        await act(async () => probe().click());
+        const beforeLogout = probe();
+        await act(async () => emit(null, 'SIGNED_OUT'));
+        check('Sign-out discards route component state', probe() !== beforeLogout && probe().textContent === '0');
+
+        const replays = [];
+        registerGateHandler('h1-test', () => replays.push(window.location.search));
+        useLoginGateStore.getState().request({
+          type: 'h1-test', payload: {}, returnTo: window.location.pathname + '?step=first',
+        });
+        await act(async () => emit(a, 'SIGNED_IN'));
+        // GateResumer waits one tick after navigating before consuming the action.
+        await act(async () => new Promise((resolve) => setTimeout(resolve, 30)));
+        await act(async () => emit(a, 'SIGNED_IN'));
+        check('Pending gate action replays once at its return URL', replays.length === 1 && replays[0] === '?step=first');
+
+        results.textContent = trace.join('\n') + '\nAll mounted integration checks passed.';
+      } catch (error) {
+        results.textContent = [...trace, 'FAIL ' + error.message].join('\n');
+      } finally {
+        stop?.();
+        await act(async () => root.unmount());
+        client.clear();
+      }
+    </script>
+  </body>
+</html>

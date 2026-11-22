@@ -6,8 +6,49 @@
  *   2. applyOptimisticToggle — optimistic update / rollback shape
  */
 
-import { describe, expect, it } from 'vitest';
-import { applyOptimisticToggle, isInSavedIds } from './saved.js';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../stores/auth.js';
+import { qk } from './keys.js';
+import { applyOptimisticToggle, isInSavedIds, useToggleSave } from './saved.js';
+
+const mocks = vi.hoisted(() => ({ client: null, setSaved: vi.fn() }));
+vi.mock('../services/index.js', () => ({ setSaved: mocks.setSaved }));
+vi.mock('@tanstack/react-query', async (importOriginal) => ({
+  ...await importOriginal(),
+  useQueryClient: () => mocks.client,
+  useMutation: (options) => options,
+}));
+
+afterEach(() => {
+  mocks.client?.clear();
+  useAuthStore.setState(useAuthStore.getInitialState(), true);
+  vi.resetAllMocks();
+});
+
+it('does not roll back the next account’s saved list when the previous save fails', async () => {
+  const { setSession } = useAuthStore.getState();
+  const savedA = { businessIds: ['a'], productIds: [] };
+  const savedB = { businessIds: ['b'], productIds: [] };
+  mocks.client = new QueryClient();
+  setSession({ userId: 'A', email: 'a@example.invalid' });
+  mocks.client.setQueryData(qk.saved, savedA);
+  let rejectSave;
+  mocks.setSaved.mockImplementation(() => new Promise((_resolve, reject) => { rejectSave = reject; }));
+  const pending = mocks.client.getMutationCache()
+    .build(mocks.client, useToggleSave())
+    .execute({ kind: 'business', id: 'extra', saved: true })
+    .catch((error) => error);
+  await vi.waitFor(() => expect(mocks.setSaved).toHaveBeenCalledOnce());
+  expect(mocks.client.getQueryData(qk.saved).businessIds).toEqual(['a', 'extra']);
+
+  mocks.client.clear();
+  setSession({ userId: 'B', email: 'b@example.invalid' });
+  mocks.client.setQueryData(qk.saved, savedB);
+  rejectSave(new Error('save failed'));
+  expect(await pending).toMatchObject({ message: 'save failed' });
+  expect(mocks.client.getQueryData(qk.saved)).toEqual(savedB);
+});
 
 // ---------------------------------------------------------------------------
 // isInSavedIds
