@@ -1,7 +1,13 @@
 import * as mock from './mock/index.js';
 import * as supabase from './supabase/index.js';
 
-const impl = import.meta.env.VITE_DATA_SOURCE === 'supabase' ? supabase : mock;
+const useSupabase = import.meta.env.VITE_DATA_SOURCE === 'supabase';
+
+if (import.meta.env.PROD && !useSupabase) {
+  throw new Error('Production requires VITE_DATA_SOURCE=supabase');
+}
+
+const impl = useSupabase ? supabase : mock;
 
 export const dataSource = impl === supabase ? 'supabase' : 'mock';
 
