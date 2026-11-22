@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Spinner from '../components/ui/Spinner';
+import { useAuthStore } from '../stores/auth.js';
 import BottomNav from './BottomNav';
 import { isBottomNavHidden } from './navVisibility';
 
@@ -18,6 +19,7 @@ import { isBottomNavHidden } from './navVisibility';
 export default function AppShell() {
   const { pathname } = useLocation();
   const navVisible = !isBottomNavHidden(pathname);
+  const sessionVersion = useAuthStore((state) => state.sessionVersion);
 
   return (
     <>
@@ -31,6 +33,7 @@ export default function AppShell() {
         >
           {/* Lazy pages show a spinner here while their chunk downloads; the nav stays put. */}
           <Suspense
+            key={sessionVersion}
             fallback={
               <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-label="Loading">
                 <Spinner size={32} />
@@ -43,7 +46,7 @@ export default function AppShell() {
       </div>
 
       {/* BottomNav renders inside its own fixed positioning */}
-      <BottomNav />
+      <BottomNav key={sessionVersion} />
     </>
   );
 }

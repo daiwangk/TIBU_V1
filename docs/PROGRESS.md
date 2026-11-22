@@ -22,6 +22,11 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-22 · H1 — isolate account caches · Codex
+- Done: Auth sync cancels outstanding queries and clears query and mutation caches before publishing a different account. AppShell remounts its routed content and bottom navigation on identity changes after initial auth resolution, while the router keeps the current location and history. Seller and Saved mutations reject stale cache writes and rollbacks.
+- Verified: The new regression first failed because account A's delayed save overwrote account B's cached business. It passed after the fix. Additional tests cover first load, same-user sign-in, token refresh, logout, query cancellation, and a late Saved rollback. `npm run check` passed (57 test files, 528 tests, build).
+- Limit: A server write already sent cannot be undone by clearing the client cache. H1 prevents its late result from writing into another session's cache.
+
 ### 2026-11-09 · C2 — enquiry integrity · Codex
 - Done: `send_enquiry` rejects a new or changed product ID if it does not belong to the target shop. Follow-ups can reuse a legacy product already stored on the thread. The app maps the new validation error to “Choose a product from this shop.”
 - Done: A message insert trigger enforces separate rolling limits of 20 customer messages and 100 shop-owner replies per sender per hour. It assigns timestamps from the database and serializes simultaneous sends for the same account. Existing row policies still restrict thread access and message inserts to participants.

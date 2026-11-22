@@ -5,21 +5,37 @@ import { qk } from '../queries/keys.js';
  *
  * - not the supabase data source (mock): status 'guest', Supabase is never touched
  * - otherwise: subscribe first, then ask for the current session (an event that arrives meanwhile wins)
- * - SIGNED_OUT clears every cached query, so the next person on a shared phone sees none of the last one's data
- * - SIGNED_IN / USER_UPDATED refetch the profile
+ * - an identity change cancels queries and clears the cache before the next session is published
+ * - same-account SIGNED_IN / USER_UPDATED refetch the profile
  *
  * @param {{
  *   dataSource: string,
  *   getSession: () => Promise<import('../services/contract.js').Session|null>,
  *   onAuthChange: (cb: (session: import('../services/contract.js').Session|null, event: string) => void) => () => void,
- *   queryClient: { clear: () => void, invalidateQueries: (filters: object) => unknown },
+ *   queryClient: import('@tanstack/react-query').QueryClient,
  *   setSession: (session: import('../services/contract.js').Session|null) => void,
+ *   initialUserId?: string|null,
  * }} deps
  * @returns {() => void} stop
  */
-export function startAuthSync({ dataSource, getSession, onAuthChange, queryClient, setSession }) {
+export function startAuthSync({ dataSource, getSession, onAuthChange, queryClient, setSession, initialUserId = null }) {
+  let currentUserId = initialUserId;
+
+  function syncSession(session) {
+    const userId = session?.userId ?? null;
+    const changed = userId !== currentUserId;
+    if (changed) {
+      void queryClient.cancelQueries();
+      // Clears query and mutation records. Mutation callbacks must still guard late results.
+      queryClient.clear();
+      currentUserId = userId;
+    }
+    setSession(session);
+    return changed;
+  }
+
   if (dataSource !== 'supabase') {
-    setSession(null);
+    syncSession(null);
     return () => {};
   }
 
@@ -31,25 +47,23 @@ export function startAuthSync({ dataSource, getSession, onAuthChange, queryClien
     unsubscribe = onAuthChange((session, event) => {
       if (stopped) return;
       eventSeen = true;
-      setSession(session);
-      if (event === 'SIGNED_OUT') {
-        queryClient.clear();
-      } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+      const changed = syncSession(session);
+      if (!changed && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
         queryClient.invalidateQueries({ queryKey: qk.me });
       }
     });
   } catch {
     // Missing Supabase config: browse as a guest rather than crash the app.
-    setSession(null);
+    syncSession(null);
     return () => {};
   }
 
   getSession()
     .then((session) => {
-      if (!stopped && !eventSeen) setSession(session);
+      if (!stopped && !eventSeen) syncSession(session);
     })
     .catch(() => {
-      if (!stopped && !eventSeen) setSession(null);
+      if (!stopped && !eventSeen) syncSession(null);
     });
 
   return () => {

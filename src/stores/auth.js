@@ -9,15 +9,21 @@ import { create } from 'zustand';
 export const useAuthStore = create((set, get) => ({
   status: 'loading',
   session: null,
+  sessionVersion: 0,
 
   /** @param {import('../services/contract.js').Session|null} session */
   setSession: (session) => {
-    const current = get().session;
+    const { session: current, status, sessionVersion } = get();
     // Token refreshes re-send the same user; keep the object so subscribers don't re-render.
     if (session && current && current.userId === session.userId && current.email === session.email) {
-      if (get().status !== 'authenticated') set({ status: 'authenticated' });
+      if (status !== 'authenticated') set({ status: 'authenticated' });
       return;
     }
-    set({ session: session ?? null, status: session ? 'authenticated' : 'guest' });
+    const identityChanged = (current?.userId ?? null) !== (session?.userId ?? null);
+    set({
+      session: session ?? null,
+      status: session ? 'authenticated' : 'guest',
+      sessionVersion: status !== 'loading' && identityChanged ? sessionVersion + 1 : sessionVersion,
+    });
   },
 }));

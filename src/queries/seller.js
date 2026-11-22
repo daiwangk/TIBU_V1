@@ -25,10 +25,27 @@ import {
   uploadProductImage,
 } from '../services/index.js';
 import { useAuthStore } from '../stores/auth.js';
+import { AppError } from '../services/errors.js';
 import { qk } from './keys.js';
 
 // Under qk.myBusiness, so invalidating the business refreshes the checklist too.
 const CHECKLIST_KEY = [...qk.myBusiness, 'checklist'];
+
+function useSellerCacheMutation(mutationFn, onSuccess) {
+  const { sessionVersion } = useAuthStore.getState();
+  return useMutation({
+    onMutate: () => ({ startedIn: useAuthStore.getState().sessionVersion }),
+    mutationFn: (input) => {
+      if (useAuthStore.getState().sessionVersion !== sessionVersion) {
+        throw new AppError('auth_required', 'The account has changed');
+      }
+      return mutationFn(input);
+    },
+    onSuccess: (result, _input, context) => {
+      if (useAuthStore.getState().sessionVersion === context?.startedIn) return onSuccess(result);
+    },
+  });
+}
 
 function useSellerQuery(queryKey, queryFn) {
   const status = useAuthStore((s) => s.status);
@@ -59,12 +76,9 @@ function useSellerMutation(mutationFn, extraKeys = []) {
 /** `becomeSeller()` for a signed-in customer. Puts the new profile straight into the `me` cache so the role check never sees the old role. */
 export function useBecomeSeller() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => becomeSeller(),
-    onSuccess: (profile) => {
-      queryClient.setQueryData(qk.me, profile);
-      return queryClient.invalidateQueries({ queryKey: qk.myBusiness });
-    },
+  return useSellerCacheMutation(() => becomeSeller(), (profile) => {
+    queryClient.setQueryData(qk.me, profile);
+    return queryClient.invalidateQueries({ queryKey: qk.myBusiness });
   });
 }
 
@@ -79,12 +93,9 @@ export function useMyBusiness() {
  */
 export function useSaveMyBusiness() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input) => saveMyBusiness(input),
-    onSuccess: (business) => {
-      queryClient.setQueryData(qk.myBusiness, business);
-      return Promise.all([qk.myBusiness, qk.myProducts].map((queryKey) => queryClient.invalidateQueries({ queryKey })));
-    },
+  return useSellerCacheMutation(saveMyBusiness, (business) => {
+    queryClient.setQueryData(qk.myBusiness, business);
+    return Promise.all([qk.myBusiness, qk.myProducts].map((queryKey) => queryClient.invalidateQueries({ queryKey })));
   });
 }
 

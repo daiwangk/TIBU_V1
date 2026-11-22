@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../stores/auth.js';
 import { startAuthSync } from './authSync.js';
 
 const A = { userId: 'u1', email: 'a@b.co' };
+const B = { userId: 'u2', email: 'b@b.co' };
 const flush = () => new Promise((resolve) => { setTimeout(resolve, 0); });
 
 function setup(overrides = {}) {
@@ -12,7 +14,7 @@ function setup(overrides = {}) {
     dataSource: 'supabase',
     getSession: vi.fn().mockResolvedValue(null),
     onAuthChange: vi.fn((cb) => { listener = cb; return unsubscribe; }),
-    queryClient: { clear: vi.fn(), invalidateQueries: vi.fn() },
+    queryClient: { cancelQueries: vi.fn(), clear: vi.fn(), invalidateQueries: vi.fn() },
     setSession: (s) => useAuthStore.getState().setSession(s),
     ...overrides,
   };
@@ -20,7 +22,7 @@ function setup(overrides = {}) {
 }
 
 beforeEach(() => {
-  useAuthStore.setState({ status: 'loading', session: null });
+  useAuthStore.setState(useAuthStore.getInitialState(), true);
 });
 
 describe('startAuthSync', () => {
@@ -39,6 +41,7 @@ describe('startAuthSync', () => {
     expect(useAuthStore.getState().status).toBe('loading');
     await flush();
     expect(useAuthStore.getState()).toMatchObject({ status: 'authenticated', session: A });
+    expect(useAuthStore.getState().sessionVersion).toBe(0);
 
     useAuthStore.setState({ status: 'loading', session: null });
     startAuthSync(setup().deps);
@@ -52,25 +55,75 @@ describe('startAuthSync', () => {
     expect(useAuthStore.getState().status).toBe('guest');
   });
 
-  it('SIGNED_OUT clears every cached query and returns to guest', async () => {
+  it('SIGNED_OUT clears every cached query and remounts the account views once', () => {
     const { deps, emit } = setup();
     startAuthSync(deps);
     emit(A, 'SIGNED_IN');
     expect(useAuthStore.getState().status).toBe('authenticated');
+    expect(useAuthStore.getState().sessionVersion).toBe(0);
+    deps.queryClient.clear.mockClear();
+    deps.queryClient.cancelQueries.mockClear();
     emit(null, 'SIGNED_OUT');
+    emit(null, 'SIGNED_OUT');
+    expect(deps.queryClient.cancelQueries).toHaveBeenCalledTimes(1);
     expect(deps.queryClient.clear).toHaveBeenCalledTimes(1);
-    expect(useAuthStore.getState()).toMatchObject({ status: 'guest', session: null });
+    expect(useAuthStore.getState()).toMatchObject({ status: 'guest', session: null, sessionVersion: 1 });
   });
 
-  it('SIGNED_IN refetches the profile; a token refresh does neither', () => {
+  it('same-user SIGNED_IN refetches the profile without clearing or remounting', () => {
     const { deps, emit } = setup();
     startAuthSync(deps);
     emit(A, 'SIGNED_IN');
+    deps.queryClient.clear.mockClear();
+    deps.queryClient.cancelQueries.mockClear();
+    emit({ ...A, email: 'new@example.invalid' }, 'SIGNED_IN');
     expect(deps.queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['me'] });
-    deps.queryClient.invalidateQueries.mockClear();
+    expect(deps.queryClient.clear).not.toHaveBeenCalled();
+    expect(deps.queryClient.cancelQueries).not.toHaveBeenCalled();
+    expect(useAuthStore.getState().sessionVersion).toBe(0);
+  });
+
+  it('TOKEN_REFRESHED does not clear, refetch, or remount', () => {
+    const { deps, emit } = setup();
+    startAuthSync(deps);
+    emit(A, 'SIGNED_IN');
+    deps.queryClient.clear.mockClear();
+    deps.queryClient.cancelQueries.mockClear();
     emit(A, 'TOKEN_REFRESHED');
     expect(deps.queryClient.invalidateQueries).not.toHaveBeenCalled();
     expect(deps.queryClient.clear).not.toHaveBeenCalled();
+    expect(deps.queryClient.cancelQueries).not.toHaveBeenCalled();
+    expect(useAuthStore.getState().sessionVersion).toBe(0);
+  });
+
+  it('switching A to B removes cached data and cancels a late query before publishing B', async () => {
+    const client = new QueryClient();
+    const { deps, emit } = setup({ queryClient: client });
+    const stop = startAuthSync(deps);
+    let resolveQuery;
+    try {
+      emit(A, 'SIGNED_IN');
+      client.setQueryData(['myBusiness'], { id: 'A-shop' });
+      const observed = [];
+      const unsubscribe = useAuthStore.subscribe(({ session }) => {
+        if (session?.userId === B.userId) observed.push(client.getQueryData(['myBusiness']));
+      });
+      const pending = client.fetchQuery({
+        queryKey: ['saved'],
+        queryFn: () => new Promise((resolve) => { resolveQuery = resolve; }),
+      }).catch((error) => error);
+
+      emit(B, 'SIGNED_IN');
+      unsubscribe();
+      resolveQuery({ businessIds: ['A-shop'] });
+      expect(await pending).toBeInstanceOf(Error);
+      expect(observed).toEqual([undefined]);
+      expect(client.getQueryData(['saved'])).toBeUndefined();
+      expect(useAuthStore.getState().sessionVersion).toBe(1);
+    } finally {
+      stop();
+      client.clear();
+    }
   });
 
   it('an auth event that arrives first is not overwritten by a late getSession answer', async () => {

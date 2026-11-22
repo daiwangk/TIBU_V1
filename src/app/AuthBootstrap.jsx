@@ -11,33 +11,35 @@ import { startAuthSync } from './authSync.js';
 export default function AuthBootstrap() {
   const queryClient = useQueryClient();
   const authStatus = useAuthStore((s) => s.status);
+  const userId = useAuthStore((s) => s.session?.userId);
   const { data: profile } = useMe();
-  const hasAppliedLocation = useRef(false);
+  const locationAppliedFor = useRef(null);
 
   useEffect(() => startAuthSync({
     dataSource,
     getSession,
     onAuthChange,
     queryClient,
+    initialUserId: useAuthStore.getState().session?.userId ?? null,
     setSession: useAuthStore.getState().setSession,
   }), [queryClient]);
 
   // Default search location from profile home area when authenticated and location is empty
   useEffect(() => {
     if (authStatus !== 'authenticated') {
-      hasAppliedLocation.current = false;
+      locationAppliedFor.current = null;
       return;
     }
 
-    if (hasAppliedLocation.current || !profile) return;
+    if (!profile || profile.id !== userId || locationAppliedFor.current === userId) return;
 
-    hasAppliedLocation.current = true;
+    locationAppliedFor.current = userId;
     const locationStore = useLocationStore.getState();
     const defaultLocation = resolveProfileLocationDefault(locationStore, profile);
     if (defaultLocation) {
       locationStore.setFromProfile(defaultLocation);
     }
-  }, [authStatus, profile]);
+  }, [authStatus, userId, profile]);
 
   return null;
 }

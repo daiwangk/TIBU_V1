@@ -12,6 +12,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved } from '../services/index.js';
+import { AppError } from '../services/errors.js';
 import { registerGateHandler, useLoginGateStore } from '../stores/loginGate.js';
 import { useAuthStore } from '../stores/auth.js';
 import { userMessage } from '../lib/errors.js';
@@ -166,27 +167,36 @@ export function useIsSaved(kind, id) {
  */
 export function useToggleSave() {
   const queryClient = useQueryClient();
+  const { sessionVersion } = useAuthStore.getState();
+  const isCurrentSession = () => useAuthStore.getState().sessionVersion === sessionVersion;
 
   return useMutation({
-    mutationFn: ({ kind, id, saved }) => setSaved({ kind, id, saved }),
+    mutationFn: ({ kind, id, saved }) => {
+      if (!isCurrentSession()) throw new AppError('auth_required', 'The account has changed');
+      return setSaved({ kind, id, saved });
+    },
 
     onMutate: async ({ kind, id, saved }) => {
+      if (!isCurrentSession()) return;
       await queryClient.cancelQueries({ queryKey: qk.saved });
+      if (!isCurrentSession()) return;
       const previous = queryClient.getQueryData(qk.saved);
       queryClient.setQueryData(qk.saved, (old) =>
         applyOptimisticToggle(old, kind, id, saved),
       );
-      return { previous };
+      return { previous, sessionVersion };
     },
 
     onError: (err, _vars, context) => {
+      if (context?.sessionVersion !== useAuthStore.getState().sessionVersion) return;
       if (context?.previous !== undefined) {
         queryClient.setQueryData(qk.saved, context.previous);
       }
       toast.error(userMessage(err));
     },
 
-    onSettled: (_data, _err, { kind }) => {
+    onSettled: (_data, _err, { kind }, context) => {
+      if (context?.sessionVersion !== useAuthStore.getState().sessionVersion) return;
       queryClient.invalidateQueries({ queryKey: qk.saved });
       queryClient.invalidateQueries({
         queryKey: kind === 'business' ? qk.savedBusinesses : qk.savedProducts,
