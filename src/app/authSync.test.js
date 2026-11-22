@@ -55,7 +55,7 @@ describe('startAuthSync', () => {
     expect(useAuthStore.getState().status).toBe('guest');
   });
 
-  it('SIGNED_OUT clears every cached query and remounts the account views once', () => {
+  it('SIGNED_OUT clears the cache and advances the session version once', () => {
     const { deps, emit } = setup();
     startAuthSync(deps);
     emit(A, 'SIGNED_IN');
@@ -70,7 +70,7 @@ describe('startAuthSync', () => {
     expect(useAuthStore.getState()).toMatchObject({ status: 'guest', session: null, sessionVersion: 1 });
   });
 
-  it('same-user SIGNED_IN refetches the profile without clearing or remounting', () => {
+  it('same-user SIGNED_IN refetches the profile and keeps the session version', () => {
     const { deps, emit } = setup();
     startAuthSync(deps);
     emit(A, 'SIGNED_IN');
@@ -83,7 +83,7 @@ describe('startAuthSync', () => {
     expect(useAuthStore.getState().sessionVersion).toBe(0);
   });
 
-  it('TOKEN_REFRESHED does not clear, refetch, or remount', () => {
+  it('TOKEN_REFRESHED keeps the cache and session version and skips profile refetch', () => {
     const { deps, emit } = setup();
     startAuthSync(deps);
     emit(A, 'SIGNED_IN');

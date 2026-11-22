@@ -4,7 +4,10 @@ import { create } from 'zustand';
  * Who is signed in. Not persisted: supabase-js keeps the session itself and AuthBootstrap restores it.
  * `loading` until the first answer arrives, so guards never flash the login redirect for a signed-in user.
  *
- * State: `{ status: 'loading' | 'guest' | 'authenticated', session: Session | null, setSession(session) }`.
+ * `sessionVersion` stays stable during initial session restoration. After that it
+ * advances on user ID changes, including sign-out, but not on same-user events.
+ * AppShell uses it as a remount key. Mutation callbacks use it to discard results
+ * from an earlier session, even if the same account has since signed back in.
  */
 export const useAuthStore = create((set, get) => ({
   status: 'loading',
