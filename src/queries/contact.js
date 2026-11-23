@@ -35,8 +35,9 @@ import { qk } from './keys.js';
  *
  * @param {{ type: 'whatsapp'|'call', payload: object, returnTo?: string }} action
  * @param {import('@tanstack/react-query').QueryClient|null} queryClient
+ * @param {boolean} replaying lets the gate preserve the action and handle errors
  */
-export async function performContactAction(action, queryClient = null) {
+export async function performContactAction(action, queryClient = null, replaying = false) {
   const { type, payload } = action;
   const { businessId, businessSlug, businessName, product } = payload;
 
@@ -86,6 +87,7 @@ export async function performContactAction(action, queryClient = null) {
       }
     }
   } catch (err) {
+    if (replaying) throw err;
     if (err?.code === 'auth_required') {
       useLoginGateStore.getState().request(action);
       return;
@@ -99,8 +101,9 @@ export async function performContactAction(action, queryClient = null) {
 // GateResumer passes its queryClient through resumePending(queryClient).
 // ---------------------------------------------------------------------------
 
-registerGateHandler('whatsapp', (action, qc) => performContactAction(action, qc));
-registerGateHandler('call', (action, qc) => performContactAction(action, qc));
+const replayContact = (action, qc) => performContactAction(action, qc, true);
+registerGateHandler('whatsapp', replayContact);
+registerGateHandler('call', replayContact);
 
 // ---------------------------------------------------------------------------
 // React hook

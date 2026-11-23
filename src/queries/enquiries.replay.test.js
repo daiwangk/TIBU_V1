@@ -10,6 +10,8 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { toast } from 'sonner';
+import { AppError } from '../services/errors.js';
 
 const sendEnquiry = vi.fn();
 vi.mock('../services/index.js', () => ({
@@ -62,9 +64,7 @@ describe("replayed 'enquiry' gate action", () => {
       }),
     );
 
-    resumePending(queryClient);
-
-    await vi.waitFor(() => expect(sendEnquiry).toHaveBeenCalled());
+    await resumePending(queryClient);
 
     expect(sendEnquiry).toHaveBeenCalledWith({
       businessId: 'biz-1',
@@ -72,10 +72,8 @@ describe("replayed 'enquiry' gate action", () => {
       body: 'Do you make custom cakes?',
     });
 
-    await vi.waitFor(() => {
-      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-        queryKey: qk.thread('thread-456'),
-      });
+    expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: qk.thread('thread-456'),
     });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['threads'],
@@ -104,9 +102,7 @@ describe("replayed 'enquiry' gate action", () => {
       }),
     );
 
-    resumePending(queryClient);
-
-    await vi.waitFor(() => expect(sendEnquiry).toHaveBeenCalled());
+    await resumePending(queryClient);
     expect(window.location.assign).toHaveBeenCalledWith('/enquiries/thread-789');
   });
 
@@ -117,7 +113,40 @@ describe("replayed 'enquiry' gate action", () => {
       returnTo: '/',
     });
 
-    expect(() => resumePending(null)).not.toThrow();
+    await resumePending(null);
     expect(sendEnquiry).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['network', "You're offline — check your connection"],
+    ['rate_limited', 'Too many requests — try again in a bit'],
+    ['unknown', 'Something went wrong'],
+  ])('keeps the draft and expiry after a %s error', async (code, message) => {
+    sendEnquiry.mockRejectedValueOnce(new AppError(code, 'failed'));
+    useLoginGateStore.getState().request(enquiryGateAction({ businessId: 'biz-1', body: 'Keep my draft' }));
+    const original = localStorage.getItem('tibu.pendingAction');
+    await resumePending();
+
+    expect(sendEnquiry).toHaveBeenCalledOnce();
+    expect(localStorage.getItem('tibu.pendingAction')).toBe(original);
+    expect(toast.error).toHaveBeenCalledExactlyOnceWith(message);
+    expect(window.location.assign).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['not_found', "We couldn't find that"],
+    ['business_not_available', "This business isn't available right now"],
+    ['forbidden', "You don't have access to that"],
+    ['validation', 'Invalid enquiry'],
+    ['auth_required', 'Please log in to continue'],
+  ])('drops the draft after a non-retryable %s error', async (code, message) => {
+    sendEnquiry.mockRejectedValueOnce(new AppError(code, message));
+    useLoginGateStore.getState().request(enquiryGateAction({ businessId: 'biz-1', body: 'Cannot send' }));
+    await resumePending();
+
+    expect(localStorage.getItem('tibu.pendingAction')).toBeNull();
+    expect(useLoginGateStore.getState().pending).toBeNull();
+    expect(toast.error).toHaveBeenCalledExactlyOnceWith(message);
+    expect(window.location.assign).not.toHaveBeenCalled();
   });
 });

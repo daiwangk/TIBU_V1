@@ -22,6 +22,11 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-23 · H2 — keep failed login-gate actions · Codex
+- Done: The gate clears the matching action on success or a non-retryable error. Only network, rate-limit, and unknown errors keep the action and its original 30-minute expiry. Failed replays show the existing toast. Automatic replay attempts are limited to one per authenticated session using H1's session version. The gate uses the in-memory action when storage is blocked.
+- Verified: The first regression failed when a rejected replay lost its draft. The terminal-error regressions then failed when the initial fix retained drafts for non-retryable errors. Both pass. Focused tests also cover delayed completion, concurrent calls, a busy browser lock, replacement actions, blocked storage, and preserved expiry. `npm run check` passed with 546 tests across 57 files and a successful build.
+- Limit: Browser locks coordinate tabs where supported. Other browsers guard duplicate replays within each tab. A retry after a server accepted a request but its response was lost can still duplicate the operation.
+
 ### 2026-11-22 · H1 — isolate account caches · Codex
 - Done: Auth sync cancels outstanding queries and clears query and mutation caches before publishing a different account. AppShell remounts its routed content and bottom navigation on identity changes after initial auth resolution, while the router keeps the current location and history. Seller and Saved mutations reject stale cache writes and rollbacks.
 - Scope: `src/stores/auth.js` owns the session version so it updates atomically with the user ID. `src/layouts/AppShell.jsx` uses that version as the key below the router.

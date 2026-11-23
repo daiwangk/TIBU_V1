@@ -15,28 +15,66 @@
  *
  * Gate-handler registry (module-level, survives store resets):
  *   registerGateHandler(type, fn) – register a handler for a pending type
- *   resumePending()               – read, clear, and execute the pending action
+ *   resumePending()               – execute the pending action and clear it on success
  */
 
 import { useSyncExternalStore } from 'react';
 import { create } from 'zustand';
-import { getWithExpiry, setWithExpiry } from '../lib/storage.js';
+import { toast } from 'sonner';
+import { userMessage } from '../lib/errors.js';
+import { setWithExpiry } from '../lib/storage.js';
+import { isAppError } from '../services/errors.js';
 
 const STORAGE_KEY = 'tibu.pendingAction';
 const EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
+const RETRYABLE_CODES = new Set(['network', 'rate_limited', 'unknown']);
 
-/** @type {Map<string, (action: object) => void>} */
+/** @type {Map<string, (action: PendingAction, context?: unknown) => unknown>} */
 const handlers = new Map();
+let replaying = false;
 
 /**
  * Register a handler function for a pending action type.
  * Safe to call multiple times — last registration wins.
  *
  * @param {string} type
- * @param {(action: object) => void} fn
+ * @param {(action: PendingAction, context?: unknown) => unknown} fn
  */
 export function registerGateHandler(type, fn) {
   handlers.set(type, fn);
+}
+
+function readPending() {
+  const { pending, memoryOnly } = useLoginGateStore.getState();
+  if (!memoryOnly) {
+    let raw;
+    try {
+      raw = localStorage.getItem(STORAGE_KEY);
+    } catch {
+      // Storage is unavailable. A readable but empty slot is authoritative.
+    }
+    if (raw === null) return null;
+    if (raw !== undefined) {
+      try {
+        const entry = JSON.parse(raw);
+        if (entry?.value && typeof entry.expiresAt === 'number' && entry.expiresAt > Date.now()) {
+          return { action: entry.value, raw };
+        }
+      } catch {
+        // Treat an invalid stored entry like an expired one.
+      }
+      try { localStorage.removeItem(STORAGE_KEY); } catch { /* Storage may be read-only. */ }
+      return null;
+    }
+  }
+  return pending && pending.createdAt + EXPIRY_MS > Date.now()
+    ? { action: pending, raw: null }
+    : null;
+}
+
+function matchesEntry(a, b) {
+  if (!a || !b) return false;
+  return a.raw === null ? a.action === b.action : a.raw === b.raw;
 }
 
 /**
@@ -46,41 +84,53 @@ export function registerGateHandler(type, fn) {
  * @returns {PendingAction|null}
  */
 export function peekPending() {
-  return getWithExpiry(STORAGE_KEY);
+  return readPending()?.action ?? null;
 }
 
 /**
- * Read the non-expired pending action from localStorage, clear it,
- * and execute its registered handler (if any).
+ * Run the pending action once. Handlers may show a terminal message themselves.
+ * A rejection gets the standard toast here and keeps the action only if retryable.
  *
  * If no handler is registered for the type (e.g. 'save', 'enquiry',
  * 'review' which don't exist yet) the entry is cleared silently — no
  * throw, no stale entry left behind (constraint c).
  */
-export function resumePending(context) {
-  const action = getWithExpiry(STORAGE_KEY); // also removes if expired
-  if (!action) {
-    useLoginGateStore.setState({ open: false, pending: null });
-    return;
+export async function resumePending(context, expectedAction) {
+  if (replaying) return;
+  const entry = readPending();
+  if (!entry || (expectedAction && JSON.stringify(expectedAction) !== JSON.stringify(entry.action))) return;
+
+  async function run() {
+    if (!matchesEntry(entry, readPending())) return;
+    const initialMemory = useLoginGateStore.getState().pending;
+    useLoginGateStore.getState().close();
+    try {
+      await handlers.get(entry.action.type)?.(entry.action, context);
+    } catch (error) {
+      toast.error(userMessage(error));
+      const code = isAppError(error) ? error.code : 'unknown';
+      if (RETRYABLE_CODES.has(code)) return;
+    }
+    if (entry.raw !== null && matchesEntry(entry, readPending())) {
+      try { localStorage.removeItem(STORAGE_KEY); } catch { /* Storage may be read-only. */ }
+    }
+    if (useLoginGateStore.getState().pending === initialMemory) {
+      useLoginGateStore.setState({ open: false, pending: null });
+    }
   }
 
-  // Always clear storage before running — prevents double-execution on errors
+  replaying = true;
   try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // localStorage may be unavailable; getWithExpiry already removed it
-  }
-
-  const handler = handlers.get(action.type);
-  if (!handler) {
-    useLoginGateStore.setState({ open: false, pending: null });
-    return; // unknown type — clear and do nothing
-  }
-
-  try {
-    handler(action, context);
+    const locks = typeof navigator === 'undefined' ? undefined : navigator.locks;
+    if (entry.raw !== null && locks) {
+      await locks.request(STORAGE_KEY, { ifAvailable: true }, (lock) => lock ? run() : undefined);
+    } else {
+      await run();
+    }
+  } catch (error) {
+    toast.error(userMessage(error));
   } finally {
-    useLoginGateStore.setState({ open: false, pending: null });
+    replaying = false;
   }
 }
 
@@ -96,6 +146,7 @@ export function resumePending(context) {
  * @typedef {Object} LoginGateState
  * @property {boolean} open
  * @property {PendingAction|null} pending
+ * @property {boolean} memoryOnly
  * @property {(action: PendingAction) => void} request
  * @property {() => void} cancel
  * @property {() => void} close
@@ -104,6 +155,7 @@ export function resumePending(context) {
 export const useLoginGateStore = create((set) => ({
   open: false,
   pending: null,
+  memoryOnly: false,
 
   /**
    * Open the login gate and persist the pending action so it survives
@@ -118,8 +170,8 @@ export const useLoginGateStore = create((set) => ({
       returnTo: action.returnTo,
       createdAt: Date.now(),
     };
-    setWithExpiry(STORAGE_KEY, pending, EXPIRY_MS);
-    set({ open: true, pending });
+    const persisted = setWithExpiry(STORAGE_KEY, pending, EXPIRY_MS);
+    set({ open: true, pending, memoryOnly: !persisted });
   },
 
   /**
@@ -132,7 +184,7 @@ export const useLoginGateStore = create((set) => ({
     } catch {
       // localStorage unavailable — nothing to do
     }
-    set({ open: false, pending: null });
+    set({ open: false, pending: null, memoryOnly: false });
   },
 
   /**
@@ -156,7 +208,7 @@ export function handlePendingStorageEvent(event) {
   if (event.key !== null && event.key !== STORAGE_KEY) return; // null = storage.clear()
   if (peekPending()) return;
   if (useLoginGateStore.getState().open || useLoginGateStore.getState().pending) {
-    useLoginGateStore.setState({ open: false, pending: null });
+    useLoginGateStore.setState({ open: false, pending: null, memoryOnly: false });
   }
 }
 

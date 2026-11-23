@@ -13,7 +13,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getSavedIds, listSavedBusinesses, listSavedProducts, setSaved } from '../services/index.js';
 import { AppError } from '../services/errors.js';
-import { registerGateHandler, useLoginGateStore } from '../stores/loginGate.js';
+import { registerGateHandler } from '../stores/loginGate.js';
 import { useAuthStore } from '../stores/auth.js';
 import { userMessage } from '../lib/errors.js';
 import { qk } from './keys.js';
@@ -72,20 +72,11 @@ async function performSaveAction(action, queryClient = null) {
   // Malformed payload — clear silently (prevents a retry loop)
   if (!kind || !id) return;
 
-  try {
-    await setSaved({ kind, id, saved });
-    if (queryClient) {
-      const listKey = kind === 'business' ? qk.savedBusinesses : qk.savedProducts;
-      queryClient.invalidateQueries({ queryKey: qk.saved }).catch(() => {});
-      queryClient.invalidateQueries({ queryKey: listKey }).catch(() => {});
-    }
-  } catch (err) {
-    if (err?.code === 'auth_required') {
-      // Session expired between login and resume — re-gate
-      useLoginGateStore.getState().request(action);
-      return;
-    }
-    toast.error(userMessage(err));
+  await setSaved({ kind, id, saved });
+  if (queryClient) {
+    const listKey = kind === 'business' ? qk.savedBusinesses : qk.savedProducts;
+    queryClient.invalidateQueries({ queryKey: qk.saved }).catch(() => {});
+    queryClient.invalidateQueries({ queryKey: listKey }).catch(() => {});
   }
 }
 

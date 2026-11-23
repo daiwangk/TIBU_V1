@@ -9,7 +9,10 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { toast } from 'sonner';
 import { handlePendingStorageEvent, peekPending, registerGateHandler, resumePending, subscribePending, useLoginGateStore } from './loginGate.js';
+
+vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -38,7 +41,7 @@ function readRaw() {
 }
 
 function resetStore() {
-  useLoginGateStore.setState({ open: false, pending: null });
+  useLoginGateStore.setState({ open: false, pending: null, memoryOnly: false });
 }
 
 // ---------------------------------------------------------------------------
@@ -47,8 +50,10 @@ function resetStore() {
 
 beforeEach(() => {
   vi.stubGlobal('localStorage', createMemoryStorage());
+  vi.stubGlobal('navigator', {});
   resetStore();
   vi.restoreAllMocks();
+  vi.clearAllMocks();
 });
 
 // ---------------------------------------------------------------------------
@@ -200,7 +205,23 @@ describe('handlePendingStorageEvent()', () => {
 });
 
 describe('resumePending()', () => {
-  it('calls the registered handler with the pending action', () => {
+  it('keeps the original persisted draft when a replay handler rejects', async () => {
+    const failed = Promise.reject(new Error('offline'));
+    // The old implementation doesn't await the handler. Observe its rejection either way.
+    void failed.catch(() => {});
+    registerGateHandler('enquiry', () => failed);
+    useLoginGateStore.getState().request({
+      type: 'enquiry', payload: { body: 'Keep this draft' }, returnTo: '/p/p1',
+    });
+    const original = readRaw();
+
+    await resumePending();
+
+    expect(readRaw()).toEqual(original);
+    expect(toast.error).toHaveBeenCalledOnce();
+  });
+
+  it('calls the registered handler with the pending action', async () => {
     const handler = vi.fn();
     registerGateHandler('whatsapp', handler);
 
@@ -210,7 +231,7 @@ describe('resumePending()', () => {
       returnTo: '/b/ammas-kitchen',
     });
 
-    resumePending();
+    await resumePending();
 
     expect(handler).toHaveBeenCalledOnce();
     expect(handler.mock.calls[0][0]).toMatchObject({
@@ -221,14 +242,14 @@ describe('resumePending()', () => {
     expect(localStorage.getItem('tibu.pendingAction')).toBeNull();
   });
 
-  it('does nothing and clears localStorage when no pending action exists', () => {
+  it('does nothing when no pending action exists', async () => {
     const handler = vi.fn();
     registerGateHandler('call', handler);
-    resumePending();
+    await resumePending();
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it('ignores an expired pending action (does not call handler, clears storage)', () => {
+  it('ignores an expired pending action (does not call handler, clears storage)', async () => {
     // Write an already-expired entry directly
     localStorage.setItem(
       'tibu.pendingAction',
@@ -241,14 +262,14 @@ describe('resumePending()', () => {
     const handler = vi.fn();
     registerGateHandler('whatsapp', handler);
 
-    resumePending();
+    await resumePending();
 
     expect(handler).not.toHaveBeenCalled();
     // getWithExpiry should have removed the stale entry
     expect(localStorage.getItem('tibu.pendingAction')).toBeNull();
   });
 
-  it('clears the entry and does nothing when type has no registered handler (constraint c)', () => {
+  it('clears the entry and does nothing when type has no registered handler (constraint c)', async () => {
     // 'save' has no handler registered yet
     useLoginGateStore.getState().request({
       type: 'save',
@@ -256,12 +277,12 @@ describe('resumePending()', () => {
       returnTo: '/p/prod-1',
     });
 
-    expect(() => resumePending()).not.toThrow();
+    await resumePending();
     // Entry must be cleared even without a handler
     expect(localStorage.getItem('tibu.pendingAction')).toBeNull();
   });
 
-  it('does not leave a stale entry when handler throws', () => {
+  it('preserves the action and toasts when a handler throws synchronously', async () => {
     registerGateHandler('call', () => {
       throw new Error('handler error');
     });
@@ -272,12 +293,13 @@ describe('resumePending()', () => {
       returnTo: '/',
     });
 
-    // The entry is cleared before the handler runs, so it should still be absent
-    expect(() => resumePending()).toThrow('handler error');
-    expect(localStorage.getItem('tibu.pendingAction')).toBeNull();
+    const original = readRaw();
+    await resumePending();
+    expect(readRaw()).toEqual(original);
+    expect(toast.error).toHaveBeenCalledOnce();
   });
 
-  it('forwards context to the handler and resets store open/pending state', () => {
+  it('forwards context to the handler and resets store open/pending state', async () => {
     const handler = vi.fn();
     registerGateHandler('whatsapp', handler);
 
@@ -288,7 +310,7 @@ describe('resumePending()', () => {
     });
 
     const fakeClient = { id: 'mock-query-client' };
-    resumePending(fakeClient);
+    await resumePending(fakeClient);
 
     expect(handler).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'whatsapp' }),
@@ -296,5 +318,81 @@ describe('resumePending()', () => {
     );
     expect(useLoginGateStore.getState().open).toBe(false);
     expect(useLoginGateStore.getState().pending).toBeNull();
+  });
+
+  it('keeps the draft through a slow handler and ignores concurrent resumes', async () => {
+    let finish;
+    const handler = vi.fn(() => new Promise((resolve) => { finish = resolve; }));
+    registerGateHandler('enquiry', handler);
+    useLoginGateStore.getState().request({ type: 'enquiry', payload: { body: 'Hello' }, returnTo: '/' });
+    const original = readRaw();
+    const running = resumePending();
+    await resumePending();
+    expect(handler).toHaveBeenCalledOnce();
+    expect(readRaw()).toEqual(original);
+    finish();
+    await running;
+    expect(readRaw()).toBeNull();
+  });
+
+  it('skips replay when another tab holds the browser lock', async () => {
+    const request = vi.fn(async (_key, _options, callback) => callback(null));
+    vi.stubGlobal('navigator', { locks: { request } });
+    const handler = vi.fn();
+    registerGateHandler('enquiry', handler);
+    useLoginGateStore.getState().request({ type: 'enquiry', payload: {}, returnTo: '/' });
+    const original = readRaw();
+    await resumePending();
+    expect(request).toHaveBeenCalledWith('tibu.pendingAction', { ifAvailable: true }, expect.any(Function));
+    expect(handler).not.toHaveBeenCalled();
+    expect(readRaw()).toEqual(original);
+  });
+
+  it('does not clear a replacement draft when the original replay resolves', async () => {
+    let finish;
+    registerGateHandler('enquiry', () => new Promise((resolve) => { finish = resolve; }));
+    const { request } = useLoginGateStore.getState();
+    request({ type: 'enquiry', payload: { body: 'Old' }, returnTo: '/' });
+    const running = resumePending();
+    request({ type: 'enquiry', payload: { body: 'New' }, returnTo: '/' });
+    const replacement = readRaw();
+    finish();
+    await running;
+    expect(readRaw()).toEqual(replacement);
+    expect(useLoginGateStore.getState()).toMatchObject({ open: true, pending: replacement.value });
+  });
+
+  it('retries the same unexpired in-memory draft on a later explicit attempt', async () => {
+    vi.stubGlobal('localStorage', undefined);
+    const handler = vi.fn().mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(undefined);
+    registerGateHandler('enquiry', handler);
+    useLoginGateStore.getState().request({ type: 'enquiry', payload: { body: 'Hello' }, returnTo: '/' });
+    const original = peekPending();
+    await resumePending();
+    expect(peekPending()).toBe(original);
+    await resumePending();
+    expect(handler).toHaveBeenCalledTimes(2);
+    expect(peekPending()).toBeNull();
+  });
+
+  it('honours the expiry when the in-memory draft cannot be persisted', async () => {
+    vi.stubGlobal('localStorage', undefined);
+    const handler = vi.fn();
+    registerGateHandler('enquiry', handler);
+    useLoginGateStore.getState().request({ type: 'enquiry', payload: {}, returnTo: '/' });
+    vi.spyOn(Date, 'now').mockReturnValue(peekPending().createdAt + 30 * 60 * 1000);
+    await resumePending();
+    expect(handler).not.toHaveBeenCalled();
+    expect(peekPending()).toBeNull();
+  });
+
+  it('does not fall back to memory when another tab removed the persisted draft', async () => {
+    const handler = vi.fn();
+    registerGateHandler('enquiry', handler);
+    useLoginGateStore.getState().request({ type: 'enquiry', payload: {}, returnTo: '/' });
+    localStorage.removeItem('tibu.pendingAction');
+    await resumePending();
+    expect(handler).not.toHaveBeenCalled();
+    expect(peekPending()).toBeNull();
   });
 });
