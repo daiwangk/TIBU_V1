@@ -17,7 +17,7 @@ import {
   sendMessage,
 } from '../services/index.js';
 import { useAuthStore } from '../stores/auth.js';
-import { registerGateHandler, useLoginGateStore } from '../stores/loginGate.js';
+import { registerGateHandler } from '../stores/loginGate.js';
 import { qk } from './keys.js';
 
 // ---------------------------------------------------------------------------
@@ -48,28 +48,20 @@ export async function performEnquiryAction(action, queryClient = null) {
   const { businessId, productId = null, body } = action.payload ?? {};
   if (!businessId || !body) return;
 
-  try {
-    const threadId = await sendEnquiry({ businessId, productId, body });
+  const threadId = await sendEnquiry({ businessId, productId, body });
 
-    if (queryClient) {
-      queryClient.invalidateQueries({ queryKey: qk.thread(threadId) }).catch(() => {});
-      queryClient.invalidateQueries({ queryKey: ['threads'] }).catch(() => {});
-      queryClient.invalidateQueries({ queryKey: qk.myThread(businessId) }).catch(() => {});
-      queryClient.invalidateQueries({ queryKey: qk.unread }).catch(() => {});
-    }
+  if (queryClient) {
+    queryClient.invalidateQueries({ queryKey: qk.thread(threadId) }).catch(() => {});
+    queryClient.invalidateQueries({ queryKey: ['threads'] }).catch(() => {});
+    queryClient.invalidateQueries({ queryKey: qk.myThread(businessId) }).catch(() => {});
+    queryClient.invalidateQueries({ queryKey: qk.unread }).catch(() => {});
+  }
 
-    const targetUrl = `/enquiries/${encodeURIComponent(threadId)}`;
-    if (queryClient && typeof queryClient.navigate === 'function') {
-      queryClient.navigate(targetUrl);
-    } else if (typeof window !== 'undefined' && window.location) {
-      window.location.assign(targetUrl);
-    }
-  } catch (err) {
-    if (err?.code === 'auth_required') {
-      useLoginGateStore.getState().request(action);
-      return;
-    }
-    toast.error(userMessage(err));
+  const targetUrl = `/enquiries/${encodeURIComponent(threadId)}`;
+  if (queryClient && typeof queryClient.navigate === 'function') {
+    queryClient.navigate(targetUrl);
+  } else if (typeof window !== 'undefined' && window.location) {
+    window.location.assign(targetUrl);
   }
 }
 

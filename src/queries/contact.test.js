@@ -6,6 +6,7 @@ const toastError = vi.fn();
 vi.mock('sonner', () => ({ toast: { error: (...args) => toastError(...args) } }));
 
 const { performContactAction } = await import('./contact.js');
+const { peekPending, resumePending, useLoginGateStore } = await import('../stores/loginGate.js');
 
 const SITE = 'https://tibu-app.pages.dev';
 const product = { id: 'p-123', name: 'Chocolate Chunk Cookies', price: 350 };
@@ -14,6 +15,7 @@ const payload = { businessId: 'b-1', businessSlug: 'sweet-crumbs', businessName:
 let location;
 beforeEach(() => {
   vi.clearAllMocks();
+  useLoginGateStore.getState().cancel();
   vi.stubEnv('VITE_SITE_URL', `${SITE}/`); // trailing slash must not produce "//p/"
   location = { href: 'about:blank', origin: 'http://localhost' };
   vi.stubGlobal('window', { location });
@@ -48,6 +50,16 @@ describe('performContactAction (CONTRACT §10)', () => {
     revealContact.mockResolvedValue({ phone: null, whatsapp: null });
     await performContactAction({ type: 'whatsapp', payload });
     expect(toastError).toHaveBeenCalledWith("This seller hasn't added a WhatsApp number");
+    expect(location.href).toBe('about:blank');
+  });
+
+  it('keeps a failed contact replay and reports the error once', async () => {
+    revealContact.mockRejectedValueOnce(new Error('offline'));
+    useLoginGateStore.getState().request({ type: 'whatsapp', payload, returnTo: '/' });
+    const original = peekPending();
+    await resumePending();
+    expect(peekPending()).toEqual(original);
+    expect(toastError).toHaveBeenCalledOnce();
     expect(location.href).toBe('about:blank');
   });
 });

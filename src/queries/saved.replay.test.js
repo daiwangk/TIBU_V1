@@ -2,6 +2,7 @@
  * Guest taps save → logs in → the replayed 'save' action really saves (setSaved with saved: true).
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { toast } from 'sonner';
 
 const setSaved = vi.fn();
 vi.mock('../services/index.js', () => ({
@@ -37,11 +38,10 @@ describe("replayed 'save' gate action", () => {
     const queryClient = { invalidateQueries: vi.fn(() => Promise.resolve()) };
 
     useLoginGateStore.getState().request(saveGateAction('product', 'p-1', '/p/p-1'));
-    resumePending(queryClient);
-    await vi.waitFor(() => expect(setSaved).toHaveBeenCalled());
+    await resumePending(queryClient);
 
     expect(setSaved).toHaveBeenCalledWith({ kind: 'product', id: 'p-1', saved: true });
-    await vi.waitFor(() => expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: qk.saved }));
+    expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: qk.saved });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: qk.savedProducts });
     expect(localStorage.getItem('tibu.pendingAction')).toBeNull();
   });
@@ -49,7 +49,16 @@ describe("replayed 'save' gate action", () => {
   it('works for businesses too', async () => {
     setSaved.mockResolvedValue(undefined);
     useLoginGateStore.getState().request(saveGateAction('business', 'b-1', '/b/sweet-crumbs'));
-    resumePending(null);
-    await vi.waitFor(() => expect(setSaved).toHaveBeenCalledWith({ kind: 'business', id: 'b-1', saved: true }));
+    await resumePending(null);
+    expect(setSaved).toHaveBeenCalledWith({ kind: 'business', id: 'b-1', saved: true });
+  });
+
+  it('retains a save action when its request fails', async () => {
+    setSaved.mockRejectedValueOnce(new Error('offline'));
+    useLoginGateStore.getState().request(saveGateAction('product', 'p-1', '/p/p-1'));
+    const original = localStorage.getItem('tibu.pendingAction');
+    await resumePending();
+    expect(localStorage.getItem('tibu.pendingAction')).toBe(original);
+    expect(toast.error).toHaveBeenCalledOnce();
   });
 });

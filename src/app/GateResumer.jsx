@@ -3,9 +3,9 @@
  *
  * Null-rendering component mounted inside BrowserRouter.
  * When auth status transitions to 'authenticated' and there is a non-expired
- * pending action in localStorage:
+ * pending action:
  *   1. Navigate to returnTo if location.pathname differs.
- *   2. Call resumePending() to clear the entry and run the registered handler.
+ *   2. Call resumePending() once and let it clear the entry on success.
  *
  * Importing src/queries/contact.js here (constraint b) guarantees the
  * 'whatsapp' and 'call' gate handlers are registered before resumePending
@@ -15,8 +15,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { getWithExpiry } from '../lib/storage.js';
-import { resumePending } from '../stores/loginGate.js';
+import { peekPending, resumePending } from '../stores/loginGate.js';
 import { useAuthStore } from '../stores/auth.js';
 
 // Side-effect imports — register gate handlers for 'whatsapp', 'call', 'save', 'enquiry', and 'review' at boot
@@ -27,20 +26,19 @@ import '../queries/enquiries.js';
 import '../queries/reviews.js';
 import { flushLocalRecent } from '../queries/activity.js';
 
-const STORAGE_KEY = 'tibu.pendingAction';
-
 /**
  * Watches auth status and replays the pending action after login.
  * Returns null — no UI rendered.
  */
 export function GateResumer() {
   const authStatus = useAuthStore((s) => s.status);
+  const sessionVersion = useAuthStore((s) => s.sessionVersion);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Guard against running resume multiple times in the same authenticated session
-  const hasResumed = useRef(false);
+  const attemptedVersion = useRef(null);
 
   // Separate guard for the local-history flush (runs once per authenticated session)
   const hasFlushed = useRef(false);
@@ -57,19 +55,13 @@ export function GateResumer() {
   }, [authStatus]);
 
   useEffect(() => {
-    // Reset guard whenever user logs out or leaves authenticated state
-    if (authStatus !== 'authenticated') {
-      hasResumed.current = false;
-      return;
-    }
-
-    if (hasResumed.current) return;
+    if (authStatus !== 'authenticated' || attemptedVersion.current === sessionVersion) return;
 
     // Peek at the pending action without consuming it (resumePending will consume)
-    const pending = getWithExpiry(STORAGE_KEY);
+    const pending = peekPending();
     if (!pending) return;
 
-    hasResumed.current = true;
+    attemptedVersion.current = sessionVersion;
 
     const doResume = async () => {
       const currentPath = location.pathname + location.search;
@@ -78,11 +70,14 @@ export function GateResumer() {
         // yield one tick so the route update settles before resuming
         await new Promise((r) => setTimeout(r, 0));
       }
-      resumePending(queryClient);
+      const auth = useAuthStore.getState();
+      if (auth.status === 'authenticated' && auth.sessionVersion === sessionVersion) {
+        await resumePending(queryClient, pending);
+      }
     };
 
     doResume();
-  }, [authStatus, location.pathname, location.search, navigate, queryClient]);
+  }, [authStatus, sessionVersion, location.pathname, location.search, navigate, queryClient]);
 
   return null;
 }
