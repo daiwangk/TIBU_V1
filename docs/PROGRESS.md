@@ -22,6 +22,11 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-24 · H5 — patch browser dependency · Codex
+- Done: The lockfile resolves Zod to 4.6.6. Only the Zod version, tarball URL, and integrity fields changed.
+- Verified: `npm run check` passed with 546 tests across 57 files and a successful build. `npm audit --omit=dev` no longer reports Zod.
+- Open: The audit still reports one high-severity package finding for Vite 8.1.2, which runs in dev and build tooling. The earlier audit preview selected Vite 8.3.8, a minor upgrade within major 8, for a separate decision.
+
 ### 2026-11-23 · H2 — keep failed login-gate actions · Codex
 - Done: The gate clears the matching action on success or a non-retryable error. Only network, rate-limit, and unknown errors keep the action and its original 30-minute expiry. Failed replays show the existing toast. Automatic replay attempts are limited to one per authenticated session using H1's session version. The gate uses the in-memory action when storage is blocked.
 - Verified: The first regression failed when a rejected replay lost its draft. The terminal-error regressions then failed when the initial fix retained drafts for non-retryable errors. Both pass. Focused tests also cover delayed completion, concurrent calls, a busy browser lock, replacement actions, blocked storage, and preserved expiry. `npm run check` passed with 546 tests across 57 files and a successful build.
