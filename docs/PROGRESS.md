@@ -22,6 +22,17 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-25 · H4 dev verification
+- Applied migration 0012 to `tibu-dev` by project ID after the dry run listed that file alone. All 12 local and remote versions match. The H4 trigger is enabled and zero public tables lack RLS.
+- The rollback-only H4 SQL test completed on dev without assertion errors. A follow-up query found zero fixture users. `npm run check` passed all 546 tests in 57 files and built successfully.
+- Guest dev browser checks reached a populated product and business with Chat, WhatsApp and Call. Guest WhatsApp opened the login sheet. Two-account/device sign-off, PR review and production rollout remain open.
+
+### 2026-11-24 · H4 — enquiry and contact SQL integrity · Codex
+- Done: Migration 0012 clears `enquiry_messages.read_at` on every insert and rejects a supplied `reveal_contact` product unless it belongs to the requested business. The RPC keeps the latest prior body from 0004 apart from the new check; its existing `product_not_in_business` error mapping is documented for contact reveals. Existing RLS policies remain enabled and unchanged.
+- Test: Added `supabase/tests/h4_enquiry_contact_integrity_test.sql` for direct message inserts, valid and invalid contact reveals, contact-event logging, unread counts, and marking a thread read. It is for a dev/disposable database only and rolls back its fixtures.
+- Verified: `npm run check` passed (guards, lint, 57 test files / 546 tests, production build). The SQL test was not run here: `psql` is unavailable and access to the local Docker engine was denied. No database push or remote project action was taken.
+- Next step: Review the migration, then run the SQL test against a local dev/disposable database with migrations through 0012 applied before pushing the migration yourself.
+
 ### 2026-11-24 · H5 — patch browser dependency · Codex
 - Done: The lockfile resolves Zod to 4.6.6. Only the Zod version, tarball URL, and integrity fields changed.
 - Verified: `npm run check` passed with 546 tests across 57 files and a successful build. `npm audit --omit=dev` no longer reports Zod.
