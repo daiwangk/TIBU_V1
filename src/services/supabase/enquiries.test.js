@@ -236,6 +236,35 @@ describe('listMyThreads()', () => {
     });
     expect(thread.lastMessagePreview).toBe('x'.repeat(80));
   });
+
+  it('labels a matching last message as mine and ignores authorship from a newer reply', async () => {
+    const lastMessageAt = '2026-10-22T10:00:00Z';
+    const preview = { sender_id: 'u-1', created_at: lastMessageAt, body: 'Hello' };
+    const rows = [
+      { enquiry_id: 't-1', last_message: 'Hello', last_message_at: lastMessageAt },
+      { enquiry_id: 't-2', last_message: 'Hello', last_message_at: lastMessageAt },
+      { enquiry_id: 't-3', last_message: 'Hello', last_message_at: lastMessageAt },
+    ];
+    const result = {
+      data: [
+        { id: 't-1', latest: [preview] },
+        { id: 't-2', latest: [{ ...preview, created_at: '2026-10-22T10:01:00Z' }] },
+        { id: 't-3', latest: [{ ...preview, sender_id: 'u-2' }] },
+      ],
+    };
+    const query = { select: vi.fn().mockReturnThis(), in: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(), limit: vi.fn().mockResolvedValue(result) };
+    getSupabase.mockReturnValue({
+      rpc: vi.fn().mockResolvedValue({ data: rows }),
+      auth: { getSession: vi.fn().mockResolvedValue({ data: { session: { user: { id: 'u-1' } } } }) },
+      from: vi.fn().mockReturnValue(query),
+    });
+
+    const threads = await listMyThreads({ as: 'seller' });
+    expect(query.in).toHaveBeenCalledWith('id', ['t-1', 't-2', 't-3']);
+    expect(query.limit).toHaveBeenCalledWith(1, { referencedTable: 'latest' });
+    expect(threads.map((thread) => thread.lastMessageFromMe)).toEqual([true, undefined, false]);
+  });
 });
 
 describe('getThread()', () => {

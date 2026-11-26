@@ -22,6 +22,12 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-26 · Chat inbox and composer
+- Sellers can open Shopping and My shop from Messages. The first visit selects My shop when it has unread messages, and later refreshes preserve the selected tab. The existing customer and seller thread links remain valid.
+- The inbox and open thread refresh every 60 seconds. Reading earlier messages preserves scroll position and offers a jump to new messages. The thread composer grows, follows the visible viewport and keeps a failed draft ready to retry. Inbox previews identify the viewer's own messages when the author can be matched.
+- Verified at 390 × 844 with browser fixtures including a reduced viewport, loading/error/empty/data states, unread-shop routing, Back, scroll preservation and failed-send retry. Real-device keyboard and two-account checks remain open.
+- Audited the account/login gate, inbox tab selection, refresh and stale-data display, conversation scroll and read markers, send and retry, preview authorship, product links, and history fallbacks. Fixed direct links that could send Back into the same conversation, preserved unread indicators while reading older messages, and added regressions for polling and a failed shop inbox refresh.
+
 ### 2026-11-24 · H5 — patch browser dependency · Codex
 - Done: The lockfile resolves Zod to 4.6.6. Only the Zod version, tarball URL, and integrity fields changed.
 - Verified: `npm run check` passed with 546 tests across 57 files and a successful build. `npm audit --omit=dev` no longer reports Zod.

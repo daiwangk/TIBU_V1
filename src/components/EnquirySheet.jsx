@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Send, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '../lib/format.js';
@@ -10,6 +10,7 @@ import IconButton from './ui/IconButton.jsx';
 import ImagePlaceholder from './ui/ImagePlaceholder.jsx';
 import Sheet from './ui/Sheet.jsx';
 import Textarea from './ui/Textarea.jsx';
+import { userMessage } from '../lib/errors.js';
 
 const MAX_LENGTH = 2000;
 
@@ -25,6 +26,7 @@ const MAX_LENGTH = 2000;
  */
 export default function EnquirySheet({ open, onClose, business, product = null }) {
   const [body, setBody] = useState('');
+  const submitting = useRef(false);
   const authStatus = useAuthStore((s) => s.status);
   const navigate = useNavigate();
   const sendEnquiry = useSendEnquiry();
@@ -36,12 +38,17 @@ export default function EnquirySheet({ open, onClose, business, product = null }
 
   function handleClose() {
     setBody('');
+    sendEnquiry.reset();
     onClose();
+  }
+
+  function requestClose() {
+    if (!submitting.current) handleClose();
   }
 
   function handleSubmit(e) {
     e?.preventDefault();
-    if (!isValid || sendEnquiry.isPending) return;
+    if (!isValid || submitting.current) return;
 
     if (authStatus !== 'authenticated') {
       const action = enquiryGateAction({
@@ -55,6 +62,7 @@ export default function EnquirySheet({ open, onClose, business, product = null }
       return;
     }
 
+    submitting.current = true;
     sendEnquiry.mutate(
       {
         businessId: business.id,
@@ -63,22 +71,24 @@ export default function EnquirySheet({ open, onClose, business, product = null }
       },
       {
         onSuccess: (threadId) => {
+          submitting.current = false;
           handleClose();
           navigate(`/enquiries/${encodeURIComponent(threadId)}`);
         },
+        onError: () => { submitting.current = false; },
       },
     );
   }
 
   return (
-    <Sheet open={open} onClose={handleClose} label={`Send enquiry to ${business.name}`}>
+    <Sheet open={open} onClose={requestClose} label={`Message ${business.name}`}>
       <form onSubmit={handleSubmit} className="flex flex-col px-screen pb-[calc(24px+env(safe-area-inset-bottom))]">
         <div className="flex items-start justify-between gap-3 pt-2">
           <div>
-            <h2 className="font-heading text-lg font-bold text-ink">Send enquiry</h2>
+            <h2 className="font-heading text-lg font-bold text-ink">Send a message</h2>
             <p className="font-body text-xs text-muted">to {business.name}</p>
           </div>
-          <IconButton label="Close enquiry sheet" onClick={handleClose} className="-mr-2">
+          <IconButton label="Close message composer" onClick={requestClose} disabled={sendEnquiry.isPending} className="-mr-2">
             <X size={20} aria-hidden="true" />
           </IconButton>
         </div>
@@ -106,7 +116,10 @@ export default function EnquirySheet({ open, onClose, business, product = null }
             placeholder="Ask about availability, customisation, details..."
             rows={4}
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(e) => {
+              setBody(e.target.value);
+              if (sendEnquiry.isError) sendEnquiry.reset();
+            }}
             disabled={sendEnquiry.isPending}
             autoFocus
           />
@@ -121,13 +134,16 @@ export default function EnquirySheet({ open, onClose, business, product = null }
           </div>
         </div>
 
+        {sendEnquiry.isError && (
+          <p role="alert" className="mt-2 text-sm text-error">Couldn’t send. {userMessage(sendEnquiry.error)}</p>
+        )}
         <div className="mt-5 flex gap-3">
           <Button
             type="button"
             variant="ghost"
             size="md"
             className="flex-1"
-            onClick={handleClose}
+            onClick={requestClose}
             disabled={sendEnquiry.isPending}
           >
             Cancel
@@ -141,7 +157,7 @@ export default function EnquirySheet({ open, onClose, business, product = null }
             disabled={!isValid || sendEnquiry.isPending}
           >
             <Send size={16} aria-hidden="true" />
-            Send enquiry
+            {sendEnquiry.isError ? 'Retry' : 'Send message'}
           </Button>
         </div>
       </form>
