@@ -22,6 +22,11 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-27 · H8 profile location ownership
+- Profile-derived locations are saved with their account ID. Auth restoration and identity changes clear mismatched locations. A profile location without a saved owner is discarded during the storage upgrade and re-derived from the current profile after sign-in.
+- The location UI and search origin wait for a confirmed owner. Explicit GPS and area-picker choices remain device-wide, including for guests.
+- Reproduced the regression first. The original account-switch test received Area A where Area B was expected. `npm run check` passed 567 tests and the build. A 390 × 844 browser run with synthetic sessions covered reload, token refresh, sign-out, account switching, and keeping an explicit guest choice.
+
 ### 2026-11-26 · Chat inbox and composer
 - Sellers can open Shopping and My shop from Messages. The first visit selects My shop when it has unread messages, and later refreshes preserve the selected tab. The existing customer and seller thread links remain valid.
 - The inbox and open thread refresh every 60 seconds. Reading earlier messages preserves scroll position and offers a jump to new messages. The thread composer grows, follows the visible viewport and keeps a failed draft ready to retry. Inbox previews identify the viewer's own messages when the author can be matched.

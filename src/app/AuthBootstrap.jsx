@@ -37,7 +37,7 @@ export default function AuthBootstrap() {
     const locationStore = useLocationStore.getState();
     const defaultLocation = resolveProfileLocationDefault(locationStore, profile);
     if (defaultLocation) {
-      locationStore.setFromProfile(defaultLocation);
+      locationStore.setFromProfile({ ...defaultLocation, ownerId: userId });
     }
   }, [authStatus, userId, profile]);
 

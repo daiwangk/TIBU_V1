@@ -1,4 +1,5 @@
 import { qk } from '../queries/keys.js';
+import { useLocationStore } from '../stores/location.js';
 
 /**
  * Keeps the auth store in step with the auth service. No React in here, so it can be tested directly.
@@ -20,6 +21,7 @@ import { qk } from '../queries/keys.js';
  */
 export function startAuthSync({ dataSource, getSession, onAuthChange, queryClient, setSession, initialUserId = null }) {
   let currentUserId = initialUserId;
+  let identityResolved = false;
 
   function syncSession(session) {
     const userId = session?.userId ?? null;
@@ -29,6 +31,10 @@ export function startAuthSync({ dataSource, getSession, onAuthChange, queryClien
       // Clears query and mutation records. Mutation callbacks must still guard late results.
       queryClient.clear();
       currentUserId = userId;
+    }
+    if (!identityResolved || changed) {
+      useLocationStore.getState().reconcileProfileOwner(userId);
+      identityResolved = true;
     }
     setSession(session);
     return changed;

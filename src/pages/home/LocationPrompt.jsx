@@ -4,7 +4,7 @@ import AreaPickerSheet from '../../components/AreaPickerSheet';
 import Button from '../../components/ui/Button';
 import IconButton from '../../components/ui/IconButton';
 import Leaf from '../../components/decor/Leaf';
-import { useLocationStore } from '../../stores/location';
+import { useLocationStore, useVisibleLocation } from '../../stores/location';
 import { userMessage } from '../../lib/errors';
 
 /**
@@ -14,7 +14,7 @@ import { userMessage } from '../../lib/errors';
  */
 export default function LocationPrompt() {
   const asked = useLocationStore((s) => s.asked);
-  const hasLocation = useLocationStore((s) => s.lat != null);
+  const hasLocation = useVisibleLocation((s) => s.lat != null);
   const requestGps = useLocationStore((s) => s.requestGps);
   const markAsked = useLocationStore((s) => s.markAsked);
 
@@ -41,7 +41,7 @@ export default function LocationPrompt() {
     setPickerOpen(true);
   }
 
-  const showCard = !asked && !hasLocation;
+  const showCard = !asked && hasLocation === false;
 
   return (
     <>
