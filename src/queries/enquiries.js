@@ -154,17 +154,19 @@ export function useMarkThreadRead() {
 /**
  * Query for the user's enquiry threads list (as customer or seller).
  *
- * @param {{ as?: 'customer'|'seller' }} [options]
+ * @param {{ as?: 'customer'|'seller', enabled?: boolean, poll?: boolean }} [options]
  * @returns {import('@tanstack/react-query').UseQueryResult<import('../services/contract.js').EnquiryThread[]>}
  */
-export function useMyThreads({ as = 'customer' } = {}) {
+export function useMyThreads({ as = 'customer', enabled = true, poll = false } = {}) {
   const authStatus = useAuthStore((s) => s.status);
 
   return useQuery({
     queryKey: qk.threads(as),
     queryFn: () => listMyThreads({ as }),
-    enabled: authStatus === 'authenticated',
+    enabled: enabled && authStatus === 'authenticated',
     staleTime: 15_000,
+    refetchInterval: poll ? 60_000 : false,
+    refetchOnMount: poll ? 'always' : true,
   });
 }
 
@@ -182,6 +184,8 @@ export function useThread(threadId, { as } = {}) {
     queryKey: qk.thread(threadId),
     queryFn: () => getThread(threadId, { as }),
     enabled: Boolean(threadId) && authStatus === 'authenticated',
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: 'always',
   });
 }
 

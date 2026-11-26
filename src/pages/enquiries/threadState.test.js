@@ -26,6 +26,9 @@ describe('conversation send lifecycle', () => {
     await pending;
     expect(model.state.pending).toBeNull();
     expect(model.state.body).toBe('  Please keep my draft  ');
+    expect(model.state.sendError.message).toBe('offline');
+    await submitDraft(request, () => Promise.resolve('thread-1'), model.dispatch);
+    expect(model.state).toEqual(initialComposer('customer:thread-1:true'));
   });
 
   it.each(['thread-1', { id: 'message-1' }])('clears the draft after success without appending the returned value %j', async (result) => {

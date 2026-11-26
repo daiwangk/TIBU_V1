@@ -62,4 +62,13 @@ describe('conversation page states', () => {
     expect(html).toContain('Try again');
     expect(html).not.toContain('textarea');
   });
+
+  it('keeps the conversation and draft editor visible if a background refresh fails', () => {
+    query.current.isError = true;
+    query.current.isRefetchError = true;
+    const html = render();
+    expect(html).toContain('Couldn’t refresh messages.');
+    expect(html).toContain('Retry');
+    expect(html).toContain('textarea');
+  });
 });

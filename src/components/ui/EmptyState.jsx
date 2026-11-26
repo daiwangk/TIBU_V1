@@ -12,7 +12,7 @@ import Spark from '../decor/Spark';
  *   illustration?: React.ReactNode,
  *   title: string,
  *   text?: string,
- *   action?: { label: React.ReactNode, onClick?: () => void, to?: string },
+ *   action?: { label: React.ReactNode, onClick?: () => void, to?: string, replace?: boolean },
  *   actionVariant?: 'primary' | 'secondary' | 'accent',
  *   className?: string,
  * }} props
@@ -42,7 +42,7 @@ export default function EmptyState({
         {text && <p className="font-body text-muted text-sm">{text}</p>}
       </div>
       {action && (
-        <Button variant={actionVariant} to={action.to} onClick={action.onClick}>
+        <Button variant={actionVariant} to={action.to} replace={action.to ? action.replace : undefined} onClick={action.onClick}>
           {action.label}
         </Button>
       )}

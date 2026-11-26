@@ -209,6 +209,7 @@
  * @property {'open'|'closed'} status
  * @property {string} lastMessageAt
  * @property {string} lastMessagePreview
+ * @property {boolean} [lastMessageFromMe] Inbox preview only, omitted when the author is unknown.
  * @property {number} unreadCount
  */
 

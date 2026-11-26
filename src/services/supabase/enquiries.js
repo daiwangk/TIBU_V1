@@ -17,6 +17,7 @@ import { mapEnquiryMessage, mapEnquiryThread } from './mappers.js';
 
 const MIN_BODY_LENGTH = 1;
 const MAX_BODY_LENGTH = 2000;
+const PREVIEW_BATCH_SIZE = 50;
 
 /**
  * Validates enquiry message body (CONTRACT §12: 1–2000 chars after trim).
@@ -94,12 +95,44 @@ export async function findMyThread(businessId) {
  * @returns {Promise<import('../contract.js').EnquiryThread[]>}
  */
 export async function listMyThreads({ as = 'customer' } = {}) {
-  const { data, error } = await getSupabase().rpc('my_enquiries', {
+  const client = getSupabase();
+  const { data, error } = await client.rpc('my_enquiries', {
     p_as: as,
   });
 
   if (error) throw mapSupabaseError(error);
-  return (data ?? []).map(mapEnquiryThread);
+  const threads = (data ?? []).map(mapEnquiryThread);
+  const withPreviews = threads.filter((thread) => thread.lastMessagePreview && thread.lastMessageAt);
+  if (withPreviews.length === 0) return threads;
+
+  // The RPC provides the inbox text. Use the existing participant-only relationship
+  // to enrich it with authorship without fetching each conversation in full.
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    const userId = session?.user?.id;
+    if (!userId) return threads;
+    for (let start = 0; start < withPreviews.length; start += PREVIEW_BATCH_SIZE) {
+      const batch = withPreviews.slice(start, start + PREVIEW_BATCH_SIZE);
+      const { data: rows, error: previewError } = await client.from('enquiries')
+        .select('id, latest:enquiry_messages(sender_id, created_at, body)')
+        .in('id', batch.map((thread) => thread.id))
+        .order('created_at', { referencedTable: 'latest', ascending: false })
+        .order('id', { referencedTable: 'latest', ascending: false })
+        .limit(1, { referencedTable: 'latest' });
+      if (previewError) break;
+      const byThread = new Map((rows ?? []).map((row) => [String(row.id), row.latest?.[0]]));
+      for (const thread of batch) {
+        const latest = byThread.get(thread.id);
+        // A concurrent reply can change the latest message between the two reads.
+        if (latest?.created_at === thread.lastMessageAt && latest.body?.slice(0, 80) === thread.lastMessagePreview) {
+          thread.lastMessageFromMe = latest.sender_id === userId;
+        }
+      }
+    }
+  } catch {
+    // Authorship is optional. Keep the inbox and its unread counts usable.
+  }
+  return threads;
 }
 
 /**

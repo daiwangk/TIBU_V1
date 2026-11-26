@@ -1,12 +1,12 @@
 import { ChevronLeft } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import useAppBack from '../../lib/useAppBack.js';
 import IconButton from './IconButton';
 
 /**
  * Page header with back navigation, title, and optional right-side actions.
  *
  * Back button behaviour:
- *   - `useLocation().key !== 'default'` → there is browser history → navigate(-1)
+ *   - An earlier in-app history entry exists → navigate(-1)
  *   - Otherwise → navigate to `fallbackTo` with `{ replace: true }`
  *
  * @param {{
@@ -18,16 +18,7 @@ import IconButton from './IconButton';
  * }} props
  */
 export default function PageHeader({ title, titleAs: TitleTag = 'h1', fallbackTo = '/', actions, className = '' }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  function handleBack() {
-    if (location.key !== 'default') {
-      navigate(-1);
-    } else {
-      navigate(fallbackTo, { replace: true });
-    }
-  }
+  const handleBack = useAppBack(fallbackTo);
 
   return (
     <header

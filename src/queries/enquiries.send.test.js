@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient } from '@tanstack/react-query';
-import { useMarkThreadRead, useSendEnquiry, useSendMessage } from './enquiries.js';
+import { useMarkThreadRead, useMyThreads, useSendEnquiry, useSendMessage, useThread } from './enquiries.js';
 import { qk } from './keys.js';
 
 const mocks = vi.hoisted(() => ({ sendEnquiry: vi.fn(), sendMessage: vi.fn(), markThreadRead: vi.fn(), client: null }));
@@ -9,15 +9,31 @@ vi.mock('../services/index.js', () => ({
   findMyThread: vi.fn(), getThread: vi.fn(), listMyThreads: vi.fn(),
 }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
+vi.mock('../stores/auth.js', () => ({ useAuthStore: (select) => select({ status: 'authenticated' }) }));
 vi.mock('@tanstack/react-query', async (importOriginal) => ({
   ...await importOriginal(),
   useQueryClient: () => mocks.client,
   useMutation: (options) => options,
+  useQuery: (options) => options,
 }));
 
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+});
+
+describe('chat query refresh', () => {
+  it('polls visible inboxes and open threads every 60 seconds', () => {
+    expect(useMyThreads({ poll: true }).refetchInterval).toBe(60_000);
+    expect(useThread('thread-1').refetchInterval).toBe(60_000);
+    expect(useThread('thread-1').refetchOnWindowFocus).toBe('always');
+  });
+
+  it('skips disabled shop inboxes and threads without an ID', () => {
+    expect(useMyThreads({ as: 'seller', enabled: false, poll: true }).enabled).toBe(false);
+    expect(useMyThreads().refetchInterval).toBe(false);
+    expect(useThread(null).enabled).toBe(false);
+  });
 });
 afterEach(() => mocks.client.clear());
 

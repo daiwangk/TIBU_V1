@@ -22,6 +22,12 @@ Every AI session starts by reading **Now** and ends by adding a **Log** entry. W
 
 ## Log
 
+### 2026-11-26 · Chat inbox and composer
+- Sellers can open Shopping and My shop from Messages. The first visit selects My shop when it has unread messages, and later refreshes preserve the selected tab. The existing customer and seller thread links remain valid.
+- The inbox and open thread refresh every 60 seconds. Reading earlier messages preserves scroll position and offers a jump to new messages. The thread composer grows, follows the visible viewport and keeps a failed draft ready to retry. Inbox previews identify the viewer's own messages when the author can be matched.
+- Verified at 390 × 844 with browser fixtures including a reduced viewport, loading/error/empty/data states, unread-shop routing, Back, scroll preservation and failed-send retry. Real-device keyboard and two-account checks remain open.
+- Audited the account/login gate, inbox tab selection, refresh and stale-data display, conversation scroll and read markers, send and retry, preview authorship, product links, and history fallbacks. Fixed direct links that could send Back into the same conversation, preserved unread indicators while reading older messages, and added regressions for polling and a failed shop inbox refresh.
+
 ### 2026-11-25 · H4 dev verification
 - Applied migration 0012 to `tibu-dev` by project ID after the dry run listed that file alone. All 12 local and remote versions match. The H4 trigger is enabled and zero public tables lack RLS.
 - The rollback-only H4 SQL test completed on dev without assertion errors. A follow-up query found zero fixture users. `npm run check` passed all 546 tests in 57 files and built successfully.
