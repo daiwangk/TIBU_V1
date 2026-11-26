@@ -242,6 +242,7 @@ Filtering by a parent slug includes its children.
  * @property {string|null} productId  @property {string|null} productName
  * @property {'open'|'closed'} status  @property {string} lastMessageAt
  * @property {string} lastMessagePreview  @property {number} unreadCount   // unread for the viewer
+ * @property {boolean} [lastMessageFromMe]  // inbox preview only, omitted when the author is unknown
  */
 /** @typedef {{ thread: EnquiryThread & { businessSlug: string, businessLogoUrl: string|null }, messages: EnquiryMessage[] }} ThreadDetail */
 /** @typedef {{ id: string, threadId: string, fromMe: boolean, body: string, createdAt: string, readAt: string|null }} EnquiryMessage */

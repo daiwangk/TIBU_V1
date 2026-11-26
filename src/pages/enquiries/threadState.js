@@ -4,17 +4,17 @@ export function uniqueMessages(messages = []) {
 }
 
 export function initialComposer(scope) {
-  return { scope, body: '', pending: null };
+  return { scope, body: '', pending: null, sendError: null };
 }
 
 export function composerReducer(state, action) {
   if (action.type === 'reset') return initialComposer(action.scope);
-  if (action.type === 'draft') return { ...state, body: action.body };
-  if (action.type === 'sending') return { ...state, pending: action.request };
+  if (action.type === 'draft') return { ...state, body: action.body, sendError: null };
+  if (action.type === 'sending') return { ...state, pending: action.request, sendError: null };
   // A late response from an old thread must never clear another thread's draft.
   if (state.pending !== action.request) return state;
   if (action.type === 'sent') return { ...state, body: '', pending: null };
-  if (action.type === 'failed') return { ...state, pending: null };
+  if (action.type === 'failed') return { ...state, pending: null, sendError: action.error };
   return state;
 }
 
@@ -24,7 +24,7 @@ export async function submitDraft(request, send, dispatch) {
   try {
     await send();
     dispatch({ type: 'sent', request });
-  } catch {
-    dispatch({ type: 'failed', request });
+  } catch (error) {
+    dispatch({ type: 'failed', request, error });
   }
 }
