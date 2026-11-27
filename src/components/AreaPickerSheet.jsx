@@ -3,7 +3,7 @@ import { Check, LocateFixed } from 'lucide-react';
 import Sheet from './ui/Sheet';
 import Button from './ui/Button';
 import Input from './ui/Input';
-import { useLocationStore } from '../stores/location';
+import { useLocationStore, useVisibleLocation } from '../stores/location';
 import { filterAreas, MUMBAI_AREAS } from '../lib/geo';
 import { userMessage } from '../lib/errors';
 
@@ -12,8 +12,8 @@ import { userMessage } from '../lib/errors';
  * @param {{ onClose: () => void, notice?: string }} props
  */
 function AreaPickerContent({ onClose, notice = '' }) {
-  const label = useLocationStore((s) => s.label);
-  const hasLocation = useLocationStore((s) => s.lat != null);
+  const label = useVisibleLocation((s) => s.label);
+  const hasLocation = useVisibleLocation((s) => s.lat != null);
   const requestGps = useLocationStore((s) => s.requestGps);
   const setArea = useLocationStore((s) => s.setArea);
   const clear = useLocationStore((s) => s.clear);

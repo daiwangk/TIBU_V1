@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { sanitizePersistedLocation, selectSearchOrigin, toOrigin, useLocationStore } from './location.js';
 import * as geo from '../lib/geo.js';
 import { AppError } from '../services/errors.js';
+import { useAuthStore } from './auth.js';
 
 vi.mock('../lib/geo.js', () => ({
   getBrowserLocation: vi.fn(),
@@ -37,12 +38,14 @@ function persistedLocation() {
 describe('location store', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', createMemoryStorage());
+    useAuthStore.setState(useAuthStore.getInitialState(), true);
     toOrigin(null, null);
     useLocationStore.setState({
       lat: null,
       lng: null,
       label: null,
       source: null,
+      profileOwnerId: null,
       asked: false,
     });
     vi.clearAllMocks();
@@ -92,13 +95,16 @@ describe('location store', () => {
     });
 
     it('setFromProfile sets profile location', () => {
-      useLocationStore.getState().setFromProfile({ lat: 12.34, lng: 56.78, label: 'My Home' });
+      useAuthStore.getState().setSession({ userId: 'user-1', email: 'one@example.invalid' });
+      useLocationStore.getState().setFromProfile({ lat: 12.34, lng: 56.78, label: 'My Home', ownerId: 'user-1' });
 
       const state = useLocationStore.getState();
       expect(state.lat).toBe(12.34);
       expect(state.lng).toBe(56.78);
       expect(state.label).toBe('My Home');
       expect(state.source).toBe('profile');
+      expect(state.profileOwnerId).toBe('user-1');
+      expect(persistedLocation()?.state.profileOwnerId).toBe('user-1');
     });
 
     it('clear resets coords but keeps asked', () => {
@@ -126,6 +132,23 @@ describe('location store', () => {
   });
 
   describe('persist', () => {
+    it.each(['gps', 'area'])('preserves a version-one %s choice during migration', async (source) => {
+      const state = { lat: 19.1, lng: 72.8, label: 'Device choice', source, asked: true };
+      localStorage.setItem('tibu.location', JSON.stringify({ state, version: 1 }));
+      await useLocationStore.persist.rehydrate();
+      expect(persistedLocation()).toEqual({ state: { ...state, profileOwnerId: null }, version: 2 });
+      expect(useLocationStore.getState()).toMatchObject(state);
+    });
+
+    it('discards an old profile area with no owner and keeps the asked flag', async () => {
+      const state = { lat: 19.1, lng: 72.8, label: 'Old home', source: 'profile', asked: true };
+      localStorage.setItem('tibu.location', JSON.stringify({ state, version: 1 }));
+      await useLocationStore.persist.rehydrate();
+      const empty = { lat: null, lng: null, label: null, source: null, profileOwnerId: null, asked: true };
+      expect(useLocationStore.getState()).toMatchObject(empty);
+      expect(persistedLocation()).toEqual({ state: empty, version: 2 });
+    });
+
     it('writes asked with the rest of the location state', async () => {
       useLocationStore.getState().setArea('Bandra West');
       await flushPersist();
@@ -219,6 +242,21 @@ describe('location store', () => {
       expect(useLocationStore.getState().lat).toBeNull();
     });
 
+    it('keeps a pending explicit GPS choice across profile-owner cleanup', async () => {
+      let resolveGps;
+      geo.getBrowserLocation.mockReturnValueOnce(new Promise((resolve) => { resolveGps = resolve; }));
+      const location = useLocationStore.getState();
+      useAuthStore.getState().setSession({ userId: 'user-1', email: 'one@example.invalid' });
+      location.setFromProfile({ lat: 19.1, lng: 72.8, label: 'A', ownerId: 'user-1' });
+      const pending = location.requestGps();
+      location.reconcileProfileOwner('user-2');
+      useAuthStore.getState().setSession({ userId: 'user-2', email: 'two@example.invalid' });
+      location.setFromProfile({ lat: 19.2, lng: 72.9, label: 'B', ownerId: 'user-2' });
+      resolveGps({ lat: 19.3, lng: 73 });
+      await pending;
+      expect(useLocationStore.getState()).toMatchObject({ source: 'gps', lat: 19.3, profileOwnerId: null });
+    });
+
     it('the latest GPS request wins over an earlier one', async () => {
       let first;
       geo.getBrowserLocation.mockReturnValueOnce(new Promise((resolve) => { first = resolve; }));
@@ -234,11 +272,11 @@ describe('location store', () => {
   describe('sanitizePersistedLocation', () => {
     it('keeps a well-formed value', () => {
       expect(sanitizePersistedLocation({ lat: 19.1, lng: 72.8, label: 'Juhu', source: 'area', asked: true }))
-        .toEqual({ lat: 19.1, lng: 72.8, label: 'Juhu', source: 'area', asked: true });
+        .toEqual({ lat: 19.1, lng: 72.8, label: 'Juhu', source: 'area', profileOwnerId: null, asked: true });
     });
 
     it('drops string, NaN, out-of-range and half-set coordinates (all or nothing)', () => {
-      const empty = { lat: null, lng: null, label: null, source: null, asked: false };
+      const empty = { lat: null, lng: null, label: null, source: null, profileOwnerId: null, asked: false };
       expect(sanitizePersistedLocation({ lat: '19.1', lng: 'x', label: 'A', source: 'gps' })).toEqual(empty);
       expect(sanitizePersistedLocation({ lat: 19, lng: null, label: 'A', source: 'gps' })).toEqual(empty);
       expect(sanitizePersistedLocation({ lat: NaN, lng: 72 })).toEqual(empty);
@@ -248,7 +286,7 @@ describe('location store', () => {
     it('keeps asked even when the coordinates are bad, and ignores junk', () => {
       expect(sanitizePersistedLocation({ lat: 'x', asked: true }).asked).toBe(true);
       expect(sanitizePersistedLocation({ asked: 'yes' }).asked).toBe(false);
-      expect(sanitizePersistedLocation(null)).toEqual({ lat: null, lng: null, label: null, source: null, asked: false });
+      expect(sanitizePersistedLocation(null)).toEqual({ lat: null, lng: null, label: null, source: null, profileOwnerId: null, asked: false });
       expect(sanitizePersistedLocation('garbage').lat).toBeNull();
       expect(sanitizePersistedLocation({ lat: 19, lng: 72, source: 'bogus', label: 5 })).toMatchObject({ source: null, label: null });
     });

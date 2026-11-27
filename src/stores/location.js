@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { getBrowserLocation, MUMBAI_AREAS } from '../lib/geo.js';
 import { AppError } from '../services/errors.js';
+import { useAuthStore } from './auth.js';
 
 const guardedStorage = {
   getItem: (name) => {
@@ -29,6 +30,7 @@ const guardedStorage = {
 };
 
 const SOURCES = new Set(['gps', 'area', 'profile']);
+const EMPTY_LOCATION = { lat: null, lng: null, label: null, source: null, profileOwnerId: null };
 
 /** GPS fixes are rounded to 3 decimals (~110 m): enough for distances, and query keys stop churning as you walk. */
 const roundCoord = (n) => Math.round(n * 1000) / 1000;
@@ -42,30 +44,30 @@ const validCoords = (lat, lng) =>
  * Keep only well-formed values from whatever was stored in localStorage.
  * Coordinates are all-or-nothing; anything else falls back to the empty state.
  * @param {unknown} persisted
- * @returns {{ lat: number|null, lng: number|null, label: string|null, source: string|null, asked: boolean }}
+ * @returns {{ lat: number|null, lng: number|null, label: string|null, source: string|null, profileOwnerId: string|null, asked: boolean }}
  */
 export function sanitizePersistedLocation(persisted) {
   const p = persisted && typeof persisted === 'object' ? /** @type {Record<string, unknown>} */ (persisted) : {};
-  const located = validCoords(p.lat, p.lng);
+  const owner = typeof p.profileOwnerId === 'string' && p.profileOwnerId ? p.profileOwnerId : null;
+  const located = validCoords(p.lat, p.lng) && (p.source !== 'profile' || owner !== null);
+  const source = located && typeof p.source === 'string' && SOURCES.has(p.source) ? p.source : null;
   return {
     lat: located ? /** @type {number} */ (p.lat) : null,
     lng: located ? /** @type {number} */ (p.lng) : null,
     label: located && typeof p.label === 'string' && p.label ? p.label : null,
-    source: located && typeof p.source === 'string' && SOURCES.has(p.source) ? p.source : null,
+    source,
+    profileOwnerId: source === 'profile' ? owner : null,
     asked: p.asked === true,
   };
 }
 
-/** Bumped by every action that sets or clears the location, so a slow GPS answer can't overwrite a newer choice. */
+/** A slow GPS result must not overwrite a more recent explicit device choice. */
 let locationVersion = 0;
 
 export const useLocationStore = create(
   persist(
-    (set) => ({
-      lat: null,
-      lng: null,
-      label: null,
-      source: null,
+    (set, get) => ({
+      ...EMPTY_LOCATION,
       asked: false,
 
       requestGps: async () => {
@@ -78,6 +80,7 @@ export const useLocationStore = create(
           lng: roundCoord(lng),
           label: 'Current location',
           source: 'gps',
+          profileOwnerId: null,
           asked: true,
         });
       },
@@ -88,17 +91,22 @@ export const useLocationStore = create(
           throw new AppError('validation', 'Unknown area selected.');
         }
         locationVersion += 1;
-        set({ lat: area.lat, lng: area.lng, label: area.name, source: 'area', asked: true });
+        set({ lat: area.lat, lng: area.lng, label: area.name, source: 'area', profileOwnerId: null, asked: true });
       },
 
-      setFromProfile: ({ lat, lng, label }) => {
-        locationVersion += 1;
-        set({ lat, lng, label, source: 'profile' });
+      setFromProfile: ({ lat, lng, label, ownerId }) => {
+        if (!ownerId || useAuthStore.getState().session?.userId !== ownerId) return;
+        set({ lat, lng, label, source: 'profile', profileOwnerId: ownerId });
+      },
+
+      reconcileProfileOwner: (userId) => {
+        const { source, profileOwnerId } = get();
+        if (source === 'profile' && (!userId || profileOwnerId !== userId)) set(EMPTY_LOCATION);
       },
 
       clear: () => {
         locationVersion += 1;
-        set({ lat: null, lng: null, label: null, source: null });
+        set(EMPTY_LOCATION);
       },
 
       markAsked: () => {
@@ -107,8 +115,9 @@ export const useLocationStore = create(
     }),
     {
       name: 'tibu.location',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => guardedStorage),
+      migrate: sanitizePersistedLocation,
       merge: (persisted, current) => ({ ...current, ...sanitizePersistedLocation(persisted) }),
     },
   ),
@@ -143,5 +152,20 @@ export function selectSearchOrigin(state) {
 }
 
 export function useSearchOrigin() {
-  return useLocationStore(selectSearchOrigin);
+  return useVisibleLocation(selectSearchOrigin) ?? null;
+}
+
+/** Undefined means auth is restoring an owner. Null means there is no signed-in user. */
+export function selectVisibleLocation(state, userId) {
+  if (state.source !== 'profile') return state;
+  if (userId === undefined) return undefined;
+  return userId && state.profileOwnerId === userId ? state : EMPTY_LOCATION;
+}
+
+export function useVisibleLocation(selector) {
+  const userId = useAuthStore((auth) => auth.status === 'loading' ? undefined : auth.session?.userId ?? null);
+  return useLocationStore((state) => {
+    const visible = selectVisibleLocation(state, userId);
+    return visible && selector(visible);
+  });
 }
