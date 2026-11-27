@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { sanitizePersistedLocation, selectSearchOrigin, toOrigin, useLocationStore } from './location.js';
 import * as geo from '../lib/geo.js';
 import { AppError } from '../services/errors.js';
+import { useAuthStore } from './auth.js';
 
 vi.mock('../lib/geo.js', () => ({
   getBrowserLocation: vi.fn(),
@@ -37,6 +38,7 @@ function persistedLocation() {
 describe('location store', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', createMemoryStorage());
+    useAuthStore.setState(useAuthStore.getInitialState(), true);
     toOrigin(null, null);
     useLocationStore.setState({
       lat: null,
@@ -93,6 +95,7 @@ describe('location store', () => {
     });
 
     it('setFromProfile sets profile location', () => {
+      useAuthStore.getState().setSession({ userId: 'user-1', email: 'one@example.invalid' });
       useLocationStore.getState().setFromProfile({ lat: 12.34, lng: 56.78, label: 'My Home', ownerId: 'user-1' });
 
       const state = useLocationStore.getState();
@@ -243,9 +246,11 @@ describe('location store', () => {
       let resolveGps;
       geo.getBrowserLocation.mockReturnValueOnce(new Promise((resolve) => { resolveGps = resolve; }));
       const location = useLocationStore.getState();
+      useAuthStore.getState().setSession({ userId: 'user-1', email: 'one@example.invalid' });
       location.setFromProfile({ lat: 19.1, lng: 72.8, label: 'A', ownerId: 'user-1' });
       const pending = location.requestGps();
       location.reconcileProfileOwner('user-2');
+      useAuthStore.getState().setSession({ userId: 'user-2', email: 'two@example.invalid' });
       location.setFromProfile({ lat: 19.2, lng: 72.9, label: 'B', ownerId: 'user-2' });
       resolveGps({ lat: 19.3, lng: 73 });
       await pending;

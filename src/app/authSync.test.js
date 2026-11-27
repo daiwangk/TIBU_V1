@@ -77,6 +77,24 @@ describe('startAuthSync', () => {
     }
   });
 
+  it('ignores a stale profile write after another account signs in', () => {
+    const { deps, emit } = setup();
+    const stop = startAuthSync(deps);
+    try {
+      emit(A, 'SIGNED_IN');
+      const applyOldProfile = () => useLocationStore.getState().setFromProfile(AREA_A);
+      emit(B, 'SIGNED_IN');
+      applyOldProfile();
+
+      const location = useLocationStore.getState();
+      const nextArea = resolveProfileLocationDefault(location, { homeLat: 19.2, homeLng: 72.9, homeLocality: 'Area B' });
+      if (nextArea) location.setFromProfile({ ...nextArea, ownerId: B.userId });
+      expect(useLocationStore.getState()).toMatchObject({ label: 'Area B', profileOwnerId: B.userId });
+    } finally {
+      stop();
+    }
+  });
+
   it.each(['gps', 'area'])('keeps an explicit %s choice on guest restore, sign-in and sign-out', (source) => {
     useLocationStore.setState({ lat: 19, lng: 73, source, label: 'Device choice' });
     const { deps, emit } = setup();

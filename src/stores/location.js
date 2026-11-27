@@ -95,7 +95,7 @@ export const useLocationStore = create(
       },
 
       setFromProfile: ({ lat, lng, label, ownerId }) => {
-        if (!ownerId) return;
+        if (!ownerId || useAuthStore.getState().session?.userId !== ownerId) return;
         set({ lat, lng, label, source: 'profile', profileOwnerId: ownerId });
       },
 
